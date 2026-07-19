@@ -129,7 +129,7 @@ namespace CM3070.Dungeon1
         {
             foreach (Vector2Int gridPosition in currentLayout.EnemyPositions)
             {
-                GameObject enemy = InstantiatePrefab(FirstPrefab(enemyPrefabs), "Enemy");
+                GameObject enemy = InstantiatePrefab(RandomEnemyPrefab(), "Enemy");
                 if (enemy == null) continue;
 
                 enemy.transform.SetParent(entityRoot);
@@ -161,11 +161,6 @@ namespace CM3070.Dungeon1
             }
         }
 
-        private static GameObject FirstPrefab(GameObject[] prefabs)
-        {
-            return prefabs != null && prefabs.Length > 0 ? prefabs[0] : null;
-        }
-
         private GameObject RandomLootPrefab()
         {
             if (lootPrefabs == null || lootPrefabs.Length == 0) return null;
@@ -192,6 +187,32 @@ namespace CM3070.Dungeon1
                 // Weighted random selection: subtract until the rolled bucket is reached.
                 roll -= option.spawnWeight;
                 if (roll < 0) return option.prefab;
+            }
+
+            return null;
+        }
+
+        private GameObject RandomEnemyPrefab()
+        {
+            if (enemyPrefabs == null || enemyPrefabs.Length == 0) return null;
+
+            int validCount = 0;
+            foreach (GameObject prefab in enemyPrefabs)
+            {
+                if (prefab != null)
+                {
+                    validCount++;
+                }
+            }
+
+            if (validCount == 0) return null;
+
+            int roll = Random.Range(0, validCount);
+            foreach (GameObject prefab in enemyPrefabs)
+            {
+                if (prefab == null) continue;
+                if (roll == 0) return prefab;
+                roll--;
             }
 
             return null;
