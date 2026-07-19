@@ -218,15 +218,40 @@ namespace CM3070.PCG
         private void ConnectRooms(DungeonLayout layout)
         {
             // RogueBasin BSP connects sibling rooms by walking back up the BSP tree.
-            // This implementation differs: rooms are sorted spatially, then consecutive
-            // room centres are connected with L-shaped corridors. This is simpler and
-            // works for the prototype, but it is not full tree-based BSP corridor linking.
-            List<RectInt> orderedRooms = layout.Rooms.OrderBy(room => room.center.x + room.center.y).ToList();
-            for (int i = 1; i < orderedRooms.Count; i++)
+            // This implementation differs: it links the nearest unconnected room to the
+            // growing connected set. That keeps corridors shorter than a simple sorted
+            // room chain while preserving the BSP room/corridor plus CA hybrid pipeline.
+            if (layout.Rooms.Count <= 1)
             {
-                Vector2Int from = Vector2Int.RoundToInt(orderedRooms[i - 1].center);
-                Vector2Int to = Vector2Int.RoundToInt(orderedRooms[i].center);
-                ConnectPoints(layout, from, to);
+                return;
+            }
+
+            List<RectInt> connected = new() { layout.Rooms[0] };
+            List<RectInt> remaining = layout.Rooms.Skip(1).ToList();
+
+            while (remaining.Count > 0)
+            {
+                RectInt fromRoom = connected[0];
+                RectInt toRoom = remaining[0];
+                float bestDistance = float.MaxValue;
+
+                foreach (RectInt connectedRoom in connected)
+                {
+                    foreach (RectInt candidateRoom in remaining)
+                    {
+                        float distance = Vector2.SqrMagnitude(connectedRoom.center - candidateRoom.center);
+                        if (distance < bestDistance)
+                        {
+                            bestDistance = distance;
+                            fromRoom = connectedRoom;
+                            toRoom = candidateRoom;
+                        }
+                    }
+                }
+
+                ConnectPoints(layout, Vector2Int.RoundToInt(fromRoom.center), Vector2Int.RoundToInt(toRoom.center));
+                connected.Add(toRoom);
+                remaining.Remove(toRoom);
             }
         }
 

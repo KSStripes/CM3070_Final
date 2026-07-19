@@ -8,6 +8,10 @@ namespace CM3070.Office
     {
         [Header("Prop Prefabs")]
         [SerializeField] private GameObject[] propPrefabs;
+        [SerializeField] private GameObject[] receptionPrefabs;
+        [SerializeField] private GameObject[] bossRoomPrefabs;
+        [SerializeField] private GameObject[] factoryPrefabs;
+        [SerializeField] private GameObject[] officePrefabs;
 
         [Header("Placement")]
         [SerializeField, Range(0f, 0.2f)] private float floorDensity = 0.015f;
@@ -19,14 +23,25 @@ namespace CM3070.Office
         [SerializeField] private bool randomizeRotation = true;
         [SerializeField] private bool disablePropColliders = true;
 
+        private OfficeRoomPlan roomPlan;
+
+        public void SetRoomPlan(OfficeRoomPlan plan)
+        {
+            roomPlan = plan;
+        }
+
         public void PlaceProps(DungeonLayout layout, Transform parent, float tileSize)
         {
-            if (layout == null || parent == null || propPrefabs == null || propPrefabs.Length == 0)
+            if (layout == null || parent == null || !HasAnyPrefab())
             {
                 return;
             }
 
-            List<Vector2Int> candidates = BuildCandidates(layout);
+            OfficeRoomPlan plan = roomPlan != null && ReferenceEquals(roomPlan.Layout, layout)
+                ? roomPlan
+                : OfficeLayoutPlanner.CreatePlan(layout);
+
+            List<PropCandidate> candidates = BuildCandidates(layout, plan);
             if (candidates.Count == 0)
             {
                 return;
@@ -42,27 +57,27 @@ namespace CM3070.Office
             Shuffle(candidates, random);
 
             List<Vector2Int> occupied = new(propCount);
-            foreach (Vector2Int position in candidates)
+            foreach (PropCandidate candidate in candidates)
             {
                 if (occupied.Count >= propCount)
                 {
                     break;
                 }
 
-                if (IsTooClose(position, occupied))
+                if (IsTooClose(candidate.Position, occupied))
                 {
                     continue;
                 }
 
-                GameObject prefab = PickPrefab(random);
+                GameObject prefab = PickPrefab(candidate.Role, random);
                 if (prefab == null)
                 {
                     continue;
                 }
 
                 GameObject prop = Instantiate(prefab, parent);
-                prop.name = $"{prefab.name} ({position.x}, {position.y})";
-                prop.transform.localPosition = new Vector3(position.x * tileSize, propHeight, position.y * tileSize);
+                prop.name = $"{prefab.name} {candidate.Role} ({candidate.Position.x}, {candidate.Position.y})";
+                prop.transform.localPosition = new Vector3(candidate.Position.x * tileSize, propHeight, candidate.Position.y * tileSize);
 
                 if (randomizeRotation)
                 {
@@ -74,15 +89,16 @@ namespace CM3070.Office
                     DisableColliders(prop);
                 }
 
-                occupied.Add(position);
+                occupied.Add(candidate.Position);
             }
         }
 
-        private List<Vector2Int> BuildCandidates(DungeonLayout layout)
+        private List<PropCandidate> BuildCandidates(DungeonLayout layout, OfficeRoomPlan plan)
         {
-            List<Vector2Int> candidates = new();
-            foreach (RectInt room in layout.Rooms)
+            List<PropCandidate> candidates = new();
+            foreach (OfficeRoomAssignment assignment in plan.Assignments)
             {
+                RectInt room = assignment.Room;
                 for (int x = room.xMin + 1; x < room.xMax - 1; x++)
                 {
                     for (int y = room.yMin + 1; y < room.yMax - 1; y++)
@@ -90,7 +106,7 @@ namespace CM3070.Office
                         Vector2Int position = new(x, y);
                         if (CanPlaceAt(layout, position))
                         {
-                            candidates.Add(position);
+                            candidates.Add(new PropCandidate(position, assignment.Role));
                         }
                     }
                 }
@@ -107,10 +123,33 @@ namespace CM3070.Office
                 && Vector2Int.Distance(position, layout.Exit) > markerExclusionRadius;
         }
 
-        private GameObject PickPrefab(System.Random random)
+        private GameObject PickPrefab(OfficeRoomRole role, System.Random random)
+        {
+            GameObject prefab = PickPrefab(RolePrefabs(role), random);
+            return prefab != null ? prefab : PickPrefab(propPrefabs, random);
+        }
+
+        private GameObject[] RolePrefabs(OfficeRoomRole role)
+        {
+            return role switch
+            {
+                OfficeRoomRole.Reception => receptionPrefabs,
+                OfficeRoomRole.BossRoom => bossRoomPrefabs,
+                OfficeRoomRole.Factory => factoryPrefabs,
+                OfficeRoomRole.Office => officePrefabs,
+                _ => null
+            };
+        }
+
+        private static GameObject PickPrefab(GameObject[] prefabs, System.Random random)
         {
             int validCount = 0;
-            foreach (GameObject prefab in propPrefabs)
+            if (prefabs == null)
+            {
+                return null;
+            }
+
+            foreach (GameObject prefab in prefabs)
             {
                 if (prefab != null)
                 {
@@ -124,7 +163,7 @@ namespace CM3070.Office
             }
 
             int selected = random.Next(validCount);
-            foreach (GameObject prefab in propPrefabs)
+            foreach (GameObject prefab in prefabs)
             {
                 if (prefab == null)
                 {
@@ -164,6 +203,33 @@ namespace CM3070.Office
             markerExclusionRadius = Mathf.Max(0, markerExclusionRadius);
         }
 
+        private bool HasAnyPrefab()
+        {
+            return HasAnyPrefab(propPrefabs)
+                || HasAnyPrefab(receptionPrefabs)
+                || HasAnyPrefab(bossRoomPrefabs)
+                || HasAnyPrefab(factoryPrefabs)
+                || HasAnyPrefab(officePrefabs);
+        }
+
+        private static bool HasAnyPrefab(GameObject[] prefabs)
+        {
+            if (prefabs == null)
+            {
+                return false;
+            }
+
+            foreach (GameObject prefab in prefabs)
+            {
+                if (prefab != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static void Shuffle<T>(IList<T> items, System.Random random)
         {
             for (int i = items.Count - 1; i > 0; i--)
@@ -179,6 +245,18 @@ namespace CM3070.Office
             {
                 collider.enabled = false;
             }
+        }
+
+        private readonly struct PropCandidate
+        {
+            public PropCandidate(Vector2Int position, OfficeRoomRole role)
+            {
+                Position = position;
+                Role = role;
+            }
+
+            public Vector2Int Position { get; }
+            public OfficeRoomRole Role { get; }
         }
     }
 }

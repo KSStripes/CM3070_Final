@@ -54302,14 +54302,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   generatePreviewInEditMode: 1
   regenerateWhenInspectorChanges: 0
-  width: 58
-  height: 42
+  width: 64
+  height: 46
   seed: 3070
   randomizeSeedOnPlay: 1
-  minRoomSize: 5
-  maxRoomSize: 12
-  minPartitionSize: 14
+  minRoomSize: 8
+  maxRoomSize: 16
+  minPartitionSize: 18
   corridorWidth: 2
+  maxSplitDepth: 5
   wallFillChance: 0.44
   cavePocketChance: 0.34
   hybridSmoothingSteps: 2

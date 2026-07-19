@@ -1,4 +1,5 @@
 using CM3070.PCG;
+using CM3070.Office;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,17 +18,18 @@ namespace CM3070.Dungeon1
         [SerializeField] private bool regenerateWhenInspectorChanges;
 
         [Header("Hybrid Dungeon")]
-        [SerializeField] private int width = 58;
-        [SerializeField] private int height = 42;
+        [SerializeField] private int width = 64;
+        [SerializeField] private int height = 46;
         [SerializeField] private int seed = 3070;
         [SerializeField] private bool randomizeSeedOnPlay = true;
         // BSP room bounds: raising these makes each carved room-like workplace section larger.
-        [SerializeField] private int minRoomSize = 5;
-        [SerializeField] private int maxRoomSize = 12;
+        [SerializeField] private int minRoomSize = 8;
+        [SerializeField] private int maxRoomSize = 16;
         // BSP leaf size: larger partitions give the generator space to fit larger rooms.
-        [SerializeField] private int minPartitionSize = 13;
-        // Corridor carving width: 1 is narrow; 2+ expands each corridor step into a wider block.
+        [SerializeField] private int minPartitionSize = 18;
+        // Corridor carving width: 2 carves a 3-tile-wide path, enough for NPC/item clearance.
         [SerializeField] private int corridorWidth = 2;
+        [SerializeField] private int maxSplitDepth = 5;
         [SerializeField, Range(0f, 1f)] private float wallFillChance = 0.44f;
         // Hybrid CA roughness: higher values disrupt non-preserved BSP floors/walls more.
         [SerializeField, Range(0f, 1f)] private float cavePocketChance = 0.34f;
@@ -44,8 +46,12 @@ namespace CM3070.Dungeon1
         private DungeonVisualizer visualizer;
         private CameraController cameraController;
         private EntitySpawner entitySpawner;
+        private OfficePropPlacer officePropPlacer;
         private DungeonLayout currentLayout;
+        private OfficeRoomPlan currentOfficeRoomPlan;
         private int activeSeed;
+
+        public OfficeRoomPlan CurrentOfficeRoomPlan => currentOfficeRoomPlan;
 
         [ContextMenu("Generate Hybrid Preview")]
         public void GenerateHybridPreview()
@@ -74,6 +80,7 @@ namespace CM3070.Dungeon1
             visualizer = GetComponent<DungeonVisualizer>();
             cameraController = GetComponent<CameraController>();
             entitySpawner = GetComponent<EntitySpawner>();
+            officePropPlacer = GetComponent<OfficePropPlacer>();
 
             if (!Application.isPlaying && generatePreviewInEditMode)
             {
@@ -123,6 +130,7 @@ namespace CM3070.Dungeon1
             maxRoomSize = Mathf.Max(minRoomSize, maxRoomSize);
             minPartitionSize = Mathf.Max(maxRoomSize + 2, minPartitionSize);
             corridorWidth = Mathf.Clamp(corridorWidth, 1, 4);
+            maxSplitDepth = Mathf.Clamp(maxSplitDepth, 2, 10);
             hybridSmoothingSteps = Mathf.Max(0, hybridSmoothingSteps);
             maxEnemies = Mathf.Max(0, maxEnemies);
             maxLoot = Mathf.Max(0, maxLoot);
@@ -133,6 +141,7 @@ namespace CM3070.Dungeon1
                 visualizer = GetComponent<DungeonVisualizer>();
                 cameraController = GetComponent<CameraController>();
                 entitySpawner = GetComponent<EntitySpawner>();
+                officePropPlacer = GetComponent<OfficePropPlacer>();
                 GenerateDungeon(false, true);
             }
         }
@@ -142,12 +151,15 @@ namespace CM3070.Dungeon1
             visualizer ??= GetComponent<DungeonVisualizer>();
             cameraController ??= GetComponent<CameraController>();
             entitySpawner ??= GetComponent<EntitySpawner>();
+            officePropPlacer ??= GetComponent<OfficePropPlacer>();
 
             cameraController.EnsureCameras(transform);
 
             DungeonGenerationSettings settings = BuildSettings();
             DungeonGenerator generator = new(settings);
             currentLayout = generator.Generate(runtimeObjects ? activeSeed : seed, DungeonGenerationMethod.HybridBspCellular);
+            currentOfficeRoomPlan = OfficeLayoutPlanner.CreatePlan(currentLayout);
+            officePropPlacer?.SetRoomPlan(currentOfficeRoomPlan);
 
             // Spawn markers are useful in edit-mode, but hidden during gameplay.
             visualizer.SetRenderSpawnMarkers(!runtimeObjects);
@@ -178,6 +190,7 @@ namespace CM3070.Dungeon1
             settings.maxRoomSize = maxRoomSize;
             settings.minPartitionSize = minPartitionSize;
             settings.corridorWidth = corridorWidth;
+            settings.maxSplitDepth = maxSplitDepth;
             settings.wallFillChance = wallFillChance;
             settings.cavePocketChance = cavePocketChance;
             settings.hybridSmoothingSteps = hybridSmoothingSteps;

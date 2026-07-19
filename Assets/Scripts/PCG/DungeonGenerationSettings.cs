@@ -7,17 +7,17 @@ namespace CM3070.PCG
     {
         [Header("Core")]
         public DungeonGenerationMethod method = DungeonGenerationMethod.HybridBspCellular;
-        public int width = 58;
-        public int height = 42;
+        public int width = 64;
+        public int height = 46;
         public int seed = 3070;
         public bool randomizeSeedOnPlay = true;
 
         [Header("BSP Rooms")]
-        public int minRoomSize = 5;
-        public int maxRoomSize = 12;
-        public int minPartitionSize = 13;
+        public int minRoomSize = 8;
+        public int maxRoomSize = 16;
+        public int minPartitionSize = 18;
         public int corridorWidth = 2;
-        public int maxSplitDepth = 7;
+        public int maxSplitDepth = 5;
 
         [Header("Cellular Automata")]
         [Range(0f, 1f)] public float wallFillChance = 0.44f;
