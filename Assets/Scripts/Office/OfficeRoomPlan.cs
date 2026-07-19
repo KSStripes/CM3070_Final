@@ -53,5 +53,21 @@ namespace CM3070.Office
             role = OfficeRoomRole.None;
             return false;
         }
+
+        public bool TryGetRoleAt(Vector2Int position, out OfficeRoomRole role)
+        {
+            // Room roles are assigned to BSP room rectangles; corridors remain unassigned.
+            foreach (OfficeRoomAssignment assignment in assignments)
+            {
+                if (assignment.Room.Contains(position))
+                {
+                    role = assignment.Role;
+                    return true;
+                }
+            }
+
+            role = OfficeRoomRole.None;
+            return false;
+        }
     }
 }
