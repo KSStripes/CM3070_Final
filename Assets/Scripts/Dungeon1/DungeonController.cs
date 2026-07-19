@@ -21,12 +21,17 @@ namespace CM3070.Dungeon1
         [SerializeField] private int height = 42;
         [SerializeField] private int seed = 3070;
         [SerializeField] private bool randomizeSeedOnPlay = true;
+        // BSP room bounds: raising these makes each carved room-like workplace section larger.
         [SerializeField] private int minRoomSize = 5;
         [SerializeField] private int maxRoomSize = 12;
+        // BSP leaf size: larger partitions give the generator space to fit larger rooms.
         [SerializeField] private int minPartitionSize = 13;
+        // Corridor carving width: 1 is narrow; 2+ expands each corridor step into a wider block.
         [SerializeField] private int corridorWidth = 2;
         [SerializeField, Range(0f, 1f)] private float wallFillChance = 0.44f;
+        // Hybrid CA roughness: higher values disrupt non-preserved BSP floors/walls more.
         [SerializeField, Range(0f, 1f)] private float cavePocketChance = 0.34f;
+        // Hybrid CA smoothing passes: higher values make noisy pockets more cave-like.
         [SerializeField] private int hybridSmoothingSteps = 2;
 
         [Header("Enemy And Loot Proportions")]

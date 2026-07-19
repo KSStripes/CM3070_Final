@@ -75,15 +75,19 @@ namespace CM3070.PCG
 
             foreach (RectInt leaf in leaves)
             {
+                // Skip BSP leaves that cannot contain the requested minimum room plus margin.
                 if (leaf.width <= settings.minRoomSize + 2 || leaf.height <= settings.minRoomSize + 2)
                 {
                     continue;
                 }
 
+                // Room dimensions are sampled from the configured min/max room size,
+                // clamped by the current BSP leaf. Larger maxRoomSize needs larger leaves.
                 int maxWidth = Mathf.Min(settings.maxRoomSize, leaf.width - 2);
                 int maxHeight = Mathf.Min(settings.maxRoomSize, leaf.height - 2);
                 int roomWidth = random.Next(settings.minRoomSize, maxWidth + 1);
                 int roomHeight = random.Next(settings.minRoomSize, maxHeight + 1);
+                // Rooms are offset inside leaves to leave wall/corridor margin around them.
                 int roomX = random.Next(leaf.xMin + 1, leaf.xMax - roomWidth);
                 int roomY = random.Next(leaf.yMin + 1, leaf.yMax - roomHeight);
 
@@ -129,6 +133,7 @@ namespace CM3070.PCG
             {
                 // Preserve room interiors so CA smoothing can roughen the surroundings
                 // without destroying the main BSP rooms.
+                // roomPreservationBorder controls how much room edge can be eroded.
                 RectInt inner = Shrink(room, settings.roomPreservationBorder);
                 for (int x = inner.xMin; x < inner.xMax; x++)
                 {
@@ -163,6 +168,7 @@ namespace CM3070.PCG
                 }
             }
 
+            // Smooth only the non-preserved tiles; preserved BSP room interiors remain floor.
             SmoothCellular(layout, settings.hybridSmoothingSteps, preserved);
             // Reconnect after smoothing because the CA-style pass can interrupt corridors.
             ConnectRooms(layout);
@@ -173,6 +179,7 @@ namespace CM3070.PCG
             // Recursive rectangular partitioning, equivalent to the subdivision stage in
             // BSP dungeon generation. The stopping conditions are min partition size and
             // max depth, both exposed in DungeonGenerationSettings.
+            // Larger minPartitionSize means fewer/larger leaves, which supports bigger rooms.
             bool canSplitHorizontally = partition.height >= settings.minPartitionSize * 2;
             bool canSplitVertically = partition.width >= settings.minPartitionSize * 2;
 
@@ -243,6 +250,8 @@ namespace CM3070.PCG
 
         private void CarveCorridorTile(DungeonLayout layout, Vector2Int center)
         {
+            // corridorWidth controls corridor thickness. Width 1 gives a single tile;
+            // width 2 gives radius 1, carving a 3x3 area at each corridor step.
             int radius = Mathf.Max(0, settings.corridorWidth - 1);
             for (int x = center.x - radius; x <= center.x + radius; x++)
             {
