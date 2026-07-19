@@ -45,6 +45,7 @@ namespace CM3070.Dungeon1
 
         [Header("Office Debug")]
         [SerializeField] private bool logRoomTransitions = true;
+        [SerializeField] private int layoutRetryAttempts = 20;
 
         private DungeonVisualizer visualizer;
         private CameraController cameraController;
@@ -141,6 +142,7 @@ namespace CM3070.Dungeon1
             maxEnemies = Mathf.Max(0, maxEnemies);
             maxLoot = Mathf.Max(0, maxLoot);
             spawnExclusionRadius = Mathf.Max(0, spawnExclusionRadius);
+            layoutRetryAttempts = Mathf.Max(1, layoutRetryAttempts);
 
             if (!Application.isPlaying && regenerateWhenInspectorChanges && isActiveAndEnabled)
             {
@@ -162,9 +164,8 @@ namespace CM3070.Dungeon1
             cameraController.EnsureCameras(transform);
 
             DungeonGenerationSettings settings = BuildSettings();
-            DungeonGenerator generator = new(settings);
-            currentLayout = generator.Generate(runtimeObjects ? activeSeed : seed, DungeonGenerationMethod.HybridBspCellular);
-            currentOfficeRoomPlan = OfficeLayoutPlanner.CreatePlan(currentLayout);
+            GenerateValidOfficeLayout(settings, runtimeObjects);
+            visualizer.SetOfficeRoomPlan(currentOfficeRoomPlan);
             officePropPlacer?.SetRoomPlan(currentOfficeRoomPlan);
             currentPlayerRoomRole = OfficeRoomRole.None;
 
@@ -207,6 +208,42 @@ namespace CM3070.Dungeon1
             settings.lootCount = Mathf.Min(maxLoot, Mathf.RoundToInt(width * height * lootDensity));
             settings.spawnExclusionRadius = spawnExclusionRadius;
             return settings;
+        }
+
+        private void GenerateValidOfficeLayout(DungeonGenerationSettings settings, bool runtimeObjects)
+        {
+            // Retry seeds so the office layer gets enough rooms and a valid start-to-exit route.
+            for (int attempt = 0; attempt < layoutRetryAttempts; attempt++)
+            {
+                int candidateSeed = runtimeObjects
+                    ? (attempt == 0 ? activeSeed : Random.Range(1, int.MaxValue))
+                    : seed + attempt;
+
+                DungeonGenerator generator = new(settings);
+                DungeonLayout candidateLayout = generator.Generate(candidateSeed, DungeonGenerationMethod.HybridBspCellular);
+                OfficeRoomPlan candidatePlan = OfficeLayoutPlanner.CreatePlan(candidateLayout);
+
+                currentLayout = candidateLayout;
+                currentOfficeRoomPlan = candidatePlan;
+
+                if (IsValidOfficeLayout(candidateLayout, candidatePlan))
+                {
+                    activeSeed = candidateSeed;
+                    return;
+                }
+            }
+
+            Debug.LogWarning($"Generated office layout did not meet validation after {layoutRetryAttempts} attempts; using the last candidate.");
+        }
+
+        private static bool IsValidOfficeLayout(DungeonLayout layout, OfficeRoomPlan plan)
+        {
+            return layout != null
+                && plan != null
+                && plan.HasRequiredRooms
+                && layout.Start != layout.Exit
+                && layout.ShortestPathLength >= 20
+                && layout.MainRegionSize >= 300;
         }
 
         private void LogPlayerRoomTransition()

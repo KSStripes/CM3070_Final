@@ -5,6 +5,14 @@ using UnityEngine;
 
 namespace CM3070.Dungeon1
 {
+    [System.Serializable]
+    public sealed class TilePrefabSet
+    {
+        public OfficeRoomRole role = OfficeRoomRole.None;
+        public GameObject[] floorPrefabs;
+        public GameObject[] wallPrefabs;
+    }
+
     public sealed class DungeonVisualizer : MonoBehaviour
     {
         [SerializeField] private Transform dungeonRoot;
@@ -17,15 +25,28 @@ namespace CM3070.Dungeon1
         [SerializeField] private Color lootSpawnGizmoColor = new(0.94f, 0.72f, 0.20f, 0.85f);
         [SerializeField] private float spawnGizmoRadius = 0.28f;
 
-        [Header("Dungeon Prefabs")]
+        [Header("Base Tile Prefabs")]
         [SerializeField] private GameObject floorPrefab;
         [SerializeField] private GameObject wallPrefab;
         [SerializeField] private GameObject roomAccentFloorPrefab;
+
+        [Header("Office Tile Sets")]
+        [SerializeField] private GameObject[] corridorFloorPrefabs;
+        [SerializeField] private GameObject[] corridorWallPrefabs;
+        [SerializeField] private TilePrefabSet[] roomTileSets;
+
+        [Header("Marker Prefabs")]
         [SerializeField] private GameObject startMarkerPrefab;
         [SerializeField] private GameObject exitMarkerPrefab;
 
         private DungeonLayout currentLayout;
+        private OfficeRoomPlan officeRoomPlan;
         private OfficePropPlacer propPlacer;
+
+        public void SetOfficeRoomPlan(OfficeRoomPlan plan)
+        {
+            officeRoomPlan = plan;
+        }
 
         public void Render(DungeonLayout layout)
         {
@@ -44,13 +65,13 @@ namespace CM3070.Dungeon1
                     {
                         if (HasWalkableNeighbor(layout, x, y))
                         {
-                            CreateWall(x, y);
+                            CreateWall(layout, x, y);
                         }
 
                         continue;
                     }
 
-                    CreateFloor(x, y, IsInsideRoom(layout, x, y));
+                    CreateFloor(x, y, GetRoomRoleAt(x, y));
 
                     if (tile == DungeonTile.Start)
                     {
@@ -110,18 +131,19 @@ namespace CM3070.Dungeon1
             dungeonRoot = root.transform;
         }
 
-        private void CreateFloor(int x, int y, bool accent)
+        private void CreateFloor(int x, int y, OfficeRoomRole role)
         {
-            GameObject prefab = accent && roomAccentFloorPrefab != null
-                ? roomAccentFloorPrefab
-                : floorPrefab;
+            GameObject prefab = FloorPrefabFor(role, x, y);
 
             CreateTile(prefab, $"Floor ({x}, {y})", new Vector3(x * tileSize, -0.05f, y * tileSize));
         }
 
-        private void CreateWall(int x, int y)
+        private void CreateWall(DungeonLayout layout, int x, int y)
         {
-            CreateTile(wallPrefab, $"Wall ({x}, {y})", new Vector3(x * tileSize, wallHeight * 0.5f, y * tileSize));
+            OfficeRoomRole role = GetNearestWalkableRoomRole(layout, x, y);
+            GameObject prefab = WallPrefabFor(role, x, y);
+
+            CreateTile(prefab, $"Wall ({x}, {y})", new Vector3(x * tileSize, wallHeight * 0.5f, y * tileSize));
         }
 
         private void CreateMarker(GameObject prefab, string objectName, int x, int y)
@@ -170,19 +192,132 @@ namespace CM3070.Dungeon1
                 || layout.IsWalkable(new Vector2Int(x, y - 1));
         }
 
-        private static bool IsInsideRoom(DungeonLayout layout, int x, int y)
+        private OfficeRoomRole GetRoomRoleAt(int x, int y)
         {
-            Vector2Int position = new(x, y);
-
-            foreach (RectInt room in layout.Rooms)
+            if (officeRoomPlan != null && officeRoomPlan.TryGetRoleAt(new Vector2Int(x, y), out OfficeRoomRole role))
             {
-                if (room.Contains(position))
+                return role;
+            }
+
+            return OfficeRoomRole.None;
+        }
+
+        private OfficeRoomRole GetNearestWalkableRoomRole(DungeonLayout layout, int x, int y)
+        {
+            Vector2Int[] neighbors =
+            {
+                new(x + 1, y),
+                new(x - 1, y),
+                new(x, y + 1),
+                new(x, y - 1)
+            };
+
+            foreach (Vector2Int neighbor in neighbors)
+            {
+                if (!layout.IsWalkable(neighbor))
                 {
-                    return true;
+                    continue;
+                }
+
+                OfficeRoomRole role = GetRoomRoleAt(neighbor.x, neighbor.y);
+                if (role != OfficeRoomRole.None)
+                {
+                    return role;
                 }
             }
 
-            return false;
+            return OfficeRoomRole.None;
+        }
+
+        private GameObject FloorPrefabFor(OfficeRoomRole role, int x, int y)
+        {
+            if (role == OfficeRoomRole.None)
+            {
+                return PickFrom(corridorFloorPrefabs, x, y, floorPrefab);
+            }
+
+            TilePrefabSet set = FindTileSet(role);
+            if (set != null)
+            {
+                GameObject fallback = roomAccentFloorPrefab != null ? roomAccentFloorPrefab : floorPrefab;
+                return PickFrom(set.floorPrefabs, x, y, fallback);
+            }
+
+            return roomAccentFloorPrefab != null ? roomAccentFloorPrefab : floorPrefab;
+        }
+
+        private GameObject WallPrefabFor(OfficeRoomRole role, int x, int y)
+        {
+            if (role == OfficeRoomRole.None)
+            {
+                return PickFrom(corridorWallPrefabs, x, y, wallPrefab);
+            }
+
+            TilePrefabSet set = FindTileSet(role);
+            if (set != null)
+            {
+                return PickFrom(set.wallPrefabs, x, y, wallPrefab);
+            }
+
+            return wallPrefab;
+        }
+
+        private TilePrefabSet FindTileSet(OfficeRoomRole role)
+        {
+            if (roomTileSets == null)
+            {
+                return null;
+            }
+
+            foreach (TilePrefabSet set in roomTileSets)
+            {
+                if (set != null && set.role == role)
+                {
+                    return set;
+                }
+            }
+
+            return null;
+        }
+
+        private static GameObject PickFrom(GameObject[] prefabs, int x, int y, GameObject fallback)
+        {
+            if (prefabs == null || prefabs.Length == 0)
+            {
+                return fallback;
+            }
+
+            int validCount = 0;
+            foreach (GameObject prefab in prefabs)
+            {
+                if (prefab != null)
+                {
+                    validCount++;
+                }
+            }
+
+            if (validCount == 0)
+            {
+                return fallback;
+            }
+
+            int index = Mathf.Abs((x * 73856093) ^ (y * 19349663)) % validCount;
+            foreach (GameObject prefab in prefabs)
+            {
+                if (prefab == null)
+                {
+                    continue;
+                }
+
+                if (index == 0)
+                {
+                    return prefab;
+                }
+
+                index--;
+            }
+
+            return fallback;
         }
     }
 }

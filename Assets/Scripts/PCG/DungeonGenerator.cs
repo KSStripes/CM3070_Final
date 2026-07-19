@@ -55,6 +55,7 @@ namespace CM3070.PCG
             // start/exit route is chosen, and enemies/loot are placed using distance data.
             // The statistics displayed in ProtoScene are populated during these steps.
             KeepLargestConnectedRegion(layout);
+            PruneDisconnectedRooms(layout);
             PlaceStartAndExit(layout);
             PlaceLootAndEnemies(layout);
 
@@ -417,6 +418,34 @@ namespace CM3070.PCG
             return region;
         }
 
+        private static void PruneDisconnectedRooms(DungeonLayout layout)
+        {
+            // Connectivity cleanup can remove isolated room fragments, so room metadata is pruned before office roles are assigned.
+            layout.Rooms.RemoveAll(room =>
+            {
+                Vector2Int center = Vector2Int.RoundToInt(room.center);
+                if (!layout.IsWalkable(center))
+                {
+                    return true;
+                }
+
+                int walkableTiles = 0;
+                int roomTiles = Mathf.Max(1, room.width * room.height);
+                for (int x = room.xMin; x < room.xMax; x++)
+                {
+                    for (int y = room.yMin; y < room.yMax; y++)
+                    {
+                        if (layout.IsWalkable(new Vector2Int(x, y)))
+                        {
+                            walkableTiles++;
+                        }
+                    }
+                }
+
+                return walkableTiles < Mathf.Max(4, Mathf.RoundToInt(roomTiles * 0.5f));
+            });
+        }
+
         private void PlaceStartAndExit(DungeonLayout layout)
         {
             // Start/exit distance metric:
@@ -432,21 +461,26 @@ namespace CM3070.PCG
                 floors.Add(fallback);
             }
 
-            Vector2Int start = layout.Rooms.Count > 0
-                ? Vector2Int.RoundToInt(layout.Rooms.OrderBy(room => room.xMin + room.yMin).First().center)
+            List<Vector2Int> roomCenters = layout.Rooms
+                .Select(room => Vector2Int.RoundToInt(room.center))
+                .Where(layout.IsWalkable)
+                .OrderBy(position => position.x + position.y)
+                .ToList();
+
+            Vector2Int start = roomCenters.Count > 0
+                ? roomCenters[0]
                 : floors[random.Next(floors.Count)];
 
             Dictionary<Vector2Int, int> distances = GetDistances(layout, start);
-            Vector2Int exit = distances
+            List<Vector2Int> distantExitCandidates = distances
                 .Where(pair => pair.Value >= settings.minimumStartExitDistance)
                 .OrderByDescending(pair => pair.Value)
                 .Select(pair => pair.Key)
-                .FirstOrDefault();
+                .ToList();
 
-            if (exit == default)
-            {
-                exit = distances.OrderByDescending(pair => pair.Value).First().Key;
-            }
+            Vector2Int exit = distantExitCandidates.Count > 0
+                ? distantExitCandidates[0]
+                : distances.OrderByDescending(pair => pair.Value).First().Key;
 
             layout.Start = start;
             layout.Exit = exit;
