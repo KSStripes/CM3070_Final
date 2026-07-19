@@ -54214,6 +54214,7 @@ GameObject:
   - component: {fileID: 1203070002}
   - component: {fileID: 1203070003}
   - component: {fileID: 1203070004}
+  - component: {fileID: 1203070007}
   - component: {fileID: 1203070006}
   - component: {fileID: 1203070005}
   m_Layer: 0
@@ -54265,6 +54266,28 @@ MonoBehaviour:
   roomAccentFloorPrefab: {fileID: 100000, guid: e15d1eea8458487e8b5b84d820fae0ab, type: 3}
   startMarkerPrefab: {fileID: 100000, guid: 9d7bf4e2a2d24a63906887b483aab024, type: 3}
   exitMarkerPrefab: {fileID: 100000, guid: 89bc7785c3b443bf80ef800b7ec119ed, type: 3}
+--- !u!114 &1203070007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1203070001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 239c7933ffe14af7977cf09ac815429d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  propPrefabs:
+  - {fileID: 100000, guid: 4255d0a6d1794369a9e19745641124f2, type: 3}
+  floorDensity: 0.015
+  maxProps: 18
+  minSpacing: 3
+  markerExclusionRadius: 3
+  propSeedOffset: 617
+  propHeight: 0.08
+  randomizeRotation: 1
+  disablePropColliders: 1
 --- !u!114 &1203070004
 MonoBehaviour:
   m_ObjectHideFlags: 0

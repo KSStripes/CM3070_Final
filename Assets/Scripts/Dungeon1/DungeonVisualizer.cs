@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CM3070.Office;
 using CM3070.PCG;
 using UnityEngine;
 
@@ -24,10 +25,12 @@ namespace CM3070.Dungeon1
         [SerializeField] private GameObject exitMarkerPrefab;
 
         private DungeonLayout currentLayout;
+        private OfficePropPlacer propPlacer;
 
         public void Render(DungeonLayout layout)
         {
             currentLayout = layout;
+            propPlacer ??= GetComponent<OfficePropPlacer>();
             EnsureRoot();
             Clear();
 
@@ -59,6 +62,8 @@ namespace CM3070.Dungeon1
                     }
                 }
             }
+
+            propPlacer?.PlaceProps(layout, dungeonRoot, tileSize);
         }
 
         public Vector3 GridToWorld(Vector2Int gridPosition)
