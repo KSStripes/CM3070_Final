@@ -6,6 +6,11 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 
+# Paid Unity Asset Store content
+# Do not commit raw third-party asset packs to the public repo.
+Assets/ThirdParty/
+Assets/ThirdParty.meta
+
 .vscode/
 *.csproj
 *.sln
