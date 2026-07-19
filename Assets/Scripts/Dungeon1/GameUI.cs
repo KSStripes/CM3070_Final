@@ -23,6 +23,13 @@ namespace CM3070.Dungeon1
         [SerializeField] private TMP_Text healthText;
         [SerializeField] private Slider healthBar;
 
+        [Header("Display Text")]
+        [SerializeField] private string titleLabel = "Dungeon Crawler";
+        [SerializeField] private string levelLabel = "Level";
+        [SerializeField] private string currencyLabel = "Coins";
+        [SerializeField] private string levelCompleteLabel = "Level Complete";
+        [SerializeField] private string gameOverLabel = "Game Over";
+
         private GameState currentState;
 
         private void Awake()
@@ -54,17 +61,17 @@ namespace CM3070.Dungeon1
 
             if (titleText != null)
             {
-                titleText.text = "Dungeon Crawler";
+                titleText.text = titleLabel;
             }
 
             if (levelCompleteText != null)
             {
-                levelCompleteText.text = $"Level {level} Complete";
+                levelCompleteText.text = levelCompleteLabel;
             }
 
             if (gameOverText != null)
             {
-                gameOverText.text = "Game Over";
+                gameOverText.text = gameOverLabel;
             }
 
             if (nextLevelButton != null)
@@ -103,7 +110,7 @@ namespace CM3070.Dungeon1
         {
             if (levelText != null)
             {
-                levelText.text = $"Level: {level}";
+                levelText.text = $"{levelLabel}: {level}";
             }
         }
 
@@ -111,7 +118,7 @@ namespace CM3070.Dungeon1
         {
             if (coinText != null)
             {
-                coinText.text = $"Coins: {count}";
+                coinText.text = $"{currencyLabel}: {count}";
             }
         }
 
