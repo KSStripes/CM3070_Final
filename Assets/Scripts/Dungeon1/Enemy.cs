@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CM3070.PCG;
 using UnityEngine;
 
@@ -32,10 +33,14 @@ namespace CM3070.Dungeon1
             attack = GetComponent<EnemyAttack>();
         }
 
-        public void Configure(DungeonLayout layout, DungeonVisualizer visualizer, Vector2Int startGridPosition)
+        public void Configure(
+            DungeonLayout layout,
+            DungeonVisualizer visualizer,
+            Vector2Int startGridPosition,
+            IReadOnlyCollection<Vector2Int> blockedPositions = null)
         {
             // Pass PCG context to the movement component.
-            patrol.Configure(layout, visualizer, startGridPosition);
+            patrol.Configure(layout, visualizer, startGridPosition, blockedPositions);
         }
 
         private void Update()

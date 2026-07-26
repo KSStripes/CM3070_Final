@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CM3070.PCG;
 using UnityEngine;
 
@@ -24,9 +25,13 @@ namespace CM3070.Dungeon1
             patrolTileDistance = Mathf.Max(1, patrolTileDistance);
         }
 
-        public void Configure(DungeonLayout layout, DungeonVisualizer visualizer, Vector2Int startGridPosition)
+        public void Configure(
+            DungeonLayout layout,
+            DungeonVisualizer visualizer,
+            Vector2Int startGridPosition,
+            IReadOnlyCollection<Vector2Int> blockedPositions = null)
         {
-            Vector2Int endGridPosition = ChoosePatrolEnd(layout, startGridPosition);
+            Vector2Int endGridPosition = ChoosePatrolEnd(layout, startGridPosition, blockedPositions);
             // Convert logical grid tiles into world-space patrol endpoints.
             pointA = visualizer.GridToWorld(startGridPosition) + Vector3.up * 0.82f;
             pointB = visualizer.GridToWorld(endGridPosition) + Vector3.up * 0.82f;
@@ -69,7 +74,10 @@ namespace CM3070.Dungeon1
             }
         }
 
-        private Vector2Int ChoosePatrolEnd(DungeonLayout layout, Vector2Int start)
+        private Vector2Int ChoosePatrolEnd(
+            DungeonLayout layout,
+            Vector2Int start,
+            IReadOnlyCollection<Vector2Int> blockedPositions)
         {
             Vector2Int[] directions =
             {
@@ -86,7 +94,7 @@ namespace CM3070.Dungeon1
                 for (int i = 0; i < patrolTileDistance; i++)
                 {
                     Vector2Int next = candidate + direction;
-                    if (!layout.IsWalkable(next))
+                    if (!layout.IsWalkable(next) || IsBlocked(next, blockedPositions))
                     {
                         break;
                     }
@@ -102,6 +110,24 @@ namespace CM3070.Dungeon1
             }
 
             return start;
+        }
+
+        private static bool IsBlocked(Vector2Int position, IReadOnlyCollection<Vector2Int> blockedPositions)
+        {
+            if (blockedPositions == null)
+            {
+                return false;
+            }
+
+            foreach (Vector2Int blockedPosition in blockedPositions)
+            {
+                if (blockedPosition == position)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

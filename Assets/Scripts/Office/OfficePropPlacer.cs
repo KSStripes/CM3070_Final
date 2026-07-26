@@ -23,7 +23,10 @@ namespace CM3070.Office
         [SerializeField] private bool randomizeRotation = true;
         [SerializeField] private bool disablePropColliders = true;
 
+        private readonly HashSet<Vector2Int> occupiedPositions = new();
         private OfficeRoomPlan roomPlan;
+
+        public IReadOnlyCollection<Vector2Int> OccupiedPositions => occupiedPositions;
 
         public void SetRoomPlan(OfficeRoomPlan plan)
         {
@@ -32,6 +35,8 @@ namespace CM3070.Office
 
         public void PlaceProps(DungeonLayout layout, Transform parent, float tileSize)
         {
+            occupiedPositions.Clear();
+
             if (layout == null || parent == null || !HasAnyPrefab())
             {
                 return;
@@ -90,6 +95,7 @@ namespace CM3070.Office
                 }
 
                 occupied.Add(candidate.Position);
+                occupiedPositions.Add(candidate.Position);
             }
         }
 

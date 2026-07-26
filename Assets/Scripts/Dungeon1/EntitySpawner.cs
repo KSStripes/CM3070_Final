@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CM3070.PCG;
 using UnityEngine;
 
@@ -27,15 +28,23 @@ namespace CM3070.Dungeon1
         private Transform entityRoot;
         private DungeonLayout currentLayout;
         private DungeonVisualizer visualizer;
+        private readonly HashSet<Vector2Int> blockedEntityPositions = new();
+        private readonly HashSet<Vector2Int> occupiedEnemyPositions = new();
 
         public PlayerInventory PlayerInventory { get; private set; }
         public Transform PlayerTransform => PlayerInventory != null ? PlayerInventory.transform : null;
 
-        public void SpawnEntities(DungeonLayout layout, DungeonVisualizer dungeonVisualizer, bool runtimeObjects, bool resetPlayerStats)
+        public void SpawnEntities(
+            DungeonLayout layout,
+            DungeonVisualizer dungeonVisualizer,
+            bool runtimeObjects,
+            bool resetPlayerStats,
+            IReadOnlyCollection<Vector2Int> blockedPositions = null)
         {
             // Store layout context so spawned entities can be configured after instantiation.
             currentLayout = layout;
             visualizer = dungeonVisualizer;
+            SetBlockedEntityPositions(blockedPositions);
 
             PlayerInventory.InventorySnapshot? inventorySnapshot = null;
             HealthSystem.HealthSnapshot? healthSnapshot = null;
@@ -60,6 +69,22 @@ namespace CM3070.Dungeon1
             SpawnPlayer(resetPlayerStats, inventorySnapshot, healthSnapshot);
             SpawnEnemies();
             SpawnLoot();
+        }
+
+        private void SetBlockedEntityPositions(IReadOnlyCollection<Vector2Int> blockedPositions)
+        {
+            blockedEntityPositions.Clear();
+            occupiedEnemyPositions.Clear();
+
+            if (blockedPositions == null)
+            {
+                return;
+            }
+
+            foreach (Vector2Int blockedPosition in blockedPositions)
+            {
+                blockedEntityPositions.Add(blockedPosition);
+            }
         }
 
         private void EnsureEntityRoot()
@@ -129,18 +154,64 @@ namespace CM3070.Dungeon1
         {
             foreach (Vector2Int gridPosition in currentLayout.EnemyPositions)
             {
+                if (!TryFindEntitySpawnPosition(gridPosition, out Vector2Int spawnPosition))
+                {
+                    continue;
+                }
+
                 GameObject enemy = InstantiatePrefab(RandomEnemyPrefab(), "Enemy");
                 if (enemy == null) continue;
 
                 enemy.transform.SetParent(entityRoot);
                 // Enemy positions come from the PCG furnishing pass.
-                enemy.transform.position = visualizer.GridToWorld(gridPosition) + Vector3.up * 0.82f;
+                enemy.transform.position = visualizer.GridToWorld(spawnPosition) + Vector3.up * 0.82f;
 
-                if (!EnemyReady(enemy, gridPosition))
+                if (!EnemyReady(enemy, spawnPosition))
                 {
                     Destroy(enemy);
+                    continue;
+                }
+
+                occupiedEnemyPositions.Add(spawnPosition);
+            }
+        }
+
+        private bool TryFindEntitySpawnPosition(Vector2Int preferredPosition, out Vector2Int spawnPosition)
+        {
+            if (CanSpawnEntityAt(preferredPosition))
+            {
+                spawnPosition = preferredPosition;
+                return true;
+            }
+
+            for (int radius = 1; radius <= 4; radius++)
+            {
+                for (int x = preferredPosition.x - radius; x <= preferredPosition.x + radius; x++)
+                {
+                    for (int y = preferredPosition.y - radius; y <= preferredPosition.y + radius; y++)
+                    {
+                        Vector2Int candidate = new(x, y);
+                        if (CanSpawnEntityAt(candidate))
+                        {
+                            spawnPosition = candidate;
+                            return true;
+                        }
+                    }
                 }
             }
+
+            spawnPosition = preferredPosition;
+            return false;
+        }
+
+        private bool CanSpawnEntityAt(Vector2Int position)
+        {
+            return currentLayout.IsWalkable(position)
+                && !currentLayout.IsMarker(position)
+                && position != currentLayout.Start
+                && position != currentLayout.Exit
+                && !blockedEntityPositions.Contains(position)
+                && !occupiedEnemyPositions.Contains(position);
         }
 
         private void SpawnLoot()
@@ -263,7 +334,7 @@ namespace CM3070.Dungeon1
             if (!enemy.TryGetComponent(out EnemyPatrol _)) return Fail("Enemy", "missing EnemyPatrol.");
             if (!enemy.TryGetComponent(out EnemyAttack _)) return Fail("Enemy", "missing EnemyAttack.");
 
-            enemyController.Configure(currentLayout, visualizer, gridPosition);
+            enemyController.Configure(currentLayout, visualizer, gridPosition, blockedEntityPositions);
             return true;
         }
 

@@ -173,7 +173,12 @@ namespace CM3070.Dungeon1
             visualizer.SetRenderSpawnMarkers(!runtimeObjects);
             visualizer.Render(currentLayout);
 
-            entitySpawner.SpawnEntities(currentLayout, visualizer, runtimeObjects, resetPlayerStats);
+            entitySpawner.SpawnEntities(
+                currentLayout,
+                visualizer,
+                runtimeObjects,
+                resetPlayerStats,
+                officePropPlacer != null ? officePropPlacer.OccupiedPositions : null);
 
             cameraController.PositionOverviewCamera(currentLayout);
             cameraController.PositionPlayerCamera(entitySpawner.PlayerTransform != null
