@@ -1,19 +1,17 @@
+using System.Collections.Generic;
 using CM3070.Dungeon1;
 using UnityEngine;
 
 namespace CM3070.Office.Quest
 {
-    // Coordinates the first playable office loop: clock in, do tasks, clock out.
+    // Coordinates the first playable office loop: complete tasks, then leave.
     public sealed class QuestManager : MonoBehaviour
     {
-        [SerializeField] private bool requireFolderDelivery = true;
-        [SerializeField] private bool requirePrinterFix = true;
+        private readonly Dictionary<OfficeTaskMarkerId, OfficeQuestDefinition> activeQuestsByMarker = new();
+        private readonly HashSet<OfficeTaskMarkerId> completedQuestMarkers = new();
 
         public static QuestManager Instance { get; private set; }
 
-        public bool ClockedIn { get; private set; }
-        public bool FolderDelivered { get; private set; }
-        public bool PrinterFixed { get; private set; }
         public bool ShiftComplete { get; private set; }
 
         private void Awake()
@@ -47,21 +45,14 @@ namespace CM3070.Office.Quest
 
             switch (markerId)
             {
-                case OfficeTaskMarkerId.ClockInTerminal:
-                    ClockIn(displayName);
+                case OfficeTaskMarkerId.ExitMarker:
+                    TryExit(displayName);
                     break;
                 case OfficeTaskMarkerId.DeliveryPoint:
-                    TryDeliverFolder(displayName, inventory);
-                    break;
                 case OfficeTaskMarkerId.Printer:
-                    TryFixPrinter(displayName, inventory);
-                    break;
-                case OfficeTaskMarkerId.ExitTerminal:
-                    TryClockOut(displayName);
-                    break;
-                case OfficeTaskMarkerId.MeetingArea:
                 case OfficeTaskMarkerId.BossDesk:
-                    Debug.Log($"{displayName} reached. No prototype task is assigned yet.");
+                case OfficeTaskMarkerId.MeetingArea:
+                    TryCompleteActiveQuest(markerId, displayName, inventory);
                     break;
             }
         }
@@ -72,17 +63,8 @@ namespace CM3070.Office.Quest
 
             return markerId switch
             {
-                OfficeTaskMarkerId.ClockInTerminal => !ClockedIn,
-                OfficeTaskMarkerId.DeliveryPoint => ClockedIn
-                    && !FolderDelivered
-                    && inventory != null
-                    && inventory.HasItem(QuestItemId.Folder),
-                OfficeTaskMarkerId.Printer => ClockedIn
-                    && !PrinterFixed
-                    && inventory != null
-                    && inventory.HasItem(QuestItemId.PrinterPaper),
-                OfficeTaskMarkerId.ExitTerminal => ClockedIn && RequiredTasksComplete(),
-                _ => false
+                OfficeTaskMarkerId.ExitMarker => RequiredTasksComplete(),
+                _ => CanCompleteActiveQuest(markerId, inventory)
             };
         }
 
@@ -90,105 +72,96 @@ namespace CM3070.Office.Quest
         {
             return markerId switch
             {
-                OfficeTaskMarkerId.ClockInTerminal => ClockedIn,
-                OfficeTaskMarkerId.DeliveryPoint => FolderDelivered,
-                OfficeTaskMarkerId.Printer => PrinterFixed,
-                OfficeTaskMarkerId.ExitTerminal => ShiftComplete,
-                _ => false
+                OfficeTaskMarkerId.ExitMarker => ShiftComplete,
+                _ => completedQuestMarkers.Contains(markerId)
             };
+        }
+
+        public void ConfigureActiveQuests(IEnumerable<OfficeQuestDefinition> activeQuests)
+        {
+            activeQuestsByMarker.Clear();
+            completedQuestMarkers.Clear();
+            ShiftComplete = false;
+
+            if (activeQuests == null) return;
+
+            foreach (OfficeQuestDefinition quest in activeQuests)
+            {
+                if (quest == null || !quest.IsRequiredQuest) continue;
+
+                // One marker represents one active task in the current prototype loop.
+                activeQuestsByMarker[quest.TaskMarkerId] = quest;
+            }
         }
 
         public void ResetShift()
         {
-            ClockedIn = false;
-            FolderDelivered = false;
-            PrinterFixed = false;
             ShiftComplete = false;
+            completedQuestMarkers.Clear();
         }
 
-        private void ClockIn(string displayName)
+        private bool CanCompleteActiveQuest(OfficeTaskMarkerId markerId, QuestInventory inventory)
         {
-            if (ClockedIn)
+            if (inventory == null || completedQuestMarkers.Contains(markerId))
             {
-                Debug.Log("Already clocked in.");
-                return;
+                return false;
             }
 
-            ClockedIn = true;
-            Debug.Log($"Clocked in at {displayName}.");
+            return activeQuestsByMarker.TryGetValue(markerId, out OfficeQuestDefinition quest)
+                && inventory.HasItem(quest.RequiredItemId);
         }
 
-        private void TryDeliverFolder(string displayName, QuestInventory inventory)
+        private void TryCompleteActiveQuest(
+            OfficeTaskMarkerId markerId,
+            string displayName,
+            QuestInventory inventory)
         {
-            if (!ClockedIn)
+            if (!activeQuestsByMarker.TryGetValue(markerId, out OfficeQuestDefinition quest))
             {
-                Debug.Log("Clock in before delivering the folder.");
+                Debug.Log($"{displayName} reached. No active quest is assigned here.");
                 return;
             }
 
-            if (FolderDelivered)
+            if (completedQuestMarkers.Contains(markerId))
             {
-                Debug.Log("Folder already delivered.");
+                Debug.Log($"{quest.QuestName} is already complete.");
                 return;
             }
 
-            if (!inventory.RemoveItem(QuestItemId.Folder))
+            if (!inventory.RemoveItem(quest.RequiredItemId))
             {
-                Debug.Log("Delivery needs QuestItem_Folder.");
+                Debug.Log($"{quest.QuestName} needs {quest.RequiredItemId}.");
                 return;
             }
 
-            FolderDelivered = true;
-            Debug.Log($"Folder delivered at {displayName}.");
+            completedQuestMarkers.Add(markerId);
+            Debug.Log($"{quest.QuestName} completed at {displayName}.");
         }
 
-        private void TryFixPrinter(string displayName, QuestInventory inventory)
+        private void TryExit(string displayName)
         {
-            if (!ClockedIn)
-            {
-                Debug.Log("Clock in before fixing the printer.");
-                return;
-            }
-
-            if (PrinterFixed)
-            {
-                Debug.Log("Printer already fixed.");
-                return;
-            }
-
-            if (!inventory.RemoveItem(QuestItemId.PrinterPaper))
-            {
-                Debug.Log("Printer task needs QuestItem_PrinterPaper.");
-                return;
-            }
-
-            PrinterFixed = true;
-            Debug.Log($"Printer fixed at {displayName}.");
-        }
-
-        private void TryClockOut(string displayName)
-        {
-            if (!ClockedIn)
-            {
-                Debug.Log("Clock in before ending the shift.");
-                return;
-            }
-
             if (!RequiredTasksComplete())
             {
-                Debug.Log("Shift cannot end yet. Complete required tasks first.");
+                Debug.Log("Exit is locked. Complete required tasks first.");
                 return;
             }
 
             ShiftComplete = true;
-            Debug.Log($"Clocked out at {displayName}. Shift complete.");
+            Debug.Log($"Exited through {displayName}. Shift complete.");
             GameManager.Instance?.NotifyExitReached();
         }
 
         private bool RequiredTasksComplete()
         {
-            return (!requireFolderDelivery || FolderDelivered)
-                && (!requirePrinterFix || PrinterFixed);
+            foreach (OfficeTaskMarkerId markerId in activeQuestsByMarker.Keys)
+            {
+                if (!completedQuestMarkers.Contains(markerId))
+                {
+                    return false;
+                }
+            }
+
+            return activeQuestsByMarker.Count > 0;
         }
     }
 }

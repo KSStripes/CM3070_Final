@@ -35,7 +35,8 @@ namespace CM3070.Dungeon1
         [SerializeField] private GameObject[] corridorWallPrefabs;
         [SerializeField] private TilePrefabSet[] roomTileSets;
 
-        [Header("Marker Prefabs")]
+        [Header("Dungeon Markers")]
+        [SerializeField] private bool spawnStartExitMarkers = true;
         [SerializeField] private GameObject startMarkerPrefab;
         [SerializeField] private GameObject exitMarkerPrefab;
 
@@ -73,13 +74,17 @@ namespace CM3070.Dungeon1
 
                     CreateFloor(x, y, GetRoomRoleAt(x, y));
 
-                    if (tile == DungeonTile.Start)
+                    if (spawnStartExitMarkers)
                     {
-                        CreateMarker(startMarkerPrefab, $"Start Marker ({x}, {y})", x, y);
-                    }
-                    else if (tile == DungeonTile.Exit)
-                    {
-                        CreateMarker(exitMarkerPrefab, $"Exit Marker ({x}, {y})", x, y);
+                        // Dungeon1 uses these prefabs for its original start/exit gameplay loop.
+                        if (tile == DungeonTile.Start)
+                        {
+                            CreateMarker(startMarkerPrefab, $"Start Marker ({x}, {y})", x, y);
+                        }
+                        else if (tile == DungeonTile.Exit)
+                        {
+                            CreateMarker(exitMarkerPrefab, $"Exit Marker ({x}, {y})", x, y);
+                        }
                     }
                 }
             }
@@ -95,6 +100,11 @@ namespace CM3070.Dungeon1
         public void SetRenderSpawnMarkers(bool shouldRender)
         {
             renderSpawnMarkers = shouldRender;
+        }
+
+        public void SetSpawnStartExitMarkers(bool shouldSpawn)
+        {
+            spawnStartExitMarkers = shouldSpawn;
         }
 
         public void Clear()

@@ -10,6 +10,7 @@ namespace CM3070.Office
     [RequireComponent(typeof(DungeonVisualizer))]
     [RequireComponent(typeof(CameraController))]
     [RequireComponent(typeof(OfficeEntitySpawner))]
+    [RequireComponent(typeof(OfficeQuestSpawner))]
     public sealed class OfficeDungeonController : MonoBehaviour
     {
         [Header("Edit Mode")]
@@ -44,6 +45,7 @@ namespace CM3070.Office
         private DungeonVisualizer visualizer;
         private CameraController cameraController;
         private OfficeEntitySpawner entitySpawner;
+        private OfficeQuestSpawner questSpawner;
         private OfficePropPlacer officePropPlacer;
         private DungeonLayout currentLayout;
         private OfficeRoomPlan currentOfficeRoomPlan;
@@ -75,6 +77,7 @@ namespace CM3070.Office
             visualizer = GetComponent<DungeonVisualizer>();
             cameraController = GetComponent<CameraController>();
             entitySpawner = GetComponent<OfficeEntitySpawner>();
+            questSpawner = GetComponent<OfficeQuestSpawner>();
             officePropPlacer = GetComponent<OfficePropPlacer>();
 
             if (!Application.isPlaying && generatePreviewInEditMode)
@@ -135,6 +138,7 @@ namespace CM3070.Office
                 visualizer = GetComponent<DungeonVisualizer>();
                 cameraController = GetComponent<CameraController>();
                 entitySpawner = GetComponent<OfficeEntitySpawner>();
+                questSpawner = GetComponent<OfficeQuestSpawner>();
                 officePropPlacer = GetComponent<OfficePropPlacer>();
                 GenerateDungeon(false, true);
             }
@@ -145,6 +149,7 @@ namespace CM3070.Office
             visualizer ??= GetComponent<DungeonVisualizer>();
             cameraController ??= GetComponent<CameraController>();
             entitySpawner ??= GetComponent<OfficeEntitySpawner>();
+            questSpawner ??= GetComponent<OfficeQuestSpawner>();
             officePropPlacer ??= GetComponent<OfficePropPlacer>();
 
             cameraController.EnsureCameras(transform);
@@ -156,6 +161,8 @@ namespace CM3070.Office
             currentPlayerRoomRole = OfficeRoomRole.None;
 
             visualizer.SetRenderSpawnMarkers(!runtimeObjects);
+            // OfficeScene gets its exit interaction from OfficeQuestSpawner instead.
+            visualizer.SetSpawnStartExitMarkers(false);
             visualizer.Render(currentLayout);
 
             entitySpawner.SpawnEntities(
@@ -164,6 +171,20 @@ namespace CM3070.Office
                 runtimeObjects,
                 resetPlayerStats,
                 officePropPlacer != null ? officePropPlacer.OccupiedPositions : null);
+
+            if (questSpawner != null && runtimeObjects)
+            {
+                questSpawner.SpawnQuestObjects(
+                    currentLayout,
+                    currentOfficeRoomPlan,
+                    visualizer,
+                    transform,
+                    officePropPlacer != null ? officePropPlacer.OccupiedPositions : null);
+            }
+            else if (questSpawner != null)
+            {
+                questSpawner.ClearQuestObjects();
+            }
 
             cameraController.PositionOverviewCamera(currentLayout);
             cameraController.PositionPlayerCamera(entitySpawner.PlayerTransform != null

@@ -11,6 +11,7 @@ namespace CM3070.Office.Quest
         AccessCard,
         BrokenBadge,
         ReportPage,
-        DocumentStack
+        DocumentStack,
+        Sandwich
     }
 }
