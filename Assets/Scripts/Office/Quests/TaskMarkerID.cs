@@ -8,6 +8,7 @@ namespace CM3070.Office.Quest
         DeliveryPoint = 3,
         MeetingArea = 4,
         BossDesk = 5,
-        ExitMarker = 6
+        ExitMarker = 6,
+        PingPongTable = 7
     }
 }
