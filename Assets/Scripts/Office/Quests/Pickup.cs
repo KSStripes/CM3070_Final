@@ -1,0 +1,87 @@
+using CM3070.Dungeon1;
+using UnityEngine;
+
+namespace CM3070.Office.Quest
+{
+    // Prototype IDs for optional coping pickups, separate from required quest items.
+    public enum PickupId
+    {
+        None,
+        Coffee,
+        Snack,
+        Headphones,
+        StressBall
+    }
+
+    // Trigger pickup for office coping items such as coffee, snacks, and stress relief props.
+    [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(Rigidbody))]
+    public sealed class Pickup : MonoBehaviour
+    {
+        [SerializeField] private PickupId pickupId = PickupId.None;
+        [SerializeField] private string displayName = "Pickup";
+        [SerializeField, Min(0)] private int healthRestore = 0;
+        [SerializeField] private bool destroyOnPickup = true;
+        [SerializeField] private float rotationSpeed = 45f;
+
+        private void Reset()
+        {
+            // Keep pickup prefabs compatible with trigger-based collection.
+            Collider pickupCollider = GetComponent<Collider>();
+            pickupCollider.isTrigger = true;
+
+            Rigidbody pickupBody = GetComponent<Rigidbody>();
+            pickupBody.isKinematic = true;
+            pickupBody.useGravity = false;
+        }
+
+        private void Update()
+        {
+            // Temporary readability cue until final pickup art/animation exists.
+            transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (pickupId == PickupId.None) return;
+
+            // QuestInventory marks the player without depending on tags or layers.
+            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
+            if (inventory == null) return;
+
+            ApplyPrototypeEffect(other);
+            QuestManager.Instance?.NotifyPickupCollected(pickupId, displayName);
+
+            if (destroyOnPickup)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void ApplyPrototypeEffect(Component playerPart)
+        {
+            HealthSystem health = playerPart.GetComponentInParent<HealthSystem>();
+            if (healthRestore > 0 && health != null)
+            {
+                health.Heal(healthRestore);
+            }
+
+            // Future emotional stats can branch from these IDs without prefab renaming.
+            switch (pickupId)
+            {
+                case PickupId.Coffee:
+                    Debug.Log($"{displayName}: prototype energy boost.");
+                    break;
+                case PickupId.Snack:
+                    Debug.Log($"{displayName}: prototype small recovery.");
+                    break;
+                case PickupId.Headphones:
+                    Debug.Log($"{displayName}: prototype noise/social stress reduction.");
+                    break;
+                case PickupId.StressBall:
+                    Debug.Log($"{displayName}: prototype stress reduction.");
+                    break;
+            }
+        }
+    }
+}
