@@ -221,6 +221,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2918670045602868753}
   - component: {fileID: 2966073710266853982}
+  - component: {fileID: 6475136384790773263}
   m_Layer: 0
   m_Name: InteractionTrigger
   m_TagString: Untagged
@@ -266,6 +267,21 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6475136384790773263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955908740534461768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f2bd44d3d24e38ba389932a55c53e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.TaskMarker
+  markerId: 5
+  displayName: Task Marker
+  triggerOnEnter: 1
 --- !u!1001 &687686091045165304
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -32,11 +32,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3764609590626294916}
   - {fileID: 4866769286806426808}
   - {fileID: 4043075765749480711}
   - {fileID: 4927223713527862049}
   - {fileID: 781924600100000002}
+  - {fileID: 3764609590626294916}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &33214662870333670
@@ -217,6 +217,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3764609590626294916}
   - component: {fileID: 4284670472442630864}
+  - component: {fileID: 287913763780181745}
   m_Layer: 0
   m_Name: InteractionTrigger
   m_TagString: Untagged
@@ -262,6 +263,21 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &287913763780181745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1506205879781267705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f2bd44d3d24e38ba389932a55c53e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.TaskMarker
+  markerId: 6
+  displayName: Task Marker
+  triggerOnEnter: 1
 --- !u!1001 &1024453854480934920
 PrefabInstance:
   m_ObjectHideFlags: 0
