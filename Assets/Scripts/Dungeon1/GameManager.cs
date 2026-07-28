@@ -1,4 +1,5 @@
 using UnityEngine;
+using CM3070.Office;
 
 // Central gameplay notification point.
 // Currently logs events for testing; later this can forward the same events to HUD/UI systems.
@@ -15,6 +16,7 @@ namespace CM3070.Dungeon1
     public sealed class GameManager : MonoBehaviour
     {
         [SerializeField] private DungeonController dungeonController;
+        [SerializeField] private OfficeDungeonController officeDungeonController;
         [SerializeField] private GameUI gameUI;
 
         public static GameManager Instance { get; private set; }
@@ -36,6 +38,7 @@ namespace CM3070.Dungeon1
         private void Start()
         {
             dungeonController ??= FindFirstObjectByType<DungeonController>();
+            officeDungeonController ??= FindFirstObjectByType<OfficeDungeonController>();
             gameUI ??= FindFirstObjectByType<GameUI>();
             SetState(GameState.StartScreen);
         }
@@ -44,8 +47,7 @@ namespace CM3070.Dungeon1
         {
             CurrentLevel = 1;
             SetState(GameState.Playing);
-            if (dungeonController == null) return;
-            dungeonController.StartNewGame();
+            StartNewControllerRun();
             Debug.Log($"Game started. Level={CurrentLevel}");
         }
 
@@ -53,8 +55,7 @@ namespace CM3070.Dungeon1
         {
             CurrentLevel++;
             SetState(GameState.Playing);
-            if (dungeonController == null) return;
-            dungeonController.StartNextLevel();
+            StartNextControllerRun();
             Debug.Log($"Next level. Level={CurrentLevel}");
         }
 
@@ -62,8 +63,7 @@ namespace CM3070.Dungeon1
         {
             CurrentLevel = 1;
             SetState(GameState.Playing);
-            if (dungeonController == null) return;
-            dungeonController.StartNewGame();
+            StartNewControllerRun();
             Debug.Log("New game.");
         }
 
@@ -116,6 +116,29 @@ namespace CM3070.Dungeon1
             CurrentState = state;
             Time.timeScale = CurrentState == GameState.Playing ? 1f : 0f;
             gameUI?.ShowState(CurrentState, CurrentLevel);
+        }
+
+        private void StartNewControllerRun()
+        // If the scene is office start the office dungeon controller, otherwise start the normal dungeon controller.
+        {
+            if (officeDungeonController != null)
+            {
+                officeDungeonController.StartNewGame();
+                return;
+            }
+
+            dungeonController?.StartNewGame();
+        }
+
+        private void StartNextControllerRun()
+        {
+            if (officeDungeonController != null)
+            {
+                officeDungeonController.StartNextLevel();
+                return;
+            }
+
+            dungeonController?.StartNextLevel();
         }
     }
 }
