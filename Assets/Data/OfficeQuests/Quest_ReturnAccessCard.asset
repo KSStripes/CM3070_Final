@@ -13,12 +13,16 @@ MonoBehaviour:
   m_Name: Quest_ReturnAccessCard
   m_EditorClassIdentifier: 
   questName: Return Access Card
+  questType: 0
+  objectiveText: Find the access card and return it to reception.
+  feedbackComment: Reception thanks you with the warmth of a locked door.
+  healthImpact: 1
   spawnWeight: 1
-  requiredItemId: 4
+  requiredItemId: 1
   questItemPrefab: {fileID: 1938695310604038, guid: 8ddd8d2122bd44bf7bcc63e092a7a181, type: 3}
   itemRoomRole: 1
   itemHeight: 0.36
-  taskMarkerId: 5
-  taskMarkerPrefab: {fileID: 1738513454615862, guid: a405ad3869aea4e3c91f40647c603dc7, type: 3}
-  markerRoomRole: 2
+  taskMarkerId: 12
+  taskMarkerPrefab: {fileID: 1440611451762170, guid: c80d6292fffc34d679a1681f90787656, type: 3}
+  markerRoomRole: 1
   markerHeight: 0.08

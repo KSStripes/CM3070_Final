@@ -10,15 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
-  m_Name: Quest_SubmitTimeSheet
+  m_Name: Quest_SubmitTimesheet
   m_EditorClassIdentifier: 
   questName: Submit Timesheet
+  questType: 0
+  objectiveText: Find your timesheet and submit it at the clock-in terminal.
+  feedbackComment: You have successfully documented time you will never get back.
+  healthImpact: -2
   spawnWeight: 1
-  requiredItemId: 1
+  requiredItemId: 21
   questItemPrefab: {fileID: 1310284936701774, guid: 5d826af8b24cc4e29ae80c48df9a58b5, type: 3}
   itemRoomRole: 4
   itemHeight: 0.36
-  taskMarkerId: 3
-  taskMarkerPrefab: {fileID: 1609770412431588, guid: b184212043b5c49b797ce34e167dabcf, type: 3}
+  taskMarkerId: 1
+  taskMarkerPrefab: {fileID: 1609770412431588, guid: 363566a86b541493cb727da9fac48377, type: 3}
   markerRoomRole: 1
   markerHeight: 0.08

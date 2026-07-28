@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: Quest_CarryArchiveBox
   m_EditorClassIdentifier: 
   questName: Carry Archive Box
+  questType: 0
+  objectiveText: Take the archive box to the delivery point.
+  feedbackComment: You lift with your knees and resent with your whole soul.
+  healthImpact: -4
   spawnWeight: 1
-  requiredItemId: 16
-  questItemPrefab: {fileID: 0}
+  requiredItemId: 2
+  questItemPrefab: {fileID: 1604850509592136, guid: b76ba3115bb5c46f8b3918ba93c7c855, type: 3}
   itemRoomRole: 5
   itemHeight: 0.36
   taskMarkerId: 3

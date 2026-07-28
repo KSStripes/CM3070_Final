@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
+  m_Name: Quest_ReturnOfficeFish
+  m_EditorClassIdentifier: 
+  questName: Return The Office Fish
+  questType: 0
+  objectiveText: Return the office fish to the fish tank.
+  feedbackComment: The fish understands office politics better than you do.
+  healthImpact: 2
+  spawnWeight: 1
+  requiredItemId: 13
+  questItemPrefab: {fileID: 8115118771843089842, guid: 2c430247938cc44059131f5127599d0e, type: 3}
+  itemRoomRole: 1
+  itemHeight: 0.36
+  taskMarkerId: 13
+  taskMarkerPrefab: {fileID: 4430468879631747696, guid: 3b40c6d8653d34933a1cc51ca9616193, type: 3}
+  markerRoomRole: 2
+  markerHeight: 0.08

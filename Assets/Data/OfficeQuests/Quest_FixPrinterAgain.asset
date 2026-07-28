@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
+  m_Name: Quest_FixPrinterAgain
+  m_EditorClassIdentifier: 
+  questName: Fix The Printer Again
+  questType: 0
+  objectiveText: Find printer paper and take it to the printer.
+  feedbackComment: The printer accepts your offering and immediately asks for toner.
+  healthImpact: -3
+  spawnWeight: 1
+  requiredItemId: 16
+  questItemPrefab: {fileID: 1253672818782978, guid: 9736efb87e6944dbf873b30b5d32e503, type: 3}
+  itemRoomRole: 4
+  itemHeight: 0.36
+  taskMarkerId: 2
+  taskMarkerPrefab: {fileID: 1609770412431588, guid: bbd53d3525baf4c82a3f05dc7abff0c6, type: 3}
+  markerRoomRole: 3
+  markerHeight: 0.08

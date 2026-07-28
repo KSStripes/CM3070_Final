@@ -13,12 +13,16 @@ MonoBehaviour:
   m_Name: Quest_ReplaceBrokenBadge
   m_EditorClassIdentifier: 
   questName: Replace Broken Badge
+  questType: 0
+  objectiveText: Bring the broken badge to reception.
+  feedbackComment: Your identity has been restored to an acceptable plastic rectangle.
+  healthImpact: 2
   spawnWeight: 1
-  requiredItemId: 5
+  requiredItemId: 4
   questItemPrefab: {fileID: 1938695310604038, guid: 852003f09e37c49a7b7973737dc4cfcc, type: 3}
   itemRoomRole: 4
   itemHeight: 0.36
-  taskMarkerId: 3
-  taskMarkerPrefab: {fileID: 1609770412431588, guid: b184212043b5c49b797ce34e167dabcf, type: 3}
+  taskMarkerId: 12
+  taskMarkerPrefab: {fileID: 1440611451762170, guid: c80d6292fffc34d679a1681f90787656, type: 3}
   markerRoomRole: 1
   markerHeight: 0.08

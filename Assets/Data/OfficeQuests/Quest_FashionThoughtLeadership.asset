@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
+  m_Name: Quest_FashionThoughtLeadership
+  m_EditorClassIdentifier: 
+  questName: Fashion Thought Leadership
+  questType: 0
+  objectiveText: Bring the fashion magazine to the bean bags.
+  feedbackComment: The creative zone is now 12 percent more performative.
+  healthImpact: -1
+  spawnWeight: 1
+  requiredItemId: 8
+  questItemPrefab: {fileID: 1766229464219394, guid: 12123ec293e234002acbbc69ce3dd6f5, type: 3}
+  itemRoomRole: 1
+  itemHeight: 0.36
+  taskMarkerId: 8
+  taskMarkerPrefab: {fileID: 1093985511282492, guid: 10fde78f611c84a889bf1dd36f719b42, type: 3}
+  markerRoomRole: 4
+  markerHeight: 0.08

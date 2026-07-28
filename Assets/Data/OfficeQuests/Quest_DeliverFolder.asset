@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: Quest_DeliverFolder
   m_EditorClassIdentifier: 
   questName: Deliver Folder
+  questType: 0
+  objectiveText: Find the folder and take it to the delivery point.
+  feedbackComment: The folder was urgent until the moment you delivered it.
+  healthImpact: -1
   spawnWeight: 1
-  requiredItemId: 2
+  requiredItemId: 9
   questItemPrefab: {fileID: 1235865142284490, guid: 0490b1e472058435586981961da070f5, type: 3}
   itemRoomRole: 4
   itemHeight: 0.36

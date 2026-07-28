@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
+  m_Name: Quest_LocateTrainingPacket
+  m_EditorClassIdentifier: 
+  questName: Locate Training Packet
+  questType: 2
+  objectiveText: Find the training packet.
+  feedbackComment: You are now trained in a system nobody uses correctly.
+  healthImpact: -2
+  spawnWeight: 1
+  requiredItemId: 22
+  questItemPrefab: {fileID: 1331128502589024, guid: 6c017c250903844ae8546f9927b5e7ba, type: 3}
+  itemRoomRole: 4
+  itemHeight: 0.36
+  taskMarkerId: 0
+  taskMarkerPrefab: {fileID: 0}
+  markerRoomRole: 0
+  markerHeight: 0.08

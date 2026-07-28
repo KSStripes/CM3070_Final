@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: Quest_DeliverSandwich
   m_EditorClassIdentifier: 
   questName: Deliver Sandwich
+  questType: 0
+  objectiveText: Bring the sandwich to the boss desk.
+  feedbackComment: Leadership has been nourished. Nothing else improves.
+  healthImpact: -3
   spawnWeight: 1
-  requiredItemId: 8
+  requiredItemId: 18
   questItemPrefab: {fileID: 1348210696840410, guid: 1571483d2f9b64de79d433f69a13269a, type: 3}
   itemRoomRole: 4
   itemHeight: 0.36
