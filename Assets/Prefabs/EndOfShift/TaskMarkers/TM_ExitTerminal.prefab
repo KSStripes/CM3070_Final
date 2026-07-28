@@ -276,9 +276,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.TaskMarker
   markerId: 6
-  displayName: ExitTerminal
+  displayName: Exit Terminal
   triggerOnEnter: 1
-  highlightRenderers: []
+  highlightRenderers:
+  - {fileID: 781924600100000004}
   availableMaterial: {fileID: 2100000, guid: 97fe2e24c8d0e45d0a6a406aff838d03, type: 2}
   unavailableMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
   completedMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}

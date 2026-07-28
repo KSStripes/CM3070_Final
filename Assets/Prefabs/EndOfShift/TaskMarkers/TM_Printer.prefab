@@ -278,7 +278,8 @@ MonoBehaviour:
   markerId: 2
   displayName: Printer
   triggerOnEnter: 1
-  highlightRenderers: []
+  highlightRenderers:
+  - {fileID: 781924600100000004}
   availableMaterial: {fileID: 2100000, guid: c3a7d1e9b41544f18ea0e5d7fd109b78, type: 2}
   unavailableMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
   completedMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
