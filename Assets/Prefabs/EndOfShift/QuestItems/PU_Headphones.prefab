@@ -158,6 +158,7 @@ MonoBehaviour:
   pickupId: 3
   displayName: Headphones
   healthRestore: 0
+  maxHealthIncrease: 10
   destroyOnPickup: 1
   rotationSpeed: 45
 --- !u!1 &1435695626343887259
@@ -276,7 +277,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.1277, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.08, z: 0.5}
+  m_LocalScale: {x: 0.7, y: 0.08, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7311634422719648051}

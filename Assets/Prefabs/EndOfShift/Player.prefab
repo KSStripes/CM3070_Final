@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6021850101649240172}
   - component: {fileID: 1548962975872286196}
   - component: {fileID: 8580007809366237626}
-  - component: {fileID: 1683785856263801443}
   - component: {fileID: 3697733545160855800}
   - component: {fileID: -1816398259683282935}
   - component: {fileID: 6718147181155327201}
@@ -95,18 +94,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1683785856263801443
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3494889878381632103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fe238d0400e4535bc8821276e943f90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CM3070.Game.PlayerInventory
 --- !u!143 &3697733545160855800
 CharacterController:
   m_ObjectHideFlags: 0
@@ -169,6 +156,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3494889878381632103}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b6e518033d034485b765241c5da3ece, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e3fda1c0370c4a61aa5467323d18ca3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.QuestInventory
+  m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.OfficePlayerInventory

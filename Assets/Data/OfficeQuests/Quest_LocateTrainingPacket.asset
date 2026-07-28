@@ -21,7 +21,7 @@ MonoBehaviour:
   requiredItemId: 22
   questItemPrefab: {fileID: 1331128502589024, guid: 6c017c250903844ae8546f9927b5e7ba, type: 3}
   itemRoomRole: 4
-  itemHeight: 0.36
+  itemHeight: 0.45
   taskMarkerId: 0
   taskMarkerPrefab: {fileID: 0}
   markerRoomRole: 0
