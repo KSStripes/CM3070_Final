@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CM3070.Dungeon1;
+using CM3070.Office;
 using UnityEngine;
 
 namespace CM3070.Office.Quest
@@ -43,7 +44,7 @@ namespace CM3070.Office.Quest
         public void NotifyMarkerReached(
             OfficeTaskMarkerId markerId,
             string displayName,
-            QuestInventory inventory)
+            OfficePlayerInventory inventory)
         {
             if (inventory == null || ShiftComplete) return;
 
@@ -56,7 +57,7 @@ namespace CM3070.Office.Quest
             TryCompleteActiveMarkerQuest(markerId, displayName, inventory);
         }
 
-        public bool CanUseMarker(OfficeTaskMarkerId markerId, QuestInventory inventory)
+        public bool CanUseMarker(OfficeTaskMarkerId markerId, OfficePlayerInventory inventory)
         {
             if (ShiftComplete) return false;
 
@@ -74,6 +75,19 @@ namespace CM3070.Office.Quest
                 OfficeTaskMarkerId.ExitMarker => ShiftComplete,
                 _ => completedQuestMarkers.Contains(markerId)
             };
+        }
+
+        public bool IsMarkerActive(OfficeTaskMarkerId markerId)
+        {
+            if (ShiftComplete) return false;
+
+            if (markerId == OfficeTaskMarkerId.ExitMarker)
+            {
+                return RequiredTasksComplete();
+            }
+
+            return activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests)
+                && HasIncompleteQuest(quests);
         }
 
         public void ConfigureActiveQuests(IEnumerable<OfficeQuestDefinition> activeQuests)
@@ -114,7 +128,7 @@ namespace CM3070.Office.Quest
             completedQuestMarkers.Clear();
         }
 
-        private bool CanCompleteActiveQuest(OfficeTaskMarkerId markerId, QuestInventory inventory)
+        private bool CanCompleteActiveQuest(OfficeTaskMarkerId markerId, OfficePlayerInventory inventory)
         {
             if (inventory == null)
             {
@@ -126,7 +140,7 @@ namespace CM3070.Office.Quest
 
         private bool TryFindCompletableMarkerQuest(
             OfficeTaskMarkerId markerId,
-            QuestInventory inventory,
+            OfficePlayerInventory inventory,
             out OfficeQuestDefinition completableQuest)
         {
             completableQuest = null;
@@ -143,7 +157,7 @@ namespace CM3070.Office.Quest
                 bool canComplete = quest.QuestType switch
                 {
                     OfficeQuestType.VisitMarker => true,
-                    OfficeQuestType.DeliverItem => inventory.HasItem(quest.RequiredItemId),
+                    OfficeQuestType.DeliverItem => inventory.HasQuestItem(quest.RequiredItemId),
                     _ => false
                 };
 
@@ -160,7 +174,7 @@ namespace CM3070.Office.Quest
         private void TryCompleteActiveMarkerQuest(
             OfficeTaskMarkerId markerId,
             string displayName,
-            QuestInventory inventory)
+            OfficePlayerInventory inventory)
         {
             if (!activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests))
             {
@@ -176,7 +190,7 @@ namespace CM3070.Office.Quest
 
             if (quest.QuestType == OfficeQuestType.DeliverItem)
             {
-                inventory.RemoveItem(quest.RequiredItemId);
+                inventory.RemoveQuestItem(quest.RequiredItemId);
             }
 
             completedQuests.Add(quest);
@@ -262,6 +276,19 @@ namespace CM3070.Office.Quest
             }
 
             return true;
+        }
+
+        private bool HasIncompleteQuest(List<OfficeQuestDefinition> quests)
+        {
+            foreach (OfficeQuestDefinition quest in quests)
+            {
+                if (!completedQuests.Contains(quest))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void LogFeedbackComment(OfficeQuestDefinition quest)

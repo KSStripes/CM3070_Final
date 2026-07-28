@@ -1,3 +1,4 @@
+using CM3070.Office;
 using UnityEngine;
 
 namespace CM3070.Office.Quest
@@ -22,7 +23,7 @@ namespace CM3070.Office.Quest
         [SerializeField] private Material completedMaterial;
 
         private bool playerInside;
-        private QuestInventory currentInventory;
+        private OfficePlayerInventory currentInventory;
         private TaskMarkerVisualState visualState = TaskMarkerVisualState.Available;
 
         private void Reset()
@@ -45,7 +46,7 @@ namespace CM3070.Office.Quest
 
         private void OnTriggerEnter(Collider other)
         {
-            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
+            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
             if (inventory == null) return;
 
             playerInside = true;
@@ -60,7 +61,7 @@ namespace CM3070.Office.Quest
 
         private void OnTriggerExit(Collider other)
         {
-            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
+            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
             if (inventory == null || inventory != currentInventory) return;
 
             playerInside = false;
@@ -77,7 +78,7 @@ namespace CM3070.Office.Quest
             }
         }
 
-        private void NotifyQuestManager(QuestInventory inventory)
+        private void NotifyQuestManager(OfficePlayerInventory inventory)
         {
             if (markerId == OfficeTaskMarkerId.None) return;
 
@@ -93,7 +94,7 @@ namespace CM3070.Office.Quest
             RefreshVisualState(inventory);
         }
 
-        private void RefreshVisualState(QuestInventory inventory)
+        private void RefreshVisualState(OfficePlayerInventory inventory)
         {
             QuestManager questManager = QuestManager.Instance;
             if (questManager == null)
@@ -106,7 +107,7 @@ namespace CM3070.Office.Quest
             {
                 ApplyVisualState(TaskMarkerVisualState.Completed);
             }
-            else if (questManager.CanUseMarker(markerId, inventory))
+            else if (questManager.IsMarkerActive(markerId))
             {
                 ApplyVisualState(TaskMarkerVisualState.Available);
             }

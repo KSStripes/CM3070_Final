@@ -72,9 +72,8 @@ namespace CM3070.Dungeon1
                 return;
             }
 
-            // Find player health system. 
-            PlayerInventory player = FindFirstObjectByType<PlayerInventory>();
-            playerHealth = player != null ? player.GetComponent<HealthSystem>() : null;
+            // Find health directly so Dungeon and Office players can both be attacked.
+            playerHealth = FindFirstObjectByType<HealthSystem>();
         }
     }
 }

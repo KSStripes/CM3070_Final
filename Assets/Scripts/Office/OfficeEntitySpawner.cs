@@ -32,8 +32,7 @@ namespace CM3070.Office
         private readonly HashSet<Vector2Int> blockedEntityPositions = new();
         private readonly HashSet<Vector2Int> occupiedNpcPositions = new();
 
-        public PlayerInventory PlayerInventory { get; private set; }
-        public QuestInventory QuestInventory { get; private set; }
+        public OfficePlayerInventory PlayerInventory { get; private set; }
         public Transform PlayerTransform => PlayerInventory != null ? PlayerInventory.transform : null;
 
         public void SpawnEntities(
@@ -47,11 +46,9 @@ namespace CM3070.Office
             visualizer = dungeonVisualizer;
             SetBlockedEntityPositions(blockedPositions);
 
-            PlayerInventory.InventorySnapshot? inventorySnapshot = null;
             HealthSystem.HealthSnapshot? healthSnapshot = null;
             if (!resetPlayerStats && PlayerInventory != null)
             {
-                inventorySnapshot = PlayerInventory.CaptureSnapshot();
                 if (PlayerInventory.TryGetComponent(out HealthSystem health))
                 {
                     healthSnapshot = health.CaptureSnapshot();
@@ -66,7 +63,7 @@ namespace CM3070.Office
                 return;
             }
 
-            SpawnPlayer(resetPlayerStats, inventorySnapshot, healthSnapshot);
+            SpawnPlayer(resetPlayerStats, healthSnapshot);
             SpawnNpcs();
             SpawnPickups();
         }
@@ -109,7 +106,6 @@ namespace CM3070.Office
         private void ClearEntities()
         {
             PlayerInventory = null;
-            QuestInventory = null;
 
             if (entityRoot == null)
             {
@@ -132,7 +128,6 @@ namespace CM3070.Office
 
         private void SpawnPlayer(
             bool resetPlayerStats,
-            PlayerInventory.InventorySnapshot? inventorySnapshot,
             HealthSystem.HealthSnapshot? healthSnapshot)
         {
             GameObject player = InstantiatePrefab(playerPrefab, "Player");
@@ -141,7 +136,7 @@ namespace CM3070.Office
             player.transform.SetParent(entityRoot);
             player.transform.position = visualizer.GridToWorld(currentLayout.Start) + Vector3.up * 0.95f;
 
-            if (!PlayerReady(player, resetPlayerStats, inventorySnapshot, healthSnapshot))
+            if (!PlayerReady(player, resetPlayerStats, healthSnapshot))
             {
                 Destroy(player);
             }
@@ -291,30 +286,21 @@ namespace CM3070.Office
         private bool PlayerReady(
             GameObject player,
             bool resetPlayerStats,
-            PlayerInventory.InventorySnapshot? inventorySnapshot,
             HealthSystem.HealthSnapshot? healthSnapshot)
         {
             if (!player.TryGetComponent(out CharacterController _)) return Fail("Player", "missing CharacterController.");
-            if (!player.TryGetComponent(out PlayerInventory inventory)) return Fail("Player", "missing PlayerInventory.");
-            if (!player.TryGetComponent(out QuestInventory questInventory)) return Fail("Player", "missing QuestInventory.");
+            if (!player.TryGetComponent(out OfficePlayerInventory inventory)) return Fail("Player", "missing OfficePlayerInventory.");
             if (!player.TryGetComponent(out HealthSystem health)) return Fail("Player", "missing HealthSystem.");
             if (!player.TryGetComponent(out PlayerController controller)) return Fail("Player", "missing PlayerController.");
 
             PlayerInventory = inventory;
-            QuestInventory = questInventory;
 
             if (resetPlayerStats)
             {
                 PlayerInventory.ResetInventory();
-                QuestInventory.ResetQuestInventory();
                 health.ResetHealth();
                 QuestManager.Instance?.ResetShift();
             }
-            else if (inventorySnapshot.HasValue)
-            {
-                PlayerInventory.ApplySnapshot(inventorySnapshot.Value);
-            }
-
             if (!resetPlayerStats && healthSnapshot.HasValue)
             {
                 health.ApplySnapshot(healthSnapshot.Value);

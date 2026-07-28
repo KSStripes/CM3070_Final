@@ -1,4 +1,5 @@
 using CM3070.Dungeon1;
+using CM3070.Office;
 using UnityEngine;
 
 namespace CM3070.Office.Quest
@@ -21,6 +22,7 @@ namespace CM3070.Office.Quest
         [SerializeField] private PickupId pickupId = PickupId.None;
         [SerializeField] private string displayName = "Pickup";
         [SerializeField, Min(0)] private int healthRestore = 0;
+        [SerializeField, Min(0)] private int maxHealthIncrease = 0;
         [SerializeField] private bool destroyOnPickup = true;
         [SerializeField] private float rotationSpeed = 45f;
 
@@ -45,11 +47,23 @@ namespace CM3070.Office.Quest
         {
             if (pickupId == PickupId.None) return;
 
-            // QuestInventory marks the player without depending on tags or layers.
-            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
+            // OfficePlayerInventory marks the player without depending on tags or layers.
+            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
             if (inventory == null) return;
 
-            ApplyPrototypeEffect(other);
+            HealthSystem health = other.GetComponentInParent<HealthSystem>();
+            if (!inventory.AddPickup(pickupId, displayName, healthRestore, health))
+            {
+                return;
+            }
+
+            // Some coping pickups increase max health instead of restoring current health.
+            if (maxHealthIncrease > 0 && health != null)
+            {
+                health.IncreaseMaxHealth(maxHealthIncrease);
+            }
+
+            ApplyPrototypeEffect();
             QuestManager.Instance?.NotifyPickupCollected(pickupId, displayName);
 
             if (destroyOnPickup)
@@ -58,14 +72,8 @@ namespace CM3070.Office.Quest
             }
         }
 
-        private void ApplyPrototypeEffect(Component playerPart)
+        private void ApplyPrototypeEffect()
         {
-            HealthSystem health = playerPart.GetComponentInParent<HealthSystem>();
-            if (healthRestore > 0 && health != null)
-            {
-                health.Heal(healthRestore);
-            }
-
             // Future emotional stats can branch from these IDs without prefab renaming.
             switch (pickupId)
             {
@@ -76,10 +84,10 @@ namespace CM3070.Office.Quest
                     Debug.Log($"{displayName}: prototype small recovery.");
                     break;
                 case PickupId.Headphones:
-                    Debug.Log($"{displayName}: prototype noise/social stress reduction.");
+                    Debug.Log($"{displayName}: max health increased by {maxHealthIncrease}.");
                     break;
                 case PickupId.StressBall:
-                    Debug.Log($"{displayName}: prototype stress reduction.");
+                    Debug.Log($"{displayName}: max health increased by {maxHealthIncrease}.");
                     break;
             }
         }

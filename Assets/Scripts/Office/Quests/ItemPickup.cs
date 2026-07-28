@@ -1,3 +1,4 @@
+using CM3070.Office;
 using UnityEngine;
 
 namespace CM3070.Office.Quest
@@ -32,10 +33,10 @@ namespace CM3070.Office.Quest
 
         private void OnTriggerEnter(Collider other)
         {
-            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
+            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
             if (inventory == null || itemId == QuestItemId.None) return;
 
-            inventory.AddItem(itemId, amount);
+            inventory.AddQuestItem(itemId, amount);
             QuestManager.Instance?.NotifyItemCollected(itemId, displayName, amount);
 
             if (destroyOnPickup)
