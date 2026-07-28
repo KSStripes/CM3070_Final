@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 23416199329498302}
   - component: {fileID: 65321608282344838}
   m_Layer: 0
-  m_Name: TM_ExitTerminal
+  m_Name: TM_ExitMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -276,7 +276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.TaskMarker
   markerId: 6
-  displayName: Exit Terminal
+  displayName: Exit Marker
   triggerOnEnter: 1
   highlightRenderers:
   - {fileID: 781924600100000004}
