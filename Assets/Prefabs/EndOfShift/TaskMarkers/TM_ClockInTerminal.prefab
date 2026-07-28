@@ -145,8 +145,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.000000010194, y: 0.015, z: 0.00000002273}
-  m_LocalScale: {x: 1.46375, y: 0.01, z: 1.4883751}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.6000001, y: 0.010930829, z: 1.6269174}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4164994288534990}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -183,7 +183,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 97fe2e24c8d0e45d0a6a406aff838d03, type: 2}
+  - {fileID: 2100000, guid: c3a7d1e9b41544f18ea0e5d7fd109b78, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -234,7 +234,7 @@ Transform:
   m_GameObject: {fileID: 4640040759857331310}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.8, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -280,7 +280,7 @@ MonoBehaviour:
   triggerOnEnter: 1
   highlightRenderers:
   - {fileID: 781924600100000004}
-  availableMaterial: {fileID: 2100000, guid: 97fe2e24c8d0e45d0a6a406aff838d03, type: 2}
+  availableMaterial: {fileID: 2100000, guid: c3a7d1e9b41544f18ea0e5d7fd109b78, type: 2}
   unavailableMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
   completedMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
 --- !u!1001 &1024453854480934920

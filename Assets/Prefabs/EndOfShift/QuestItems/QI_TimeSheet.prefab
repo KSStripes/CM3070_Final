@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c632dc132ea44f26ad16e983e83f78c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.ItemPickup
-  itemId: 1
+  itemId: 21
   displayName: Time Sheet
   amount: 1
   destroyOnPickup: 1
