@@ -115,7 +115,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -280,8 +280,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Quest.TaskMarker
   markerId: 3
-  displayName: Task Marker
+  displayName: DeliveryPoint
   triggerOnEnter: 1
+  highlightRenderers: []
+  availableMaterial: {fileID: 2100000, guid: c3a7d1e9b41544f18ea0e5d7fd109b78, type: 2}
+  unavailableMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
+  completedMaterial: {fileID: 2100000, guid: a1479dfc381834a859de3b8d0426287c, type: 2}
 --- !u!1001 &218302565999150166
 PrefabInstance:
   m_ObjectHideFlags: 0
