@@ -25,6 +25,7 @@ namespace CM3070.Office.Quest
         private bool playerInside;
         private OfficePlayerInventory currentInventory;
         private TaskMarkerVisualState visualState = TaskMarkerVisualState.Available;
+        private QuestManager subscribedQuestManager;
 
         private void Reset()
         {
@@ -42,6 +43,22 @@ namespace CM3070.Office.Quest
             }
 
             RefreshVisualState(null);
+        }
+
+        private void OnEnable()
+        {
+            SubscribeToQuestManager();
+        }
+
+        private void Start()
+        {
+            SubscribeToQuestManager();
+            RefreshVisualState(currentInventory);
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromQuestManager();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -86,12 +103,44 @@ namespace CM3070.Office.Quest
             if (questManager != null && !questManager.CanUseMarker(markerId, inventory))
             {
                 RefreshVisualState(inventory);
-                Debug.Log($"{displayName} is unavailable.");
+                QuestMarkerSnapshot markerSnapshot = questManager.ReportMarkerStatus(markerId, inventory);
+                Debug.Log($"[Marker] {displayName} ({markerId}) is unavailable. {markerSnapshot.Reason}");
                 return;
             }
 
             QuestManager.Instance?.NotifyMarkerReached(markerId, displayName, inventory);
             RefreshVisualState(inventory);
+        }
+
+        private void OnQuestStateChanged(QuestStateSnapshot snapshot)
+        {
+            // Quest completion can unlock the exit while the player is elsewhere.
+            RefreshVisualState(currentInventory);
+        }
+
+        private void SubscribeToQuestManager()
+        {
+            // Markers spawned before/after QuestManager initialization both get a chance to subscribe.
+            QuestManager questManager = QuestManager.Instance;
+            if (questManager == null || subscribedQuestManager == questManager)
+            {
+                return;
+            }
+
+            UnsubscribeFromQuestManager();
+            subscribedQuestManager = questManager;
+            subscribedQuestManager.QuestStateChanged += OnQuestStateChanged;
+        }
+
+        private void UnsubscribeFromQuestManager()
+        {
+            if (subscribedQuestManager == null)
+            {
+                return;
+            }
+
+            subscribedQuestManager.QuestStateChanged -= OnQuestStateChanged;
+            subscribedQuestManager = null;
         }
 
         private void RefreshVisualState(OfficePlayerInventory inventory)

@@ -4,7 +4,7 @@ namespace CM3070.Office.Quest
     public enum OfficeTaskMarkerId
     {
         None = 0,
-        ClockIn = 1,
+        ClockInTerminal = 1,
         Printer = 2,
         DeliveryPoint = 3,
         MeetingArea = 4,
