@@ -19,6 +19,7 @@ namespace CM3070.Office
 
         [Header("Status Fields")]
         [SerializeField] private TMP_Text exit;
+        [SerializeField] private GameObject feedbackRoot;
         [SerializeField] private TMP_Text feedback;
 
         [Header("Display Text")]
@@ -246,6 +247,11 @@ namespace CM3070.Office
         private void RefreshFeedback()
         {
             SetText(feedback, latestFeedback, message);
+
+            if (feedbackRoot != null)
+            {
+                feedbackRoot.SetActive(!string.IsNullOrWhiteSpace(latestFeedback));
+            }
         }
 
         private static TMP_Text TextAt(TMP_Text[] textFields, int index)
