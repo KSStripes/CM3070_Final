@@ -1,21 +1,12 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using CM3070.Dungeon1;
 using CM3070.Office;
 using UnityEngine;
 
 namespace CM3070.Office.Quest
 {
-    // UI/debug status for an interactable task marker.
-    public enum QuestMarkerStatus
-    {
-        Inactive,
-        Available,
-        Unavailable,
-        Completed
-    }
-
-    // Immutable UI/debug view of one active quest's completion state.
+    // Read-only progress for one active quest row in the HUD.
     public readonly struct QuestProgressSnapshot
     {
         public QuestProgressSnapshot(OfficeQuestDefinition quest, bool isCompleted)
@@ -28,54 +19,30 @@ namespace CM3070.Office.Quest
         public bool IsCompleted { get; }
     }
 
-    // Captures whether a marker can currently progress a quest, plus the reason.
-    public readonly struct QuestMarkerSnapshot
-    {
-        public QuestMarkerSnapshot(
-            OfficeTaskMarkerId markerId,
-            QuestMarkerStatus status,
-            bool canUse,
-            string reason)
-        {
-            MarkerId = markerId;
-            Status = status;
-            CanUse = canUse;
-            Reason = reason;
-        }
-
-        public OfficeTaskMarkerId MarkerId { get; }
-        public QuestMarkerStatus Status { get; }
-        public bool CanUse { get; }
-        public string Reason { get; }
-    }
-
-    // Full quest-state snapshot for HUDs that need to redraw all objectives.
+    // Current quest state needed by OfficeHUD.
     public readonly struct QuestStateSnapshot
     {
         public QuestStateSnapshot(
             QuestProgressSnapshot[] quests,
-            OfficeTaskMarkerId[] completedMarkers,
             bool requiredTasksComplete,
             bool shiftComplete)
         {
             Quests = quests;
-            CompletedMarkers = completedMarkers;
             RequiredTasksComplete = requiredTasksComplete;
             ShiftComplete = shiftComplete;
         }
 
         public QuestProgressSnapshot[] Quests { get; }
-        public OfficeTaskMarkerId[] CompletedMarkers { get; }
         public bool RequiredTasksComplete { get; }
         public bool ShiftComplete { get; }
     }
 
-    // Coordinates the first playable office loop: complete tasks, then leave.
+    // Coordinates the playable office loop: complete tasks, then leave.
     public sealed class QuestManager : MonoBehaviour
     {
         private readonly Dictionary<OfficeTaskMarkerId, List<OfficeQuestDefinition>> activeQuestsByMarker = new();
         private readonly Dictionary<QuestItemId, List<OfficeQuestDefinition>> activeCollectQuestsByItem = new();
-        private readonly HashSet<OfficeQuestDefinition> activeQuests = new();
+        private readonly List<OfficeQuestDefinition> activeQuests = new();
         private readonly HashSet<OfficeQuestDefinition> completedQuests = new();
         private readonly HashSet<OfficeTaskMarkerId> completedQuestMarkers = new();
 
@@ -83,16 +50,11 @@ namespace CM3070.Office.Quest
 
         public bool ShiftComplete { get; private set; }
 
-        // Future HUD scripts can subscribe here instead of depending on Debug.Log output.
         public event Action<QuestStateSnapshot> QuestStateChanged;
-        public event Action<OfficeQuestDefinition> QuestCompleted;
         public event Action<string> FeedbackPublished;
-        public event Action<QuestMarkerSnapshot> MarkerStatusReported;
-        public event Action ShiftCompleted;
 
         private void Awake()
         {
-            // Scene-level singleton mirrors GameManager for simple prototype access.
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
@@ -102,15 +64,57 @@ namespace CM3070.Office.Quest
             Instance = this;
         }
 
+        public void ConfigureActiveQuests(IEnumerable<OfficeQuestDefinition> quests)
+        {
+            activeQuestsByMarker.Clear();
+            activeCollectQuestsByItem.Clear();
+            activeQuests.Clear();
+            completedQuests.Clear();
+            completedQuestMarkers.Clear();
+            ShiftComplete = false;
+
+            if (quests != null)
+            {
+                foreach (OfficeQuestDefinition quest in quests)
+                {
+                    AddActiveQuest(quest);
+                }
+            }
+
+            NotifyQuestStateChanged();
+        }
+
+        public void ResetShift()
+        {
+            ShiftComplete = false;
+            completedQuests.Clear();
+            completedQuestMarkers.Clear();
+            NotifyQuestStateChanged();
+        }
+
+        public QuestStateSnapshot CaptureSnapshot()
+        {
+            QuestProgressSnapshot[] questSnapshots = new QuestProgressSnapshot[activeQuests.Count];
+            for (int i = 0; i < activeQuests.Count; i++)
+            {
+                OfficeQuestDefinition quest = activeQuests[i];
+                questSnapshots[i] = new QuestProgressSnapshot(quest, completedQuests.Contains(quest));
+            }
+
+            return new QuestStateSnapshot(
+                questSnapshots,
+                RequiredTasksComplete(),
+                ShiftComplete);
+        }
+
         public void NotifyItemCollected(QuestItemId itemId, string displayName, int amount)
         {
-            Debug.Log($"[Quest] Item pickup noted: {displayName} ({itemId}) x{amount}");
             TryCompleteCollectQuest(itemId);
         }
 
         public void NotifyPickupCollected(PickupId pickupId, string displayName)
         {
-            Debug.Log($"[Pickup] Coping pickup noted: {displayName} ({pickupId})");
+            // Coping pickups are tracked by OfficePlayerInventory for now.
         }
 
         public void NotifyMarkerReached(
@@ -122,181 +126,117 @@ namespace CM3070.Office.Quest
 
             if (markerId == OfficeTaskMarkerId.ExitMarker)
             {
-                TryExit(displayName);
+                TryExit();
                 return;
             }
 
-            TryCompleteActiveMarkerQuest(markerId, displayName, inventory);
+            TryCompleteMarkerQuest(markerId, inventory);
         }
 
         public bool CanUseMarker(OfficeTaskMarkerId markerId, OfficePlayerInventory inventory)
         {
             if (ShiftComplete) return false;
 
-            return markerId switch
-            {
-                OfficeTaskMarkerId.ExitMarker => RequiredTasksComplete(),
-                _ => CanCompleteActiveQuest(markerId, inventory)
-            };
+            return markerId == OfficeTaskMarkerId.ExitMarker
+                ? RequiredTasksComplete()
+                : TryFindCompletableMarkerQuest(markerId, inventory, out _);
         }
 
         public bool IsMarkerCompleted(OfficeTaskMarkerId markerId)
         {
-            return markerId switch
-            {
-                OfficeTaskMarkerId.ExitMarker => ShiftComplete,
-                _ => completedQuestMarkers.Contains(markerId)
-            };
+            return markerId == OfficeTaskMarkerId.ExitMarker
+                ? ShiftComplete
+                : completedQuestMarkers.Contains(markerId);
         }
 
         public bool IsMarkerActive(OfficeTaskMarkerId markerId)
         {
             if (ShiftComplete) return false;
-
-            if (markerId == OfficeTaskMarkerId.ExitMarker)
-            {
-                return RequiredTasksComplete();
-            }
+            if (markerId == OfficeTaskMarkerId.ExitMarker) return RequiredTasksComplete();
 
             return activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests)
                 && HasIncompleteQuest(quests);
         }
 
-        public QuestStateSnapshot CaptureSnapshot()
+        private void AddActiveQuest(OfficeQuestDefinition quest)
         {
-            // Copy private collections into arrays so UI cannot mutate quest progress.
-            QuestProgressSnapshot[] questSnapshots = new QuestProgressSnapshot[activeQuests.Count];
-            int index = 0;
-            foreach (OfficeQuestDefinition quest in activeQuests)
-            {
-                questSnapshots[index] = new QuestProgressSnapshot(quest, completedQuests.Contains(quest));
-                index++;
-            }
+            if (quest == null) return;
 
-            OfficeTaskMarkerId[] markerSnapshots = new OfficeTaskMarkerId[completedQuestMarkers.Count];
-            index = 0;
-            foreach (OfficeTaskMarkerId markerId in completedQuestMarkers)
-            {
-                markerSnapshots[index] = markerId;
-                index++;
-            }
+            activeQuests.Add(quest);
 
-            return new QuestStateSnapshot(
-                questSnapshots,
-                markerSnapshots,
-                RequiredTasksComplete(),
-                ShiftComplete);
+            switch (quest.QuestType)
+            {
+                case OfficeQuestType.DeliverItem:
+                case OfficeQuestType.VisitMarker:
+                    AddQuestByMarker(quest);
+                    break;
+                case OfficeQuestType.CollectItemOnly:
+                    AddQuestByItem(quest);
+                    break;
+            }
         }
 
-        public QuestMarkerSnapshot CaptureMarkerSnapshot(
+        private void TryCompleteMarkerQuest(
             OfficeTaskMarkerId markerId,
             OfficePlayerInventory inventory)
         {
-            if (IsMarkerCompleted(markerId))
+            if (!TryFindCompletableMarkerQuest(markerId, inventory, out OfficeQuestDefinition quest))
             {
-                return new QuestMarkerSnapshot(markerId, QuestMarkerStatus.Completed, false, "Already completed.");
+                return;
             }
 
-            if (ShiftComplete)
+            if (!completedQuests.Add(quest))
             {
-                return new QuestMarkerSnapshot(markerId, QuestMarkerStatus.Inactive, false, "Shift is already complete.");
+                return;
             }
 
-            if (markerId == OfficeTaskMarkerId.ExitMarker)
+            if (quest.QuestType == OfficeQuestType.DeliverItem)
             {
-                bool exitReady = RequiredTasksComplete();
-                return new QuestMarkerSnapshot(
-                    markerId,
-                    exitReady ? QuestMarkerStatus.Available : QuestMarkerStatus.Unavailable,
-                    exitReady,
-                    exitReady ? "All required tasks complete." : "Complete required tasks first.");
+                inventory.RemoveQuestItem(quest.RequiredItemId);
             }
 
-            if (!activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests)
-                || !HasIncompleteQuest(quests))
+            if (IsMarkerFullyComplete(markerId))
             {
-                return new QuestMarkerSnapshot(markerId, QuestMarkerStatus.Inactive, false, "No active incomplete quest is assigned here.");
+                completedQuestMarkers.Add(markerId);
             }
 
-            if (inventory == null)
-            {
-                return new QuestMarkerSnapshot(markerId, QuestMarkerStatus.Unavailable, false, "No office inventory was provided.");
-            }
-
-            if (TryFindCompletableMarkerQuest(markerId, inventory, out OfficeQuestDefinition quest))
-            {
-                return new QuestMarkerSnapshot(markerId, QuestMarkerStatus.Available, true, $"Ready: {quest.ObjectiveText}");
-            }
-
-            return new QuestMarkerSnapshot(markerId, QuestMarkerStatus.Unavailable, false, BuildMarkerUnavailableReason(markerId, inventory));
+            PublishFeedback(quest);
+            NotifyQuestStateChanged();
         }
 
-        public QuestMarkerSnapshot ReportMarkerStatus(
-            OfficeTaskMarkerId markerId,
-            OfficePlayerInventory inventory)
+        private void TryCompleteCollectQuest(QuestItemId itemId)
         {
-            // Emits a marker-status event for UI/debug overlays without changing gameplay state.
-            QuestMarkerSnapshot snapshot = CaptureMarkerSnapshot(markerId, inventory);
-            MarkerStatusReported?.Invoke(snapshot);
-            return snapshot;
-        }
-
-        public void ConfigureActiveQuests(IEnumerable<OfficeQuestDefinition> activeQuests)
-        {
-            activeQuestsByMarker.Clear();
-            activeCollectQuestsByItem.Clear();
-            this.activeQuests.Clear();
-            completedQuests.Clear();
-            completedQuestMarkers.Clear();
-            ShiftComplete = false;
-
-            if (activeQuests == null) return;
-
-            foreach (OfficeQuestDefinition quest in activeQuests)
+            if (!activeCollectQuestsByItem.TryGetValue(itemId, out List<OfficeQuestDefinition> quests))
             {
-                if (quest == null) continue;
+                return;
+            }
 
-                this.activeQuests.Add(quest);
-
-                // Store the lookup needed by each simple quest type.
-                switch (quest.QuestType)
+            bool changed = false;
+            foreach (OfficeQuestDefinition quest in quests)
+            {
+                if (completedQuests.Add(quest))
                 {
-                    case OfficeQuestType.DeliverItem:
-                    case OfficeQuestType.VisitMarker:
-                        AddQuestByMarker(quest);
-                        break;
-                    case OfficeQuestType.CollectItemOnly:
-                        AddQuestByItem(quest);
-                        break;
+                    changed = true;
+                    PublishFeedback(quest);
                 }
             }
 
-            Debug.Log($"[Quest] Active quest set configured. Count={this.activeQuests.Count}. ExitUnlocked={RequiredTasksComplete()}");
-            foreach (OfficeQuestDefinition quest in this.activeQuests)
+            if (changed)
             {
-                Debug.Log($"[Quest] Active: {quest.QuestName} | Type={quest.QuestType} | Objective={quest.ObjectiveText} | Item={quest.RequiredItemId} | Marker={quest.TaskMarkerId} | HealthImpact={quest.HealthImpact}");
+                NotifyQuestStateChanged();
             }
-
-            NotifyQuestStateChanged();
         }
 
-        public void ResetShift()
+        private void TryExit()
         {
-            ShiftComplete = false;
-            completedQuests.Clear();
-            completedQuestMarkers.Clear();
-            Debug.Log("[Shift] Quest progress reset.");
-            NotifyQuestStateChanged();
-        }
-
-        private bool CanCompleteActiveQuest(OfficeTaskMarkerId markerId, OfficePlayerInventory inventory)
-        {
-            if (inventory == null)
+            if (!RequiredTasksComplete())
             {
-                return false;
+                return;
             }
 
-            return TryFindCompletableMarkerQuest(markerId, inventory, out _);
+            ShiftComplete = true;
+            NotifyQuestStateChanged();
+            GameManager.Instance?.NotifyExitReached();
         }
 
         private bool TryFindCompletableMarkerQuest(
@@ -305,8 +245,7 @@ namespace CM3070.Office.Quest
             out OfficeQuestDefinition completableQuest)
         {
             completableQuest = null;
-
-            if (!activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests))
+            if (inventory == null || !activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests))
             {
                 return false;
             }
@@ -315,12 +254,8 @@ namespace CM3070.Office.Quest
             {
                 if (completedQuests.Contains(quest)) continue;
 
-                bool canComplete = quest.QuestType switch
-                {
-                    OfficeQuestType.VisitMarker => true,
-                    OfficeQuestType.DeliverItem => inventory.HasQuestItem(quest.RequiredItemId),
-                    _ => false
-                };
+                bool canComplete = quest.QuestType == OfficeQuestType.VisitMarker
+                    || (quest.QuestType == OfficeQuestType.DeliverItem && inventory.HasQuestItem(quest.RequiredItemId));
 
                 if (canComplete)
                 {
@@ -332,110 +267,9 @@ namespace CM3070.Office.Quest
             return false;
         }
 
-        private void TryCompleteActiveMarkerQuest(
-            OfficeTaskMarkerId markerId,
-            string displayName,
-            OfficePlayerInventory inventory)
-        {
-            if (!activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests))
-            {
-                QuestMarkerSnapshot markerSnapshot = CaptureMarkerSnapshot(markerId, inventory);
-                Debug.Log($"[Marker] {displayName} ({markerId}) reached. {markerSnapshot.Reason}");
-                MarkerStatusReported?.Invoke(markerSnapshot);
-                return;
-            }
-
-            if (!TryFindCompletableMarkerQuest(markerId, inventory, out OfficeQuestDefinition quest))
-            {
-                QuestMarkerSnapshot markerSnapshot = CaptureMarkerSnapshot(markerId, inventory);
-                Debug.Log($"[Marker] {displayName} ({markerId}) reached. {markerSnapshot.Reason}");
-                MarkerStatusReported?.Invoke(markerSnapshot);
-                return;
-            }
-
-            if (quest.QuestType == OfficeQuestType.DeliverItem)
-            {
-                inventory.RemoveQuestItem(quest.RequiredItemId);
-            }
-
-            completedQuests.Add(quest);
-            Debug.Log($"[Quest] Completed: {quest.QuestName} at {displayName} ({markerId}). ExitUnlocked={RequiredTasksComplete()}");
-            QuestCompleted?.Invoke(quest);
-            LogFeedbackComment(quest);
-
-            if (IsMarkerFullyComplete(markerId))
-            {
-                completedQuestMarkers.Add(markerId);
-                Debug.Log($"[Marker] Completed: {markerId}");
-            }
-
-            MarkerStatusReported?.Invoke(CaptureMarkerSnapshot(markerId, inventory));
-            NotifyQuestStateChanged();
-        }
-
-        private void TryCompleteCollectQuest(QuestItemId itemId)
-        {
-            if (!activeCollectQuestsByItem.TryGetValue(itemId, out List<OfficeQuestDefinition> quests))
-            {
-                return;
-            }
-
-            foreach (OfficeQuestDefinition quest in quests)
-            {
-                if (completedQuests.Contains(quest)) continue;
-
-                completedQuests.Add(quest);
-                Debug.Log($"[Quest] Completed: {quest.QuestName} by collecting {itemId}. ExitUnlocked={RequiredTasksComplete()}");
-                QuestCompleted?.Invoke(quest);
-                LogFeedbackComment(quest);
-            }
-
-            NotifyQuestStateChanged();
-        }
-
-        private void TryExit(string displayName)
-        {
-            if (!RequiredTasksComplete())
-            {
-                QuestMarkerSnapshot markerSnapshot = CaptureMarkerSnapshot(OfficeTaskMarkerId.ExitMarker, null);
-                Debug.Log($"[Shift] Exit locked at {displayName}. {markerSnapshot.Reason}");
-                MarkerStatusReported?.Invoke(markerSnapshot);
-                return;
-            }
-
-            ShiftComplete = true;
-            Debug.Log($"[Shift] Completed through {displayName}.");
-            MarkerStatusReported?.Invoke(CaptureMarkerSnapshot(OfficeTaskMarkerId.ExitMarker, null));
-            ShiftCompleted?.Invoke();
-            NotifyQuestStateChanged();
-            GameManager.Instance?.NotifyExitReached();
-        }
-
         private bool RequiredTasksComplete()
         {
-            foreach (List<OfficeQuestDefinition> quests in activeQuestsByMarker.Values)
-            {
-                foreach (OfficeQuestDefinition quest in quests)
-                {
-                    if (!completedQuests.Contains(quest))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            foreach (List<OfficeQuestDefinition> quests in activeCollectQuestsByItem.Values)
-            {
-                foreach (OfficeQuestDefinition quest in quests)
-                {
-                    if (!completedQuests.Contains(quest))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return activeQuests.Count > 0;
+            return activeQuests.Count > 0 && completedQuests.Count >= activeQuests.Count;
         }
 
         private bool IsMarkerFullyComplete(OfficeTaskMarkerId markerId)
@@ -469,35 +303,12 @@ namespace CM3070.Office.Quest
             return false;
         }
 
-        private static void LogFeedbackComment(OfficeQuestDefinition quest)
+        private void PublishFeedback(OfficeQuestDefinition quest)
         {
-            // Temporary UI stand-in: log the SO feedback text until UI exists.
             if (!string.IsNullOrWhiteSpace(quest.FeedbackComment))
             {
-                Debug.Log($"[Feedback] {quest.FeedbackComment}");
-                Instance?.FeedbackPublished?.Invoke(quest.FeedbackComment);
+                FeedbackPublished?.Invoke(quest.FeedbackComment);
             }
-        }
-
-        private string BuildMarkerUnavailableReason(OfficeTaskMarkerId markerId, OfficePlayerInventory inventory)
-        {
-            if (!activeQuestsByMarker.TryGetValue(markerId, out List<OfficeQuestDefinition> quests))
-            {
-                return "No active quest is assigned here.";
-            }
-
-            foreach (OfficeQuestDefinition quest in quests)
-            {
-                if (completedQuests.Contains(quest)) continue;
-
-                if (quest.QuestType == OfficeQuestType.DeliverItem)
-                {
-                    int itemCount = inventory != null ? inventory.GetQuestItemCount(quest.RequiredItemId) : 0;
-                    return $"Missing {quest.RequiredItemId} for '{quest.QuestName}'. Current={itemCount}.";
-                }
-            }
-
-            return "No matching quest can be completed yet.";
         }
 
         private void NotifyQuestStateChanged()

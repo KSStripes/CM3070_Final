@@ -63,7 +63,6 @@ namespace CM3070.Office.Quest
                 health.IncreaseMaxHealth(maxHealthIncrease);
             }
 
-            ApplyPrototypeEffect();
             QuestManager.Instance?.NotifyPickupCollected(pickupId, displayName);
 
             if (destroyOnPickup)
@@ -72,24 +71,5 @@ namespace CM3070.Office.Quest
             }
         }
 
-        private void ApplyPrototypeEffect()
-        {
-            // Future emotional stats can branch from these IDs without prefab renaming.
-            switch (pickupId)
-            {
-                case PickupId.Coffee:
-                    Debug.Log($"{displayName}: prototype energy boost.");
-                    break;
-                case PickupId.Snack:
-                    Debug.Log($"{displayName}: prototype small recovery.");
-                    break;
-                case PickupId.Headphones:
-                    Debug.Log($"{displayName}: max health increased by {maxHealthIncrease}.");
-                    break;
-                case PickupId.StressBall:
-                    Debug.Log($"{displayName}: max health increased by {maxHealthIncrease}.");
-                    break;
-            }
-        }
     }
 }

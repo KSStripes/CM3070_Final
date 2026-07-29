@@ -103,8 +103,6 @@ namespace CM3070.Office.Quest
             if (questManager != null && !questManager.CanUseMarker(markerId, inventory))
             {
                 RefreshVisualState(inventory);
-                QuestMarkerSnapshot markerSnapshot = questManager.ReportMarkerStatus(markerId, inventory);
-                Debug.Log($"[Marker] {displayName} ({markerId}) is unavailable. {markerSnapshot.Reason}");
                 return;
             }
 

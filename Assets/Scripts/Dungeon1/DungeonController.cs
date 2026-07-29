@@ -44,7 +44,6 @@ namespace CM3070.Dungeon1
         [SerializeField] private int spawnExclusionRadius = 4;
 
         [Header("Office Debug")]
-        [SerializeField] private bool logRoomTransitions = true;
         [SerializeField] private int layoutRetryAttempts = 20;
 
         private DungeonVisualizer visualizer;
@@ -53,7 +52,6 @@ namespace CM3070.Dungeon1
         private OfficePropPlacer officePropPlacer;
         private DungeonLayout currentLayout;
         private OfficeRoomPlan currentOfficeRoomPlan;
-        private OfficeRoomRole currentPlayerRoomRole = OfficeRoomRole.None;
         private int activeSeed;
 
         public OfficeRoomPlan CurrentOfficeRoomPlan => currentOfficeRoomPlan;
@@ -115,8 +113,6 @@ namespace CM3070.Dungeon1
                 // R gives a quick playable regeneration loop for testing layouts.
                 StartNewGame();
             }
-
-            LogPlayerRoomTransition();
         }
 
         private void LateUpdate()
@@ -167,7 +163,6 @@ namespace CM3070.Dungeon1
             GenerateValidOfficeLayout(settings, runtimeObjects);
             visualizer.SetOfficeRoomPlan(currentOfficeRoomPlan);
             officePropPlacer?.SetRoomPlan(currentOfficeRoomPlan);
-            currentPlayerRoomRole = OfficeRoomRole.None;
 
             // Spawn markers are useful in edit-mode, but hidden during gameplay.
             visualizer.SetRenderSpawnMarkers(!runtimeObjects);
@@ -251,33 +246,5 @@ namespace CM3070.Dungeon1
                 && layout.MainRegionSize >= 300;
         }
 
-        private void LogPlayerRoomTransition()
-        {
-            if (!logRoomTransitions || currentOfficeRoomPlan == null || entitySpawner.PlayerTransform == null)
-            {
-                return;
-            }
-
-            Vector3 playerPosition = entitySpawner.PlayerTransform.position;
-            Vector2Int gridPosition = new(Mathf.RoundToInt(playerPosition.x), Mathf.RoundToInt(playerPosition.z));
-            currentOfficeRoomPlan.TryGetRoleAt(gridPosition, out OfficeRoomRole playerRoomRole);
-
-            if (playerRoomRole == currentPlayerRoomRole)
-            {
-                return;
-            }
-
-            if (currentPlayerRoomRole != OfficeRoomRole.None)
-            {
-                Debug.Log($"Exited {currentPlayerRoomRole}");
-            }
-
-            if (playerRoomRole != OfficeRoomRole.None)
-            {
-                Debug.Log($"Entered {playerRoomRole}");
-            }
-
-            currentPlayerRoomRole = playerRoomRole;
-        }
     }
 }

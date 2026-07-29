@@ -9,8 +9,8 @@ namespace CM3070.Dungeon1
     {
         StartScreen,
         Playing,
-        LevelComplete,
-        GameComplete,
+        DayComplete,
+        GameWon,
         GameOver
     }
 
@@ -31,10 +31,9 @@ namespace CM3070.Dungeon1
 
         public static GameManager Instance { get; private set; }
         public GameState CurrentState { get; private set; } = GameState.StartScreen;
-        public int CurrentLevel { get; private set; } = 1;
-        public int CurrentDay => CurrentLevel;
-        public string CurrentDayName => DayNameFor(CurrentLevel);
-        public bool IsFinalDay => CurrentLevel >= TotalDays;
+        public int CurrentDay { get; private set; } = 1;
+        public string CurrentDayName => DayNameFor(CurrentDay);
+        public bool IsFinalDay => CurrentDay >= TotalDays;
         public int TotalDays => Mathf.Max(1, workdayNames != null ? workdayNames.Length : 0);
 
         private void Awake()
@@ -59,53 +58,46 @@ namespace CM3070.Dungeon1
 
         public void StartGame()
         {
-            CurrentLevel = 1;
+            CurrentDay = 1;
             SetState(GameState.Playing);
             StartNewControllerRun();
-            Debug.Log($"Game started. Day={CurrentDayName}");
         }
 
-        public void NextLevel()
+        public void NextDay()
         {
-            if (CurrentState == GameState.GameComplete)
+            if (CurrentState == GameState.GameWon)
             {
                 return;
             }
 
-            CurrentLevel++;
+            CurrentDay++;
             SetState(GameState.Playing);
             StartNextControllerRun();
-            Debug.Log($"Next day. Day={CurrentDayName}");
         }
 
         public void NewGame()
         {
-            CurrentLevel = 1;
+            CurrentDay = 1;
             SetState(GameState.Playing);
             StartNewControllerRun();
-            Debug.Log("New game. Day=Monday");
         }
 
         public void NotifyCoinsChanged(int coinCount)
         {
             // Legacy dungeon pickup notification. Office economy/readouts live in OfficeHUD.
-            Debug.Log($"Coins/Credits: {coinCount}");
         }
 
         public void NotifyArmourCollected(string armourName, string armourType, int maxHealth)
         {
-            Debug.Log($"Armour: {armourName} ({armourType}). Max health={maxHealth}");
         }
 
         public void NotifyWeaponCollected(LootProperties weapon, PlayerInventory inventory)
         {
-            Debug.Log($"Weapon: {weapon.WeaponName} ({weapon.WeaponType}). Attack={inventory.Attack}");
         }
 
         public void NotifyHealthChanged(int currentHealth, int maxHealth)
         {
             gameUI?.SetHealth(currentHealth, maxHealth);
-            Debug.Log($"Health: {currentHealth}/{maxHealth}");
         }
 
         public void NotifyPlayerDied()
@@ -128,12 +120,12 @@ namespace CM3070.Dungeon1
 
             if (IsFinalDay)
             {
-                SetState(GameState.GameComplete);
+                SetState(GameState.GameWon);
                 Debug.Log("Probation period complete. Player is now hired.");
                 return;
             }
 
-            SetState(GameState.LevelComplete);
+            SetState(GameState.DayComplete);
             Debug.Log($"Day complete. Day={CurrentDayName}");
         }
 
@@ -141,7 +133,7 @@ namespace CM3070.Dungeon1
         {
             CurrentState = state;
             Time.timeScale = CurrentState == GameState.Playing ? 1f : 0f;
-            gameUI?.ShowState(CurrentState, CurrentLevel, CurrentDayName, TotalDays);
+            gameUI?.ShowState(CurrentState, CurrentDay, CurrentDayName, TotalDays);
         }
 
         private string DayNameFor(int day)

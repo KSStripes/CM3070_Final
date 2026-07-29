@@ -100,7 +100,6 @@ namespace CM3070.Office
             subscribedQuestManager = questManager;
             subscribedQuestManager.QuestStateChanged += OnQuestStateChanged;
             subscribedQuestManager.FeedbackPublished += OnFeedbackPublished;
-            subscribedQuestManager.ShiftCompleted += OnShiftCompleted;
             lastQuestSnapshot = subscribedQuestManager.CaptureSnapshot();
         }
 
@@ -129,7 +128,6 @@ namespace CM3070.Office
 
             subscribedQuestManager.QuestStateChanged -= OnQuestStateChanged;
             subscribedQuestManager.FeedbackPublished -= OnFeedbackPublished;
-            subscribedQuestManager.ShiftCompleted -= OnShiftCompleted;
             subscribedQuestManager = null;
         }
 
@@ -156,11 +154,6 @@ namespace CM3070.Office
             latestFeedback = feedback;
             feedbackTimer = feedbackSeconds;
             RefreshFeedback();
-        }
-
-        private void OnShiftCompleted()
-        {
-            RefreshExitStatus();
         }
 
         private void OnInventoryChanged(OfficeInventorySnapshot snapshot)

@@ -19,30 +19,15 @@ namespace CM3070.Office
         public int Amount { get; }
     }
 
-    // Immutable UI/debug view of one optional coping pickup count.
-    public readonly struct PickupStack
-    {
-        public PickupStack(PickupId pickupId, int amount)
-        {
-            PickupId = pickupId;
-            Amount = amount;
-        }
-
-        public PickupId PickupId { get; }
-        public int Amount { get; }
-    }
-
-    // Full office inventory snapshot for HUDs that need to redraw from current state.
+    // Quest-item snapshot for HUD redraws.
     public readonly struct OfficeInventorySnapshot
     {
-        public OfficeInventorySnapshot(QuestItemStack[] questItems, PickupStack[] pickups)
+        public OfficeInventorySnapshot(QuestItemStack[] questItems)
         {
             QuestItems = questItems;
-            Pickups = pickups;
         }
 
         public QuestItemStack[] QuestItems { get; }
-        public PickupStack[] Pickups { get; }
     }
 
     // Stores office quest items and optional coping pickups collected by the player.
@@ -51,10 +36,7 @@ namespace CM3070.Office
         private readonly Dictionary<QuestItemId, int> questItems = new();
         private readonly Dictionary<PickupId, int> pickups = new();
 
-        // Future HUD scripts can subscribe here instead of polling private dictionaries.
         public event Action<OfficeInventorySnapshot> InventoryChanged;
-        public event Action<QuestItemId, int> QuestItemCountChanged;
-        public event Action<PickupId, string, int> PickupCountChanged;
 
         public OfficeInventorySnapshot CaptureSnapshot()
         {
@@ -66,25 +48,12 @@ namespace CM3070.Office
                 index++;
             }
 
-            PickupStack[] pickupSnapshot = new PickupStack[pickups.Count];
-            index = 0;
-            foreach (KeyValuePair<PickupId, int> pickup in pickups)
-            {
-                pickupSnapshot[index] = new PickupStack(pickup.Key, pickup.Value);
-                index++;
-            }
-
-            return new OfficeInventorySnapshot(questItemSnapshot, pickupSnapshot);
+            return new OfficeInventorySnapshot(questItemSnapshot);
         }
 
         public int GetQuestItemCount(QuestItemId itemId)
         {
             return questItems.TryGetValue(itemId, out int amount) ? amount : 0;
-        }
-
-        public int GetPickupCount(PickupId pickupId)
-        {
-            return pickups.TryGetValue(pickupId, out int amount) ? amount : 0;
         }
 
         public void AddQuestItem(QuestItemId itemId, int amount = 1)
@@ -93,7 +62,6 @@ namespace CM3070.Office
 
             questItems.TryGetValue(itemId, out int currentAmount);
             questItems[itemId] = currentAmount + amount;
-            Debug.Log($"[Inventory] Quest item collected: {itemId} x{amount}. Total={questItems[itemId]}");
             NotifyQuestItemChanged(itemId);
         }
 
@@ -119,7 +87,6 @@ namespace CM3070.Office
                 questItems.Remove(itemId);
             }
 
-            Debug.Log($"[Inventory] Quest item used: {itemId} x{amount}. Remaining={GetQuestItemCount(itemId)}");
             NotifyQuestItemChanged(itemId);
             return true;
         }
@@ -136,8 +103,6 @@ namespace CM3070.Office
             pickups.TryGetValue(pickupId, out int currentAmount);
             pickups[pickupId] = currentAmount + 1;
 
-            Debug.Log($"[Inventory] Coping pickup collected: {displayName} ({pickupId}). Total={pickups[pickupId]}");
-            PickupCountChanged?.Invoke(pickupId, displayName, pickups[pickupId]);
             NotifyInventoryChanged();
             return true;
         }
@@ -147,13 +112,11 @@ namespace CM3070.Office
             // Reset only office inventory state; health is reset by HealthSystem.
             questItems.Clear();
             pickups.Clear();
-            Debug.Log("[Inventory] Office inventory reset.");
             NotifyInventoryChanged();
         }
 
         private void NotifyQuestItemChanged(QuestItemId itemId)
         {
-            QuestItemCountChanged?.Invoke(itemId, GetQuestItemCount(itemId));
             NotifyInventoryChanged();
         }
 

@@ -12,14 +12,16 @@ namespace CM3070.Dungeon1
     {
         [SerializeField] private GameObject startPanel;
         [SerializeField] private GameObject levelCompletePanel;
-        [SerializeField] private GameObject probationCompletePanel;
+        [SerializeField] private GameObject gameWonPanel;
         [SerializeField] private GameObject gameOverPanel;
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private Button startButton;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text levelCompleteText;
-        [SerializeField] private TMP_Text probationCompleteText;
-        [SerializeField] private TMP_Text probationCreditsText;
+        [SerializeField] private TMP_Text gameWonTitleText;
+        [SerializeField] private TMP_Text gameWonText;
+        [SerializeField] private TMP_Text creditsText;
+        [SerializeField] private Button gameWonButton;
         [SerializeField] private Button nextLevelButton;
         [SerializeField] private TMP_Text gameOverText;
         [SerializeField] private Button newGameButton;
@@ -28,20 +30,21 @@ namespace CM3070.Dungeon1
         [SerializeField] private Slider healthBar;
 
         [Header("Display Text")]
-        [SerializeField] private string titleLabel = "Dungeon Crawler";
-        [SerializeField] private string levelLabel = "Day";
-        [SerializeField] private string levelCompleteLabel = "Level Complete";
-        [SerializeField] private string probationCompleteLabel = "Probation Complete";
+        [SerializeField] private string titleLabel = "EndOfShift";
+        [SerializeField] private string dayLabel = "Day";
+        [SerializeField] private string dayCompleteLabel = "Shift Done";
+        [SerializeField] private string gameWonLabel = "Probation Period Finished";
         [TextArea]
-        [SerializeField] private string probationCompleteMessage = "You managed your probation period.\nYou're now hired.";
+        [SerializeField] private string gameWonMessage = "You managed your probation period.\nYou're now hired.";
         [TextArea]
-        [SerializeField] private string probationCreditsMessage = "Credits\nDesign, code, and emotional damage: Kristin";
+        [SerializeField] private string creditsMessage = "Credits\nDesign, code, and burnout:\nKristin Schumann #210569373";
         [SerializeField] private string gameOverLabel = "Game Over";
 
         private GameState currentState;
 
         private void Awake()
         {
+            // Button callbacks stay here so UI buttons only need Inspector references to this component.
             if (startButton != null)
             {
                 startButton.onClick.AddListener(OnStartButtonPressed);
@@ -49,31 +52,38 @@ namespace CM3070.Dungeon1
 
             if (nextLevelButton != null)
             {
-                nextLevelButton.onClick.AddListener(OnNextLevelButtonPressed);
+                nextLevelButton.onClick.AddListener(OnNextDayButtonPressed);
             }
 
             if (newGameButton != null)
             {
                 newGameButton.onClick.AddListener(OnNewGameButtonPressed);
             }
+
+            if (gameWonButton != null)
+            {
+                gameWonButton.onClick.AddListener(OnNewGameButtonPressed);
+            }
         }
 
-        public void ShowState(GameState state, int level)
+        public void ShowState(GameState state, int day)
         {
-            ShowState(state, level, level.ToString(), level);
+            ShowState(state, day, day.ToString(), day);
         }
 
-        public void ShowState(GameState state, int level, string dayName, int totalDays)
+        public void ShowState(GameState state, int day, string dayName, int totalDays)
         {
             currentState = state;
-            bool useSeparateProbationPanel = probationCompletePanel != null;
+            // If no separate win panel is assigned, reuse the normal completion panel for the final day.
+            bool useGameWonPanel = gameWonPanel != null;
 
+            // Only one high-level screen should be visible at a time.
             if (startPanel != null) startPanel.SetActive(state == GameState.StartScreen);
             if (levelCompletePanel != null)
             {
-                levelCompletePanel.SetActive(state == GameState.LevelComplete || (state == GameState.GameComplete && !useSeparateProbationPanel));
+                levelCompletePanel.SetActive(state == GameState.DayComplete || (state == GameState.GameWon && !useGameWonPanel));
             }
-            if (probationCompletePanel != null) probationCompletePanel.SetActive(state == GameState.GameComplete);
+            if (gameWonPanel != null) gameWonPanel.SetActive(state == GameState.GameWon);
             if (gameOverPanel != null) gameOverPanel.SetActive(state == GameState.GameOver);
             if (hudPanel != null) hudPanel.SetActive(state == GameState.Playing);
 
@@ -82,21 +92,27 @@ namespace CM3070.Dungeon1
                 titleText.text = titleLabel;
             }
 
+            if (gameWonTitleText != null)
+            {
+                gameWonTitleText.text = titleLabel;
+            }
+
             if (levelCompleteText != null)
             {
-                levelCompleteText.text = state == GameState.GameComplete
-                    ? probationCompleteMessage
-                    : $"{levelCompleteLabel}\n{dayName} complete";
+                // The final fallback panel uses the game-won message; normal days show day completion.
+                levelCompleteText.text = state == GameState.GameWon
+                    ? gameWonMessage
+                    : $"{dayCompleteLabel}\n{dayName} complete";
             }
 
-            if (probationCompleteText != null)
+            if (gameWonText != null)
             {
-                probationCompleteText.text = $"{probationCompleteLabel}\n{probationCompleteMessage}";
+                gameWonText.text = $"{gameWonLabel}\n{gameWonMessage}";
             }
 
-            if (probationCreditsText != null)
+            if (creditsText != null)
             {
-                probationCreditsText.text = probationCreditsMessage;
+                creditsText.text = creditsMessage;
             }
 
             if (gameOverText != null)
@@ -106,8 +122,9 @@ namespace CM3070.Dungeon1
 
             if (nextLevelButton != null)
             {
-                nextLevelButton.interactable = state == GameState.LevelComplete;
-                nextLevelButton.gameObject.SetActive(state == GameState.LevelComplete);
+                // There is no "next day" button on game over or final victory.
+                nextLevelButton.interactable = state == GameState.DayComplete;
+                nextLevelButton.gameObject.SetActive(state == GameState.DayComplete);
             }
 
             if (newGameButton != null)
@@ -115,7 +132,12 @@ namespace CM3070.Dungeon1
                 newGameButton.interactable = state == GameState.GameOver;
             }
 
-            SetLevel(level, dayName, totalDays);
+            if (gameWonButton != null)
+            {
+                gameWonButton.interactable = state == GameState.GameWon;
+            }
+
+            SetDay(day, dayName, totalDays);
         }
 
         public void OnStartButtonPressed()
@@ -123,35 +145,38 @@ namespace CM3070.Dungeon1
             GameManager.Instance?.StartGame();
         }
 
-        public void OnNextLevelButtonPressed()
+        public void OnNextDayButtonPressed()
         {
-            if (currentState != GameState.LevelComplete) return;
+            // Prevent accidental button calls when the panel is not in the day-complete state.
+            if (currentState != GameState.DayComplete) return;
 
-            GameManager.Instance?.NextLevel();
+            GameManager.Instance?.NextDay();
         }
 
         public void OnNewGameButtonPressed()
         {
-            if (currentState != GameState.GameOver) return;
+            // New game is offered from both failure and final victory panels.
+            if (currentState != GameState.GameOver && currentState != GameState.GameWon) return;
 
             GameManager.Instance?.NewGame();
         }
 
-        public void SetLevel(int level)
+        public void SetDay(int day)
         {
-            SetLevel(level, level.ToString(), level);
+            SetDay(day, day.ToString(), day);
         }
 
-        public void SetLevel(int level, string dayName, int totalDays)
+        public void SetDay(int day, string dayName, int totalDays)
         {
             if (levelText != null)
             {
-                levelText.text = $"{levelLabel}: {dayName}";
+                levelText.text = $"{dayLabel}: {dayName}";
             }
         }
 
         public void SetHealth(int current, int max)
         {
+            // Health remains in GameUI because it is shared by Dungeon1 and OfficeScene.
             if (healthBar != null)
             {
                 healthBar.maxValue = max;
