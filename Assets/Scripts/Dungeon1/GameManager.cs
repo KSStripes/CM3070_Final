@@ -10,6 +10,7 @@ namespace CM3070.Dungeon1
         StartScreen,
         Playing,
         LevelComplete,
+        GameComplete,
         GameOver
     }
 
@@ -18,10 +19,23 @@ namespace CM3070.Dungeon1
         [SerializeField] private DungeonController dungeonController;
         [SerializeField] private OfficeDungeonController officeDungeonController;
         [SerializeField] private GameUI gameUI;
+        [SerializeField] private string[] workdayNames =
+        {
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        };
 
         public static GameManager Instance { get; private set; }
         public GameState CurrentState { get; private set; } = GameState.StartScreen;
         public int CurrentLevel { get; private set; } = 1;
+        public int CurrentDay => CurrentLevel;
+        public string CurrentDayName => DayNameFor(CurrentLevel);
+        public bool IsFinalDay => CurrentLevel >= TotalDays;
+        public int TotalDays => Mathf.Max(1, workdayNames != null ? workdayNames.Length : 0);
 
         private void Awake()
         {
@@ -48,15 +62,20 @@ namespace CM3070.Dungeon1
             CurrentLevel = 1;
             SetState(GameState.Playing);
             StartNewControllerRun();
-            Debug.Log($"Game started. Level={CurrentLevel}");
+            Debug.Log($"Game started. Day={CurrentDayName}");
         }
 
         public void NextLevel()
         {
+            if (CurrentState == GameState.GameComplete)
+            {
+                return;
+            }
+
             CurrentLevel++;
             SetState(GameState.Playing);
             StartNextControllerRun();
-            Debug.Log($"Next level. Level={CurrentLevel}");
+            Debug.Log($"Next day. Day={CurrentDayName}");
         }
 
         public void NewGame()
@@ -64,13 +83,13 @@ namespace CM3070.Dungeon1
             CurrentLevel = 1;
             SetState(GameState.Playing);
             StartNewControllerRun();
-            Debug.Log("New game.");
+            Debug.Log("New game. Day=Monday");
         }
 
         public void NotifyCoinsChanged(int coinCount)
         {
-            gameUI?.SetCoinCount(coinCount);
-            Debug.Log($"Coins: {coinCount}");
+            // Legacy dungeon pickup notification. Office economy/readouts live in OfficeHUD.
+            Debug.Log($"Coins/Credits: {coinCount}");
         }
 
         public void NotifyArmourCollected(string armourName, string armourType, int maxHealth)
@@ -107,15 +126,33 @@ namespace CM3070.Dungeon1
                 return;
             }
 
+            if (IsFinalDay)
+            {
+                SetState(GameState.GameComplete);
+                Debug.Log("Probation period complete. Player is now hired.");
+                return;
+            }
+
             SetState(GameState.LevelComplete);
-            Debug.Log($"Level complete. Level={CurrentLevel}");
+            Debug.Log($"Day complete. Day={CurrentDayName}");
         }
 
         private void SetState(GameState state)
         {
             CurrentState = state;
             Time.timeScale = CurrentState == GameState.Playing ? 1f : 0f;
-            gameUI?.ShowState(CurrentState, CurrentLevel);
+            gameUI?.ShowState(CurrentState, CurrentLevel, CurrentDayName, TotalDays);
+        }
+
+        private string DayNameFor(int day)
+        {
+            if (workdayNames == null || workdayNames.Length == 0)
+            {
+                return $"Day {day}";
+            }
+
+            int index = Mathf.Clamp(day - 1, 0, workdayNames.Length - 1);
+            return workdayNames[index];
         }
 
         private void StartNewControllerRun()

@@ -2,32 +2,40 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Canvas bridge for start, level-complete, and game-over screens.
-// Buttons call GameManager; gameplay systems do not talk directly to UI.
+// Shared canvas bridge for scene flow: start, level-complete, game-over, HUD visibility,
+// buttons, basic health, and the existing overview minimap panel wiring.
+// OfficeScene can keep this component and add OfficeHUD to the same GameUI object.
+// Keep office-specific objectives, inventory, feedback, and debug readouts in OfficeHUD.
 namespace CM3070.Dungeon1
 {
     public sealed class GameUI : MonoBehaviour
     {
         [SerializeField] private GameObject startPanel;
         [SerializeField] private GameObject levelCompletePanel;
+        [SerializeField] private GameObject probationCompletePanel;
         [SerializeField] private GameObject gameOverPanel;
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private Button startButton;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text levelCompleteText;
+        [SerializeField] private TMP_Text probationCompleteText;
+        [SerializeField] private TMP_Text probationCreditsText;
         [SerializeField] private Button nextLevelButton;
         [SerializeField] private TMP_Text gameOverText;
         [SerializeField] private Button newGameButton;
         [SerializeField] private TMP_Text levelText;
-        [SerializeField] private TMP_Text coinText;
         [SerializeField] private TMP_Text healthText;
         [SerializeField] private Slider healthBar;
 
         [Header("Display Text")]
         [SerializeField] private string titleLabel = "Dungeon Crawler";
-        [SerializeField] private string levelLabel = "Level";
-        [SerializeField] private string currencyLabel = "Coins";
+        [SerializeField] private string levelLabel = "Day";
         [SerializeField] private string levelCompleteLabel = "Level Complete";
+        [SerializeField] private string probationCompleteLabel = "Probation Complete";
+        [TextArea]
+        [SerializeField] private string probationCompleteMessage = "You managed your probation period.\nYou're now hired.";
+        [TextArea]
+        [SerializeField] private string probationCreditsMessage = "Credits\nDesign, code, and emotional damage: Kristin";
         [SerializeField] private string gameOverLabel = "Game Over";
 
         private GameState currentState;
@@ -52,10 +60,20 @@ namespace CM3070.Dungeon1
 
         public void ShowState(GameState state, int level)
         {
+            ShowState(state, level, level.ToString(), level);
+        }
+
+        public void ShowState(GameState state, int level, string dayName, int totalDays)
+        {
             currentState = state;
+            bool useSeparateProbationPanel = probationCompletePanel != null;
 
             if (startPanel != null) startPanel.SetActive(state == GameState.StartScreen);
-            if (levelCompletePanel != null) levelCompletePanel.SetActive(state == GameState.LevelComplete);
+            if (levelCompletePanel != null)
+            {
+                levelCompletePanel.SetActive(state == GameState.LevelComplete || (state == GameState.GameComplete && !useSeparateProbationPanel));
+            }
+            if (probationCompletePanel != null) probationCompletePanel.SetActive(state == GameState.GameComplete);
             if (gameOverPanel != null) gameOverPanel.SetActive(state == GameState.GameOver);
             if (hudPanel != null) hudPanel.SetActive(state == GameState.Playing);
 
@@ -66,7 +84,19 @@ namespace CM3070.Dungeon1
 
             if (levelCompleteText != null)
             {
-                levelCompleteText.text = levelCompleteLabel;
+                levelCompleteText.text = state == GameState.GameComplete
+                    ? probationCompleteMessage
+                    : $"{levelCompleteLabel}\n{dayName} complete";
+            }
+
+            if (probationCompleteText != null)
+            {
+                probationCompleteText.text = $"{probationCompleteLabel}\n{probationCompleteMessage}";
+            }
+
+            if (probationCreditsText != null)
+            {
+                probationCreditsText.text = probationCreditsMessage;
             }
 
             if (gameOverText != null)
@@ -77,6 +107,7 @@ namespace CM3070.Dungeon1
             if (nextLevelButton != null)
             {
                 nextLevelButton.interactable = state == GameState.LevelComplete;
+                nextLevelButton.gameObject.SetActive(state == GameState.LevelComplete);
             }
 
             if (newGameButton != null)
@@ -84,7 +115,7 @@ namespace CM3070.Dungeon1
                 newGameButton.interactable = state == GameState.GameOver;
             }
 
-            SetLevel(level);
+            SetLevel(level, dayName, totalDays);
         }
 
         public void OnStartButtonPressed()
@@ -108,17 +139,14 @@ namespace CM3070.Dungeon1
 
         public void SetLevel(int level)
         {
-            if (levelText != null)
-            {
-                levelText.text = $"{levelLabel}: {level}";
-            }
+            SetLevel(level, level.ToString(), level);
         }
 
-        public void SetCoinCount(int count)
+        public void SetLevel(int level, string dayName, int totalDays)
         {
-            if (coinText != null)
+            if (levelText != null)
             {
-                coinText.text = $"{currencyLabel}: {count}";
+                levelText.text = $"{levelLabel}: {dayName}";
             }
         }
 

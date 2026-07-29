@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -31,6 +32,9 @@ namespace CM3070.Dungeon1
         public bool IsDead => currentHealth <= 0;
         public bool IsFullHealth => currentHealth >= maxHealth;
 
+        // UI/debug observers can subscribe without replacing the existing GameManager path.
+        public event Action<int, int> HealthChanged;
+
         public HealthSnapshot CaptureSnapshot()
         {
             return new HealthSnapshot(currentHealth, maxHealth);
@@ -41,6 +45,7 @@ namespace CM3070.Dungeon1
             maxHealth = Mathf.Max(1, snapshot.MaxHealth);
             currentHealth = Mathf.Clamp(snapshot.CurrentHealth, 0, maxHealth);
             GameManager.Instance?.NotifyHealthChanged(currentHealth, maxHealth);
+            HealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
         private void Awake()
@@ -67,6 +72,7 @@ namespace CM3070.Dungeon1
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
             // GameManager is the future UI notification path.
             GameManager.Instance?.NotifyHealthChanged(currentHealth, maxHealth);
+            HealthChanged?.Invoke(currentHealth, maxHealth);
             return true;
         }
 
@@ -82,6 +88,7 @@ namespace CM3070.Dungeon1
             // Increasing max health should not overfill current health here.
             currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
             GameManager.Instance?.NotifyHealthChanged(currentHealth, maxHealth);
+            HealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
         public void TakeDamage(int amount)
@@ -95,6 +102,7 @@ namespace CM3070.Dungeon1
             currentHealth = Mathf.Max(0, currentHealth - amount);
             // Damage, enemy attacks, and later hazards all share this notification.
             GameManager.Instance?.NotifyHealthChanged(currentHealth, maxHealth);
+            HealthChanged?.Invoke(currentHealth, maxHealth);
 
             if (IsDead)
             {
@@ -116,6 +124,7 @@ namespace CM3070.Dungeon1
             if (notifyGameManager)
             {
                 GameManager.Instance?.NotifyHealthChanged(currentHealth, maxHealth);
+                HealthChanged?.Invoke(currentHealth, maxHealth);
             }
         }
     }
