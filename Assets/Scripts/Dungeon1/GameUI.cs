@@ -35,9 +35,9 @@ namespace CM3070.Dungeon1
         [SerializeField] private string dayCompleteLabel = "Shift Done";
         [SerializeField] private string gameWonLabel = "Probation Period Finished";
         [TextArea]
-        [SerializeField] private string gameWonMessage = "You managed your probation period.\nYou're now hired.";
+        [SerializeField] private string gameWonMessage = "Congratulations!\nYou're now hired.";
         [TextArea]
-        [SerializeField] private string creditsMessage = "Credits\nDesign, code, and burnout:\nKristin Schumann #210569373";
+        [SerializeField] private string creditsMessage = "Credits\nDesign, code, and burnout:\nKristin Schumann #210569373\nA University of London CM3070 Final Project";
         [SerializeField] private string gameOverLabel = "Game Over";
 
         private GameState currentState;
@@ -185,7 +185,7 @@ namespace CM3070.Dungeon1
 
             if (healthText != null)
             {
-                healthText.text = $"Health: {current}/{max}";
+                healthText.text = $"Resolve: {current}/{max}";
             }
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using CM3070.Office.Quest;
 using CM3070.Dungeon1;
 using CM3070.PCG;
@@ -22,7 +23,11 @@ namespace CM3070.Office
         [SerializeField] private int minSpacing = 3;
         [SerializeField] private int markerExclusionRadius = 2;
 
+        [Header("Debug")]
+        [SerializeField] private bool logSpawnSnapshotOnStart = true;
+
         private readonly HashSet<Vector2Int> occupiedPositions = new();
+        private readonly List<string> spawnSnapshot = new();
         private Transform questRoot;
 
         public void SpawnQuestObjects(
@@ -46,8 +51,10 @@ namespace CM3070.Office
             System.Random random = new(layout.Seed ^ questSeedOffset);
             List<OfficeQuestDefinition> selectedQuests = SelectQuests(random);
             QuestManager.Instance?.ConfigureActiveQuests(selectedQuests);
+            spawnSnapshot.Clear();
             SpawnSelectedQuests(layout, roomPlan, visualizer, selectedQuests, random);
             SpawnExitMarker(layout, roomPlan, visualizer, random);
+            LogSpawnSnapshot(layout);
         }
 
         public void ClearQuestObjects()
@@ -113,7 +120,12 @@ namespace CM3070.Office
                 && TryFindNearExit(layout, random, out Vector2Int exitPosition))
             {
                 SpawnPrefab(exitMarkerPrefab, "Exit", exitPosition, markerHeight, visualizer);
+                roomPlan.TryGetRoleAt(exitPosition, out OfficeRoomRole actualExitRole);
+                RecordSpawn("TM", "Exit", exitMarkerPrefab.name, OfficeRoomRole.None, actualExitRole, exitPosition, visualizer);
+                return;
             }
+
+            RecordMissing("TM", "Exit", exitMarkerPrefab != null ? exitMarkerPrefab.name : "Missing prefab", OfficeRoomRole.None);
         }
 
         private void SpawnSelectedQuests(
@@ -129,12 +141,38 @@ namespace CM3070.Office
                     && TryFindInRoomRole(layout, roomPlan, quest.ItemRoomRole, random, out Vector2Int itemPosition))
                 {
                     SpawnPrefab(quest.QuestItemPrefab, quest.QuestName, itemPosition, quest.ItemHeight, visualizer);
+                    roomPlan.TryGetRoleAt(itemPosition, out OfficeRoomRole actualItemRole);
+                    RecordSpawn(
+                        "QI",
+                        quest.QuestName,
+                        quest.QuestItemPrefab.name,
+                        quest.ItemRoomRole,
+                        actualItemRole,
+                        itemPosition,
+                        visualizer);
+                }
+                else if (quest.QuestItemPrefab != null)
+                {
+                    RecordMissing("QI", quest.QuestName, quest.QuestItemPrefab.name, quest.ItemRoomRole);
                 }
 
                 if (quest.TaskMarkerPrefab != null
                     && TryFindInRoomRole(layout, roomPlan, quest.MarkerRoomRole, random, out Vector2Int markerPosition))
                 {
                     SpawnPrefab(quest.TaskMarkerPrefab, quest.QuestName, markerPosition, quest.MarkerHeight, visualizer);
+                    roomPlan.TryGetRoleAt(markerPosition, out OfficeRoomRole actualMarkerRole);
+                    RecordSpawn(
+                        "TM",
+                        quest.QuestName,
+                        quest.TaskMarkerPrefab.name,
+                        quest.MarkerRoomRole,
+                        actualMarkerRole,
+                        markerPosition,
+                        visualizer);
+                }
+                else if (quest.TaskMarkerPrefab != null)
+                {
+                    RecordMissing("TM", quest.QuestName, quest.TaskMarkerPrefab.name, quest.MarkerRoomRole);
                 }
             }
         }
@@ -181,6 +219,23 @@ namespace CM3070.Office
                     occupiedPositions.Add(candidate);
                     return true;
                 }
+            }
+
+            foreach (Vector2Int candidate in candidates)
+            {
+                if (CanPlaceExitAt(layout, candidate))
+                {
+                    position = candidate;
+                    occupiedPositions.Add(candidate);
+                    return true;
+                }
+            }
+
+            if (CanPlaceExitAt(layout, layout.Exit))
+            {
+                position = layout.Exit;
+                occupiedPositions.Add(position);
+                return true;
             }
 
             position = Vector2Int.zero;
@@ -278,6 +333,14 @@ namespace CM3070.Office
             return true;
         }
 
+        private bool CanPlaceExitAt(DungeonLayout layout, Vector2Int position)
+        {
+            return layout.IsWalkable(position)
+                && position != layout.Start
+                && (position == layout.Exit || !layout.IsMarker(position))
+                && !occupiedPositions.Contains(position);
+        }
+
         private void SpawnPrefab(
             GameObject prefab,
             string label,
@@ -288,6 +351,60 @@ namespace CM3070.Office
             GameObject spawned = Instantiate(prefab, questRoot);
             spawned.name = $"{prefab.name} {label} ({gridPosition.x}, {gridPosition.y})";
             spawned.transform.position = visualizer.GridToWorld(gridPosition) + Vector3.up * height;
+        }
+
+        private void RecordSpawn(
+            string kind,
+            string questName,
+            string prefabName,
+            OfficeRoomRole requestedRole,
+            OfficeRoomRole actualRole,
+            Vector2Int gridPosition,
+            DungeonVisualizer visualizer)
+        {
+            Vector3 worldPosition = visualizer.GridToWorld(gridPosition);
+            spawnSnapshot.Add(
+                $"{kind} spawned\n"
+                + $"  Quest: {questName}\n"
+                + $"  Prefab: {prefabName}\n"
+                + $"  Room: {requestedRole} -> {actualRole}\n"
+                + $"  Grid: ({gridPosition.x}, {gridPosition.y})\n"
+                + $"  World: ({worldPosition.x:0.##}, {worldPosition.y:0.##}, {worldPosition.z:0.##})");
+        }
+
+        private void RecordMissing(
+            string kind,
+            string questName,
+            string prefabName,
+            OfficeRoomRole requestedRole)
+        {
+            spawnSnapshot.Add(
+                $"{kind} MISSING\n"
+                + $"  Quest: {questName}\n"
+                + $"  Prefab: {prefabName}\n"
+                + $"  Requested room: {requestedRole}\n"
+                + "  Problem: no valid spawn position found");
+        }
+
+        private void LogSpawnSnapshot(DungeonLayout layout)
+        {
+            if (!logSpawnSnapshotOnStart || !Application.isPlaying)
+            {
+                return;
+            }
+
+            StringBuilder builder = new();
+            builder.AppendLine("[OfficeQuestSpawner] Spawn snapshot");
+            builder.AppendLine($"Seed: {layout.Seed}");
+            builder.AppendLine($"Entries: {spawnSnapshot.Count}");
+            builder.AppendLine();
+            foreach (string entry in spawnSnapshot)
+            {
+                builder.AppendLine(entry);
+                builder.AppendLine();
+            }
+
+            Debug.Log(builder.ToString());
         }
 
         private void OnValidate()

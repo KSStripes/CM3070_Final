@@ -200,6 +200,7 @@ namespace CM3070.Office.Quest
                 completedQuestMarkers.Add(markerId);
             }
 
+            ApplyHealthImpact(quest, inventory.GetComponent<HealthSystem>());
             PublishFeedback(quest);
             NotifyQuestStateChanged();
         }
@@ -217,6 +218,7 @@ namespace CM3070.Office.Quest
                 if (completedQuests.Add(quest))
                 {
                     changed = true;
+                    ApplyHealthImpact(quest);
                     PublishFeedback(quest);
                 }
             }
@@ -308,6 +310,34 @@ namespace CM3070.Office.Quest
             if (!string.IsNullOrWhiteSpace(quest.FeedbackComment))
             {
                 FeedbackPublished?.Invoke(quest.FeedbackComment);
+            }
+        }
+
+        private static void ApplyHealthImpact(
+            OfficeQuestDefinition quest,
+            HealthSystem preferredHealth = null)
+        {
+            if (quest == null || quest.HealthImpact == 0)
+            {
+                return;
+            }
+
+            HealthSystem health = preferredHealth != null
+                ? preferredHealth
+                : FindFirstObjectByType<HealthSystem>();
+
+            if (health == null)
+            {
+                return;
+            }
+
+            if (quest.HealthImpact > 0)
+            {
+                health.Heal(quest.HealthImpact);
+            }
+            else
+            {
+                health.TakeDamage(-quest.HealthImpact);
             }
         }
 

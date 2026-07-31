@@ -20,7 +20,7 @@ MonoBehaviour:
   spawnWeight: 1
   requiredItemId: 14
   questItemPrefab: {fileID: 1666821995508848, guid: f4e95b78558494cee8b6494dc7fea1a4, type: 3}
-  itemRoomRole: 5
+  itemRoomRole: 4
   itemHeight: 0.45
   taskMarkerId: 8
   taskMarkerPrefab: {fileID: 1093985511282492, guid: 10fde78f611c84a889bf1dd36f719b42, type: 3}
