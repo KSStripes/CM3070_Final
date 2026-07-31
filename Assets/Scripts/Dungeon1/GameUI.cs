@@ -29,6 +29,12 @@ namespace CM3070.Dungeon1
         [SerializeField] private TMP_Text healthText;
         [SerializeField] private Slider healthBar;
 
+        [Header("Player Avatar Choice")]
+        // Optional start-menu controls for selecting which player visual to enable at spawn.
+        [SerializeField] private Button femaleAvatarButton;
+        [SerializeField] private Button maleAvatarButton;
+        [SerializeField] private TMP_Text selectedAvatarText;
+
         [Header("Display Text")]
         [SerializeField] private string titleLabel = "EndOfShift";
         [SerializeField] private string dayLabel = "Day";
@@ -63,6 +69,16 @@ namespace CM3070.Dungeon1
             if (gameWonButton != null)
             {
                 gameWonButton.onClick.AddListener(OnNewGameButtonPressed);
+            }
+
+            if (femaleAvatarButton != null)
+            {
+                femaleAvatarButton.onClick.AddListener(OnFemaleAvatarButtonPressed);
+            }
+
+            if (maleAvatarButton != null)
+            {
+                maleAvatarButton.onClick.AddListener(OnMaleAvatarButtonPressed);
             }
         }
 
@@ -137,12 +153,30 @@ namespace CM3070.Dungeon1
                 gameWonButton.interactable = state == GameState.GameWon;
             }
 
+            RefreshAvatarChoiceLabel(GameManager.Instance != null
+                ? GameManager.Instance.SelectedPlayerAvatar
+                : PlayerAvatarChoice.Female);
+
             SetDay(day, dayName, totalDays);
         }
 
         public void OnStartButtonPressed()
         {
             GameManager.Instance?.StartGame();
+        }
+
+        public void OnFemaleAvatarButtonPressed()
+        {
+            // Store the choice on GameManager so OfficeEntitySpawner can read it later.
+            GameManager.Instance?.SetPlayerAvatarChoice(PlayerAvatarChoice.Female);
+            RefreshAvatarChoiceLabel(PlayerAvatarChoice.Female);
+        }
+
+        public void OnMaleAvatarButtonPressed()
+        {
+            // Store the choice on GameManager so OfficeEntitySpawner can read it later.
+            GameManager.Instance?.SetPlayerAvatarChoice(PlayerAvatarChoice.Male);
+            RefreshAvatarChoiceLabel(PlayerAvatarChoice.Male);
         }
 
         public void OnNextDayButtonPressed()
@@ -186,6 +220,15 @@ namespace CM3070.Dungeon1
             if (healthText != null)
             {
                 healthText.text = $"Resolve: {current}/{max}";
+            }
+        }
+
+        private void RefreshAvatarChoiceLabel(PlayerAvatarChoice avatarChoice)
+        {
+            if (selectedAvatarText != null)
+            {
+                // Keeps the start menu clear without requiring extra button-state styling.
+                selectedAvatarText.text = $"Player: {avatarChoice}";
             }
         }
     }

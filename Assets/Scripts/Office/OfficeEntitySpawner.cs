@@ -307,6 +307,16 @@ namespace CM3070.Office
             }
 
             controller.Configure(playerMoveSpeed);
+
+            // The player root keeps gameplay scripts; this only swaps the child avatar visuals.
+            if (player.TryGetComponent(out PlayerAvatarPresenter avatarPresenter))
+            {
+                PlayerAvatarChoice avatarChoice = GameManager.Instance != null
+                    ? GameManager.Instance.SelectedPlayerAvatar
+                    : PlayerAvatarChoice.Female;
+                avatarPresenter.Apply(avatarChoice);
+            }
+
             return true;
         }
 

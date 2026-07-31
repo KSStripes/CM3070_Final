@@ -14,6 +14,13 @@ namespace CM3070.Dungeon1
         GameOver
     }
 
+    // Start-menu choice used by the office player prefab to show the matching visual child.
+    public enum PlayerAvatarChoice
+    {
+        Female,
+        Male
+    }
+
     public sealed class GameManager : MonoBehaviour
     {
         [SerializeField] private DungeonController dungeonController;
@@ -32,6 +39,8 @@ namespace CM3070.Dungeon1
         public static GameManager Instance { get; private set; }
         public GameState CurrentState { get; private set; } = GameState.StartScreen;
         public int CurrentDay { get; private set; } = 1;
+        // Defaults to female so starting without clicking a choice still gives a valid avatar.
+        public PlayerAvatarChoice SelectedPlayerAvatar { get; private set; } = PlayerAvatarChoice.Female;
         public string CurrentDayName => DayNameFor(CurrentDay);
         public bool IsFinalDay => CurrentDay >= TotalDays;
         public int TotalDays => Mathf.Max(1, workdayNames != null ? workdayNames.Length : 0);
@@ -61,6 +70,12 @@ namespace CM3070.Dungeon1
             CurrentDay = 1;
             SetState(GameState.Playing);
             StartNewControllerRun();
+        }
+
+        public void SetPlayerAvatarChoice(PlayerAvatarChoice avatarChoice)
+        {
+            // Called by GameUI before the procedural office run spawns the player.
+            SelectedPlayerAvatar = avatarChoice;
         }
 
         public void NextDay()
