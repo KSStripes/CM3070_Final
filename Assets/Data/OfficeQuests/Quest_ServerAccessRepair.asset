@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
+  m_Name: Quest_ServerAccessRepair
+  m_EditorClassIdentifier: 
+  questName: Server Access Repair
+  questType: 0
+  objectiveText: Bring the server card to the servers.
+  feedbackComment: The servers blink in a way that asks "Are you now also in charge
+    of the IT?" You're exhausted.
+  healthImpact: -3
+  spawnWeight: 1
+  requiredItemId: 19
+  questItemPrefab: {fileID: 1599998013852078, guid: f2a92564a11b44f59986de3ac770494c, type: 3}
+  itemRoomRole: 4
+  itemHeight: 0.45
+  taskMarkerId: 10
+  taskMarkerPrefab: {fileID: 7054140759692857475, guid: af7ebb13a66b340eb97336b89bd0fa7b, type: 3}
+  markerRoomRole: 3
+  markerHeight: 0.08

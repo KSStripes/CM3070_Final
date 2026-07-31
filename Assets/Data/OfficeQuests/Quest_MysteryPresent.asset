@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
-  m_Name: Quest_OpenMysteryPresent
+  m_Name: Quest_MysteryPresent
   m_EditorClassIdentifier: 
-  questName: Open The Mystery Present
+  questName: Mystery Present
   questType: 2
   objectiveText: Find the mystery present.
-  feedbackComment: It is either recognition or more work. The box refuses to clarify.
-  healthImpact: -1
+  feedbackComment: You're not sure if it's meant for you. You take it anyway and
+    feel better.
+  healthImpact: 6
   spawnWeight: 1
   requiredItemId: 12
   questItemPrefab: {fileID: 1796026641418316, guid: 9263f9b13431b482f934ac03d648a425, type: 3}

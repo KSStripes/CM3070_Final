@@ -15,8 +15,9 @@ MonoBehaviour:
   questName: Mandatory Birthday Cheer
   questType: 0
   objectiveText: Bring the cake to the meeting area.
-  feedbackComment: You smile at cake. Cake does not smile back.
-  healthImpact: -2
+  feedbackComment: Everyone is happy about the cake. But there is no place for you
+    to sit. Your workday continues.
+  healthImpact: -5
   spawnWeight: 1
   requiredItemId: 6
   questItemPrefab: {fileID: 1120874687463514, guid: fa9eb121f08f547f8a944bdd3fcc219d, type: 3}

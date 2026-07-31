@@ -15,8 +15,8 @@ MonoBehaviour:
   questName: Clock Into The System
   questType: 1
   objectiveText: Go to the clock-in terminal.
-  feedbackComment: You are now present, billable, and spiritually absent.
-  healthImpact: -2
+  feedbackComment: You are now present, being paid, but spiritually absent.
+  healthImpact: -3
   spawnWeight: 1
   requiredItemId: 0
   questItemPrefab: {fileID: 0}

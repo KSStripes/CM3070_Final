@@ -16,6 +16,7 @@ MonoBehaviour:
   questType: 0
   objectiveText: Bring the broken badge to reception.
   feedbackComment: Your identity has been restored to an acceptable plastic rectangle.
+    You feel better.
   healthImpact: 2
   spawnWeight: 1
   requiredItemId: 4

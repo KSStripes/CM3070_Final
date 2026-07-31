@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
-  m_Name: Quest_WellnessFruitInitiative
+  m_Name: Quest_WellnessFruit
   m_EditorClassIdentifier: 
-  questName: Wellness Fruit Initiative
+  questName: Wellness Fruit
   questType: 0
   objectiveText: Bring the fruit plate to the meeting area.
-  feedbackComment: Free fruit has solved systemic overwork. Allegedly.
-  healthImpact: 1
+  feedbackComment: Free fruit has solved systemic overwork and made everyone a little
+    more resolved.
+  healthImpact: 6
   spawnWeight: 1
   requiredItemId: 10
   questItemPrefab: {fileID: 1940992545781120, guid: 959de42992aeb49c68da21c9f35a9bce, type: 3}

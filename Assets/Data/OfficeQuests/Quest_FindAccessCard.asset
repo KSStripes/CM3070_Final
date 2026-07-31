@@ -15,8 +15,8 @@ MonoBehaviour:
   questName: Find Access Card
   questType: 2
   objectiveText: Find the access card before someone blames you.
-  feedbackComment: You found access. Permission remains philosophical.
-  healthImpact: 1
+  feedbackComment: You gained access. To where is not yet clear but you remain hopeful.
+  healthImpact: 4
   spawnWeight: 1
   requiredItemId: 1
   questItemPrefab: {fileID: 1938695310604038, guid: 8ddd8d2122bd44bf7bcc63e092a7a181, type: 3}

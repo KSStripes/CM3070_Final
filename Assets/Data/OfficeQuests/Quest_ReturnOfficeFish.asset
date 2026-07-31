@@ -15,8 +15,9 @@ MonoBehaviour:
   questName: Return The Office Fish
   questType: 0
   objectiveText: Return the office fish to the fish tank.
-  feedbackComment: The fish understands office politics better than you do.
-  healthImpact: 2
+  feedbackComment: The fish understands office politics better than you do. It seems
+    happy, so are you.
+  healthImpact: 6
   spawnWeight: 1
   requiredItemId: 13
   questItemPrefab: {fileID: 8115118771843089842, guid: 2c430247938cc44059131f5127599d0e, type: 3}

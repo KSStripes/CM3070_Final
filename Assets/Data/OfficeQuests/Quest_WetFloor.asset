@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c0f8dea1114742865b945b6201088d, type: 3}
-  m_Name: Quest_ServerAccessRitual
+  m_Name: Quest_WetFloor
   m_EditorClassIdentifier: 
-  questName: Server Access Ritual
+  questName: Wet Floor
   questType: 0
-  objectiveText: Bring the server card to the servers.
-  feedbackComment: The servers blink in a way that feels judgmental.
-  healthImpact: -2
+  objectiveText: Bring the wet floor sign to the janitor station.
+  feedbackComment: The hazard has been averted. Nobody cares. But your resolve lifts.
+  healthImpact: 4
   spawnWeight: 1
-  requiredItemId: 19
-  questItemPrefab: {fileID: 1599998013852078, guid: f2a92564a11b44f59986de3ac770494c, type: 3}
+  requiredItemId: 20
+  questItemPrefab: {fileID: 1083170872810082, guid: 20ea3872a65e34b78b156eefb2d90a26, type: 3}
   itemRoomRole: 4
   itemHeight: 0.45
-  taskMarkerId: 10
-  taskMarkerPrefab: {fileID: 7054140759692857475, guid: af7ebb13a66b340eb97336b89bd0fa7b, type: 3}
+  taskMarkerId: 9
+  taskMarkerPrefab: {fileID: 397395291363478899, guid: 62251b5d7206f4ac5b35aa03865331d8, type: 3}
   markerRoomRole: 3
   markerHeight: 0.08

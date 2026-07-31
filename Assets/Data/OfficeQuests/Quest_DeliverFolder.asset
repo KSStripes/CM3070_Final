@@ -16,7 +16,7 @@ MonoBehaviour:
   questType: 0
   objectiveText: Find the folder and take it to the delivery point.
   feedbackComment: The folder was urgent until the moment you delivered it.
-  healthImpact: -1
+  healthImpact: -3
   spawnWeight: 1
   requiredItemId: 9
   questItemPrefab: {fileID: 1235865142284490, guid: 0490b1e472058435586981961da070f5, type: 3}

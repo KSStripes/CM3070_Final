@@ -15,8 +15,8 @@ MonoBehaviour:
   questName: Find Ping-Pong Racket
   questType: 0
   objectiveText: Bring the ping-pong racket to the ping-pong table.
-  feedbackComment: Mandatory fun has recovered one piece of equipment.
-  healthImpact: 1
+  feedbackComment: Mandatory fun can go on.
+  healthImpact: 5
   spawnWeight: 1
   requiredItemId: 15
   questItemPrefab: {fileID: 1261112379122028, guid: 5e4ee0a908e7f47e3a7a77a23552c398, type: 3}

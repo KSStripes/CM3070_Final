@@ -15,8 +15,9 @@ MonoBehaviour:
   questName: Return Access Card
   questType: 0
   objectiveText: Find the access card and return it to reception.
-  feedbackComment: Reception thanks you with the warmth of a locked door.
-  healthImpact: 1
+  feedbackComment: Reception thanks you with the warmth of an icy day. Still, your
+    mood improves slightly.
+  healthImpact: 3
   spawnWeight: 1
   requiredItemId: 1
   questItemPrefab: {fileID: 1938695310604038, guid: 8ddd8d2122bd44bf7bcc63e092a7a181, type: 3}

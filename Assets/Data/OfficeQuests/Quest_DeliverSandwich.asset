@@ -15,7 +15,7 @@ MonoBehaviour:
   questName: Deliver Sandwich
   questType: 0
   objectiveText: Bring the sandwich to the boss desk.
-  feedbackComment: Leadership has been nourished. Nothing else improves.
+  feedbackComment: Leadership has been nourished. Nothing else seems improved.
   healthImpact: -3
   spawnWeight: 1
   requiredItemId: 18

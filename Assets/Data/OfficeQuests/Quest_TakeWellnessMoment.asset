@@ -15,13 +15,14 @@ MonoBehaviour:
   questName: Take A Wellness Moment
   questType: 1
   objectiveText: Visit the bean bags.
-  feedbackComment: You rested exactly long enough for it to become suspicious.
-  healthImpact: 3
+  feedbackComment: You rested exactly long enough for it not to become suspicious.
+    You feel better.
+  healthImpact: 6
   spawnWeight: 1
   requiredItemId: 0
   questItemPrefab: {fileID: 0}
-  itemRoomRole: 4
-  itemHeight: 0.36
+  itemRoomRole: 0
+  itemHeight: 0
   taskMarkerId: 8
   taskMarkerPrefab: {fileID: 1093985511282492, guid: 10fde78f611c84a889bf1dd36f719b42, type: 3}
   markerRoomRole: 4

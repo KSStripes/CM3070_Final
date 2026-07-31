@@ -15,8 +15,8 @@ MonoBehaviour:
   questName: Inflate Morale
   questType: 0
   objectiveText: Bring the balloon to the meeting area.
-  feedbackComment: Morale is now floating three inches above budget.
-  healthImpact: -1
+  feedbackComment: Morale is now higher than the budget. Your resolve is not.
+  healthImpact: -3
   spawnWeight: 1
   requiredItemId: 3
   questItemPrefab: {fileID: 1578434290008380, guid: c97c3dd51a09640d492625b6a1fe8b9e, type: 3}

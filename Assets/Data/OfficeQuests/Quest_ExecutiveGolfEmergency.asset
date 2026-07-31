@@ -15,7 +15,8 @@ MonoBehaviour:
   questName: Executive Golf Emergency
   questType: 0
   objectiveText: Bring the golf club to the boss desk.
-  feedbackComment: Business continuity has been restored to the putting green.
+  feedbackComment: Business continuity has been restored. The boss can enjoy the
+    putting green.
   healthImpact: -3
   spawnWeight: 1
   requiredItemId: 11

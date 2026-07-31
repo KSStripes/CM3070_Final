@@ -15,8 +15,9 @@ MonoBehaviour:
   questName: Submit Report Page
   questType: 0
   objectiveText: Bring the report page to the boss desk.
-  feedbackComment: Your report joins the sacred pile of unread urgency.
-  healthImpact: -2
+  feedbackComment: Your report joins the sacred pile of unread urgency. You feel
+    tired.
+  healthImpact: -3
   spawnWeight: 1
   requiredItemId: 17
   questItemPrefab: {fileID: 1971960948444136, guid: 4d5284a6f061147a6accb5a5ccc8da18, type: 3}

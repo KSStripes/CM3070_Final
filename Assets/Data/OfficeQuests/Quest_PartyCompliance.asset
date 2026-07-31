@@ -15,8 +15,8 @@ MonoBehaviour:
   questName: Party Compliance
   questType: 0
   objectiveText: Bring the party hat to the bean bags.
-  feedbackComment: You are now legally fun.
-  healthImpact: -2
+  feedbackComment: The party goes on! So does your workday, seemingly endless.
+  healthImpact: -5
   spawnWeight: 1
   requiredItemId: 14
   questItemPrefab: {fileID: 1666821995508848, guid: f4e95b78558494cee8b6494dc7fea1a4, type: 3}

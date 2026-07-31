@@ -15,8 +15,8 @@ MonoBehaviour:
   questName: Locate Training Packet
   questType: 2
   objectiveText: Find the training packet.
-  feedbackComment: You are now trained in a system nobody uses correctly.
-  healthImpact: -2
+  feedbackComment: You are now trained in a meaningless system nobody uses correctly.
+  healthImpact: -3
   spawnWeight: 1
   requiredItemId: 22
   questItemPrefab: {fileID: 1331128502589024, guid: 6c017c250903844ae8546f9927b5e7ba, type: 3}
