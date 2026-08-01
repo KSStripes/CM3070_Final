@@ -24,7 +24,7 @@ namespace CM3070.Dungeon1
     public sealed class GameManager : MonoBehaviour
     {
         [SerializeField] private DungeonController dungeonController;
-        [SerializeField] private OfficeDungeonController officeDungeonController;
+        [SerializeField] private OfficeController officeController;
         [SerializeField] private GameUI gameUI;
         [SerializeField] private string[] workdayNames =
         {
@@ -60,7 +60,7 @@ namespace CM3070.Dungeon1
         private void Start()
         {
             dungeonController ??= FindFirstObjectByType<DungeonController>();
-            officeDungeonController ??= FindFirstObjectByType<OfficeDungeonController>();
+            officeController ??= FindFirstObjectByType<OfficeController>();
             gameUI ??= FindFirstObjectByType<GameUI>();
             SetState(GameState.StartScreen);
         }
@@ -165,9 +165,9 @@ namespace CM3070.Dungeon1
         private void StartNewControllerRun()
         // If the scene is office start the office dungeon controller, otherwise start the normal dungeon controller.
         {
-            if (officeDungeonController != null)
+            if (officeController != null)
             {
-                officeDungeonController.StartNewGame();
+                officeController.StartNewGame();
                 return;
             }
 
@@ -176,9 +176,9 @@ namespace CM3070.Dungeon1
 
         private void StartNextControllerRun()
         {
-            if (officeDungeonController != null)
+            if (officeController != null)
             {
-                officeDungeonController.StartNextLevel();
+                officeController.StartNextLevel();
                 return;
             }
 

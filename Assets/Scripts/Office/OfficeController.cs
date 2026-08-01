@@ -9,9 +9,9 @@ namespace CM3070.Office
     [ExecuteAlways]
     [RequireComponent(typeof(DungeonVisualizer))]
     [RequireComponent(typeof(CameraController))]
-    [RequireComponent(typeof(OfficeEntitySpawner))]
+    [RequireComponent(typeof(EntitySpawner))]
     [RequireComponent(typeof(OfficeQuestSpawner))]
-    public sealed class OfficeDungeonController : MonoBehaviour
+    public sealed class OfficeController : MonoBehaviour
     {
         [Header("Edit Mode")]
         [SerializeField] private bool generatePreviewInEditMode = true;
@@ -33,7 +33,7 @@ namespace CM3070.Office
 
         [Header("NPC And Pickup Proportions")]
         [SerializeField, Range(0f, 0.2f)] private float enemyDensity = 0.035f;
-        [SerializeField] private int maxEnemies = 24;
+        [SerializeField] private int maxEnemies = 20;
         [SerializeField, Range(0f, 0.08f)] private float lootDensity = 0.005f;
         [SerializeField] private int maxLoot = 14;
         [SerializeField] private int spawnExclusionRadius = 4;
@@ -43,7 +43,7 @@ namespace CM3070.Office
 
         private DungeonVisualizer visualizer;
         private CameraController cameraController;
-        private OfficeEntitySpawner entitySpawner;
+        private EntitySpawner entitySpawner;
         private OfficeQuestSpawner questSpawner;
         private OfficePropPlacer officePropPlacer;
         private DungeonLayout currentLayout;
@@ -74,7 +74,7 @@ namespace CM3070.Office
         {
             visualizer = GetComponent<DungeonVisualizer>();
             cameraController = GetComponent<CameraController>();
-            entitySpawner = GetComponent<OfficeEntitySpawner>();
+            entitySpawner = GetComponent<EntitySpawner>();
             questSpawner = GetComponent<OfficeQuestSpawner>();
             officePropPlacer = GetComponent<OfficePropPlacer>();
 
@@ -133,7 +133,7 @@ namespace CM3070.Office
             {
                 visualizer = GetComponent<DungeonVisualizer>();
                 cameraController = GetComponent<CameraController>();
-                entitySpawner = GetComponent<OfficeEntitySpawner>();
+                entitySpawner = GetComponent<EntitySpawner>();
                 questSpawner = GetComponent<OfficeQuestSpawner>();
                 officePropPlacer = GetComponent<OfficePropPlacer>();
                 GenerateDungeon(false, true);
@@ -144,7 +144,7 @@ namespace CM3070.Office
         {
             visualizer ??= GetComponent<DungeonVisualizer>();
             cameraController ??= GetComponent<CameraController>();
-            entitySpawner ??= GetComponent<OfficeEntitySpawner>();
+            entitySpawner ??= GetComponent<EntitySpawner>();
             questSpawner ??= GetComponent<OfficeQuestSpawner>();
             officePropPlacer ??= GetComponent<OfficePropPlacer>();
 

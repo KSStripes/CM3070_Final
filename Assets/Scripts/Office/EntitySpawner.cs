@@ -3,12 +3,11 @@ using CM3070.Dungeon1;
 using CM3070.Office.Quest;
 using CM3070.PCG;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 // Instantiates office-scene gameplay entities for a generated workplace layout.
 namespace CM3070.Office
 {
-    public sealed class OfficeEntitySpawner : MonoBehaviour
+    public sealed class EntitySpawner : MonoBehaviour
     {
         private const int FirstNpcSlots = 6;
 
@@ -19,13 +18,20 @@ namespace CM3070.Office
             [Min(0)] public int spawnWeight = 1;
         }
 
+        [System.Serializable]
+        private sealed class NpcSpawnOption
+        {
+            public GameObject prefab = null;
+            [Min(0)] public int weight = 1;
+            [Min(0)] public int maxPerDay = 6;
+        }
+
         [Header("Player")]
         [SerializeField] private GameObject playerPrefab;
         [SerializeField] private float playerMoveSpeed = 5.5f;
 
         [Header("NPCs")]
-        [FormerlySerializedAs("enemyPrefabs")]
-        [SerializeField] private GameObject[] npcPrefabs = new GameObject[FirstNpcSlots];
+        [SerializeField] private NpcSpawnOption[] npcOptions = new NpcSpawnOption[FirstNpcSlots];
 
         [Header("Office Pickups")]
         [SerializeField] private PickupSpawnOption[] lootPrefabs;
@@ -41,18 +47,26 @@ namespace CM3070.Office
 
         private void OnValidate()
         {
-            if (npcPrefabs == null)
+            if (npcOptions == null)
             {
-                npcPrefabs = new GameObject[FirstNpcSlots];
-                return;
+                npcOptions = new NpcSpawnOption[FirstNpcSlots];
             }
 
-            if (npcPrefabs.Length >= FirstNpcSlots)
+            if (npcOptions.Length < FirstNpcSlots)
             {
-                return;
+                System.Array.Resize(ref npcOptions, FirstNpcSlots);
             }
 
-            System.Array.Resize(ref npcPrefabs, FirstNpcSlots);
+            for (int i = 0; i < npcOptions.Length; i++)
+            {
+                npcOptions[i] ??= new NpcSpawnOption();
+                NpcSpawnOption option = npcOptions[i];
+
+                if (option == null) continue;
+
+                option.weight = Mathf.Max(0, option.weight);
+                option.maxPerDay = Mathf.Max(0, option.maxPerDay);
+            }
         }
 
         public void SpawnEntities(
@@ -164,6 +178,9 @@ namespace CM3070.Office
 
         private void SpawnNpcs()
         {
+            // Per-day caps keep rare roles, like Boss, from filling ordinary NPC slots.
+            Dictionary<GameObject, int> spawnCounts = new();
+
             foreach (Vector2Int gridPosition in currentLayout.EnemyPositions)
             {
                 if (!TryFindEntitySpawnPosition(gridPosition, out Vector2Int spawnPosition))
@@ -171,7 +188,13 @@ namespace CM3070.Office
                     continue;
                 }
 
-                GameObject npc = InstantiatePrefab(RandomNpcPrefab(), "NPC");
+                NpcSpawnOption option = RandomNpcOption(spawnCounts);
+                if (option == null)
+                {
+                    break;
+                }
+
+                GameObject npc = InstantiatePrefab(option.prefab, "NPC");
                 if (npc == null) continue;
 
                 npc.transform.SetParent(entityRoot);
@@ -183,6 +206,7 @@ namespace CM3070.Office
                     continue;
                 }
 
+                AddSpawnCount(spawnCounts, option.prefab);
                 occupiedNpcPositions.Add(spawnPosition);
             }
         }
@@ -269,30 +293,51 @@ namespace CM3070.Office
             return null;
         }
 
-        private GameObject RandomNpcPrefab()
+        private NpcSpawnOption RandomNpcOption(IReadOnlyDictionary<GameObject, int> spawnCounts)
         {
-            if (npcPrefabs == null || npcPrefabs.Length == 0) return null;
+            if (npcOptions == null || npcOptions.Length == 0) return null;
 
-            int validCount = 0;
-            foreach (GameObject prefab in npcPrefabs)
+            int totalWeight = 0;
+            foreach (NpcSpawnOption option in npcOptions)
             {
-                if (prefab != null)
+                if (CanSpawn(option, spawnCounts))
                 {
-                    validCount++;
+                    totalWeight += option.weight;
                 }
             }
 
-            if (validCount == 0) return null;
+            if (totalWeight <= 0) return null;
 
-            int roll = Random.Range(0, validCount);
-            foreach (GameObject prefab in npcPrefabs)
+            int roll = Random.Range(0, totalWeight);
+            foreach (NpcSpawnOption option in npcOptions)
             {
-                if (prefab == null) continue;
-                if (roll == 0) return prefab;
-                roll--;
+                if (!CanSpawn(option, spawnCounts)) continue;
+
+                roll -= option.weight;
+                if (roll < 0) return option;
             }
 
             return null;
+        }
+
+        private static bool CanSpawn(NpcSpawnOption option, IReadOnlyDictionary<GameObject, int> spawnCounts)
+        {
+            if (option == null || option.prefab == null || option.weight <= 0)
+            {
+                return false;
+            }
+
+            return option.maxPerDay <= 0
+                || !spawnCounts.TryGetValue(option.prefab, out int count)
+                || count < option.maxPerDay;
+        }
+
+        private static void AddSpawnCount(Dictionary<GameObject, int> spawnCounts, GameObject prefab)
+        {
+            if (!spawnCounts.TryAdd(prefab, 1))
+            {
+                spawnCounts[prefab]++;
+            }
         }
 
         private static GameObject InstantiatePrefab(GameObject prefab, string label)

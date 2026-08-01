@@ -167,14 +167,14 @@ namespace CM3070.Dungeon1
 
         public void OnFemaleAvatarButtonPressed()
         {
-            // Store the choice on GameManager so OfficeEntitySpawner can read it later.
+            // Store the choice on GameManager so the office EntitySpawner can read it later.
             GameManager.Instance?.SetPlayerAvatarChoice(PlayerAvatarChoice.Female);
             RefreshAvatarChoiceLabel(PlayerAvatarChoice.Female);
         }
 
         public void OnMaleAvatarButtonPressed()
         {
-            // Store the choice on GameManager so OfficeEntitySpawner can read it later.
+            // Store the choice on GameManager so the office EntitySpawner can read it later.
             GameManager.Instance?.SetPlayerAvatarChoice(PlayerAvatarChoice.Male);
             RefreshAvatarChoiceLabel(PlayerAvatarChoice.Male);
         }
