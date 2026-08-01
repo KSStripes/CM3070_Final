@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1455692040422409016}
   - component: {fileID: 6980604914562765477}
   - component: {fileID: 5811705739354767035}
+  - component: {fileID: 6198306859021297653}
   m_Layer: 0
   m_Name: NPC_Harmonizer_Receptionist
   m_TagString: Untagged
@@ -113,6 +114,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.Npc
   state: 0
+--- !u!114 &6198306859021297653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84621b7b96fb4e52a263049ddc15ef0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.MovementAnimator
+  speedParameter: Speed
+  movingThreshold: 0.05
+  movingSpeedValue: 1
+  stoppedSpeedValue: 0
+  dampingTime: 0.08
 --- !u!1001 &4431620561720964667
 PrefabInstance:
   m_ObjectHideFlags: 0

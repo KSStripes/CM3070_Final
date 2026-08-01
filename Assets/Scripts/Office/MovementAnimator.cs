@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace CM3070.Office
 {
-    public sealed class PlayerAnimationController : MonoBehaviour
+    public sealed class MovementAnimator : MonoBehaviour
     {
         [SerializeField] private string speedParameter = "Speed";
         [SerializeField] private float movingThreshold = 0.05f;
