@@ -1,5 +1,7 @@
 using CM3070.Dungeon1;
 using CM3070.PCG;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -45,12 +47,12 @@ namespace CM3070.Office
         private CameraController cameraController;
         private EntitySpawner entitySpawner;
         private OfficeQuestSpawner questSpawner;
-        private OfficePropPlacer officePropPlacer;
+        private PropPlacer officePropPlacer;
         private DungeonLayout currentLayout;
-        private OfficeRoomPlan currentOfficeRoomPlan;
+        private RoomPlan currentRoomPlan;
         private int activeSeed;
 
-        public OfficeRoomPlan CurrentOfficeRoomPlan => currentOfficeRoomPlan;
+        public event System.Action<OfficeRunStatsSnapshot> RunStatsChanged;
 
         [ContextMenu("Generate Office Preview")]
         public void GenerateHybridPreview()
@@ -76,7 +78,7 @@ namespace CM3070.Office
             cameraController = GetComponent<CameraController>();
             entitySpawner = GetComponent<EntitySpawner>();
             questSpawner = GetComponent<OfficeQuestSpawner>();
-            officePropPlacer = GetComponent<OfficePropPlacer>();
+            officePropPlacer = GetComponent<PropPlacer>();
 
             if (!Application.isPlaying && generatePreviewInEditMode)
             {
@@ -135,7 +137,7 @@ namespace CM3070.Office
                 cameraController = GetComponent<CameraController>();
                 entitySpawner = GetComponent<EntitySpawner>();
                 questSpawner = GetComponent<OfficeQuestSpawner>();
-                officePropPlacer = GetComponent<OfficePropPlacer>();
+                officePropPlacer = GetComponent<PropPlacer>();
                 GenerateDungeon(false, true);
             }
         }
@@ -146,14 +148,14 @@ namespace CM3070.Office
             cameraController ??= GetComponent<CameraController>();
             entitySpawner ??= GetComponent<EntitySpawner>();
             questSpawner ??= GetComponent<OfficeQuestSpawner>();
-            officePropPlacer ??= GetComponent<OfficePropPlacer>();
+            officePropPlacer ??= GetComponent<PropPlacer>();
 
             cameraController.EnsureCameras(transform);
 
             DungeonGenerationSettings settings = BuildSettings();
             GenerateValidOfficeLayout(settings, runtimeObjects);
-            visualizer.SetOfficeRoomPlan(currentOfficeRoomPlan);
-            officePropPlacer?.SetRoomPlan(currentOfficeRoomPlan);
+            visualizer.SetRoomPlan(currentRoomPlan);
+            officePropPlacer?.SetRoomPlan(currentRoomPlan);
 
             visualizer.SetRenderSpawnMarkers(!runtimeObjects);
             // OfficeScene gets its exit interaction from OfficeQuestSpawner instead.
@@ -171,7 +173,7 @@ namespace CM3070.Office
             {
                 questSpawner.SpawnQuestObjects(
                     currentLayout,
-                    currentOfficeRoomPlan,
+                    currentRoomPlan,
                     visualizer,
                     transform,
                     officePropPlacer != null ? officePropPlacer.OccupiedPositions : null);
@@ -185,6 +187,53 @@ namespace CM3070.Office
             cameraController.PositionPlayerCamera(entitySpawner.PlayerTransform != null
                 ? entitySpawner.PlayerTransform.position
                 : visualizer.GridToWorld(currentLayout.Start));
+            RunStatsChanged?.Invoke(CaptureRunStats());
+        }
+
+        public OfficeRunStatsSnapshot CaptureRunStats()
+        {
+            if (currentLayout == null)
+            {
+                return default;
+            }
+
+            EntitySpawnStatsSnapshot entityStats = entitySpawner != null
+                ? entitySpawner.LastSpawnStats
+                : default;
+            QuestSpawnStatsSnapshot questStats = questSpawner != null
+                ? questSpawner.LastSpawnStats
+                : default;
+            PropSpawnStatsSnapshot propStats = officePropPlacer != null
+                ? officePropPlacer.LastSpawnStats
+                : default;
+
+            return new OfficeRunStatsSnapshot(
+                currentLayout.Seed,
+                currentLayout.Rooms.Count,
+                CaptureRoomRoleCounts(),
+                currentLayout.WalkableCount(),
+                currentLayout.MainRegionSize,
+                propStats.PropCount,
+                propStats.PropRoleCounts,
+                entityStats.NpcCount,
+                questStats.QuestCount,
+                questStats.QuestItemCount,
+                questStats.TaskMarkerCount,
+                entityStats.NpcRoleCounts);
+        }
+
+        private IReadOnlyList<OfficeRoleCount> CaptureRoomRoleCounts()
+        {
+            if (currentRoomPlan == null)
+            {
+                return new List<OfficeRoleCount>();
+            }
+
+            return currentRoomPlan.Assignments
+                .GroupBy(assignment => assignment.Role)
+                .OrderBy(group => PropPlacer.RoleSortIndex(group.Key))
+                .Select(group => new OfficeRoleCount(PropPlacer.DisplayName(group.Key), group.Count()))
+                .ToList();
         }
 
         private int NextSeed()
@@ -225,10 +274,10 @@ namespace CM3070.Office
 
                 DungeonGenerator generator = new(settings);
                 DungeonLayout candidateLayout = generator.Generate(candidateSeed, DungeonGenerationMethod.HybridBspCellular);
-                OfficeRoomPlan candidatePlan = OfficeLayoutPlanner.CreatePlan(candidateLayout);
+                RoomPlan candidatePlan = LayoutPlanner.CreatePlan(candidateLayout);
 
                 currentLayout = candidateLayout;
-                currentOfficeRoomPlan = candidatePlan;
+                currentRoomPlan = candidatePlan;
 
                 if (IsValidOfficeLayout(candidateLayout, candidatePlan))
                 {
@@ -240,7 +289,7 @@ namespace CM3070.Office
             Debug.LogWarning($"Generated office layout did not meet validation after {layoutRetryAttempts} attempts; using the last candidate.");
         }
 
-        private static bool IsValidOfficeLayout(DungeonLayout layout, OfficeRoomPlan plan)
+        private static bool IsValidOfficeLayout(DungeonLayout layout, RoomPlan plan)
         {
             return layout != null
                 && plan != null

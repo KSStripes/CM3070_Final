@@ -1,4 +1,5 @@
 using CM3070.Office.Quest;
+using System.Text;
 using TMPro;
 using UnityEngine;
 
@@ -22,6 +23,15 @@ namespace CM3070.Office
         [SerializeField] private GameObject feedbackRoot;
         [SerializeField] private TMP_Text feedback;
 
+        [Header("Report Stats")]
+        [SerializeField] private bool showReportStats = true;
+        [SerializeField] private GameObject reportStatsRoot;
+        [SerializeField] private TMP_Text reportStats;
+        [SerializeField, Range(12f, 16f)] private float reportFontSize = 12f;
+        [SerializeField] private Vector2 reportPanelSize = new(360f, 190f);
+        [SerializeField] private Vector2 reportPanelOffset = new(-16f, 16f);
+        [SerializeField] private string reportStatsPending = "Report stats pending";
+
         [Header("Display Text")]
         [SerializeField] private string emptyQuest = "[ ] Waiting for the day to decide what it wants.";
         [SerializeField] private string emptySlot = "Empty";
@@ -40,31 +50,41 @@ namespace CM3070.Office
         [SerializeField] private Color message = new(0.62f, 0.85f, 0.91f, 1f);
 
         private QuestManager subscribedQuestManager;
-        private OfficePlayerInventory subscribedInventory;
+        private QuestInventory subscribedInventory;
+        private OfficeController subscribedOfficeController;
         private QuestStateSnapshot? lastQuestSnapshot;
-        private OfficeInventorySnapshot? lastInventorySnapshot;
+        private QuestInventorySnapshot? lastInventorySnapshot;
+        private OfficeRunStatsSnapshot? lastRunStatsSnapshot;
         private string latestFeedback = string.Empty;
         private float feedbackTimer;
 
+        private void Awake()
+        {
+            EnsureReportStatsText();
+        }
+
         private void OnEnable()
         {
-            SubscribeToQuestManager();
-            SubscribeToRuntimePlayer();
+            EnsureReportStatsText();
+            SubscribeToSceneObjects();
+            SubscribeToInventory();
             RefreshAll();
         }
 
         private void Start()
         {
-            SubscribeToQuestManager();
-            SubscribeToRuntimePlayer();
+            SubscribeToSceneObjects();
+            SubscribeToInventory();
             RefreshAll();
         }
 
         private void Update()
         {
-            // OfficeScene can respawn the player on regeneration, so reconnect when needed.
-            SubscribeToQuestManager();
-            SubscribeToRuntimePlayer();
+            // The player can be respawned, so only reconnect the inventory if it disappeared.
+            if (subscribedInventory == null)
+            {
+                SubscribeToInventory();
+            }
 
             if (feedbackSeconds > 0f && feedbackTimer > 0f)
             {
@@ -79,6 +99,7 @@ namespace CM3070.Office
 
         private void OnDisable()
         {
+            UnsubscribeFromOfficeController();
             UnsubscribeFromQuestManager();
             UnsubscribeFromInventory();
         }
@@ -87,6 +108,48 @@ namespace CM3070.Office
         {
             EnsureArraySize(ref quests);
             EnsureArraySize(ref items);
+            reportFontSize = Mathf.Clamp(reportFontSize, 12f, 16f);
+            reportPanelSize.x = Mathf.Max(220f, reportPanelSize.x);
+            reportPanelSize.y = Mathf.Max(120f, reportPanelSize.y);
+        }
+
+        private void SubscribeToSceneObjects()
+        {
+            if (subscribedOfficeController == null)
+            {
+                SubscribeToOfficeController();
+            }
+
+            if (subscribedQuestManager == null)
+            {
+                SubscribeToQuestManager();
+            }
+        }
+
+        private void SubscribeToOfficeController()
+        {
+            OfficeController officeController = FindFirstObjectByType<OfficeController>();
+            if (officeController == null || subscribedOfficeController == officeController)
+            {
+                return;
+            }
+
+            UnsubscribeFromOfficeController();
+            subscribedOfficeController = officeController;
+            subscribedOfficeController.RunStatsChanged += OnRunStatsChanged;
+            lastRunStatsSnapshot = subscribedOfficeController.CaptureRunStats();
+            RefreshReportStats();
+        }
+
+        private void UnsubscribeFromOfficeController()
+        {
+            if (subscribedOfficeController == null)
+            {
+                return;
+            }
+
+            subscribedOfficeController.RunStatsChanged -= OnRunStatsChanged;
+            subscribedOfficeController = null;
         }
 
         private void SubscribeToQuestManager()
@@ -104,9 +167,9 @@ namespace CM3070.Office
             lastQuestSnapshot = subscribedQuestManager.CaptureSnapshot();
         }
 
-        private void SubscribeToRuntimePlayer()
+        private void SubscribeToInventory()
         {
-            OfficePlayerInventory inventory = FindFirstObjectByType<OfficePlayerInventory>();
+            QuestInventory inventory = FindFirstObjectByType<QuestInventory>();
 
             if (inventory == null || subscribedInventory == inventory)
             {
@@ -157,10 +220,16 @@ namespace CM3070.Office
             RefreshFeedback();
         }
 
-        private void OnInventoryChanged(OfficeInventorySnapshot snapshot)
+        private void OnInventoryChanged(QuestInventorySnapshot snapshot)
         {
             lastInventorySnapshot = snapshot;
             RefreshInventorySlots();
+        }
+
+        private void OnRunStatsChanged(OfficeRunStatsSnapshot snapshot)
+        {
+            lastRunStatsSnapshot = snapshot;
+            RefreshReportStats();
         }
 
         private void RefreshAll()
@@ -169,6 +238,7 @@ namespace CM3070.Office
             RefreshInventorySlots();
             RefreshExitStatus();
             RefreshFeedback();
+            RefreshReportStats();
         }
 
         private void RefreshQuestRows()
@@ -251,6 +321,139 @@ namespace CM3070.Office
             if (feedbackRoot != null)
             {
                 feedbackRoot.SetActive(!string.IsNullOrWhiteSpace(latestFeedback));
+            }
+        }
+
+        private void RefreshReportStats()
+        {
+            EnsureReportStatsText();
+
+            if (reportStatsRoot != null)
+            {
+                reportStatsRoot.SetActive(showReportStats);
+            }
+
+            if (!showReportStats || reportStats == null)
+            {
+                return;
+            }
+
+            if (!lastRunStatsSnapshot.HasValue || !lastRunStatsSnapshot.Value.HasLayout)
+            {
+                SetText(reportStats, reportStatsPending, message);
+                return;
+            }
+
+            OfficeRunStatsSnapshot stats = lastRunStatsSnapshot.Value;
+            SetText(reportStats, FormatReportStats(stats), message);
+            reportStats.fontSize = reportFontSize;
+        }
+
+        private void EnsureReportStatsText()
+        {
+            if (reportStats != null)
+            {
+                reportStatsRoot ??= reportStats.gameObject;
+                ConfigureReportRect(reportStats.rectTransform);
+                reportStats.fontSize = reportFontSize;
+                reportStats.alignment = TextAlignmentOptions.BottomRight;
+                reportStats.textWrappingMode = TextWrappingModes.Normal;
+                reportStats.raycastTarget = false;
+                return;
+            }
+
+            Transform parent = transform.Find("HUDPanel") ?? transform;
+            Transform existing = parent.Find("ReportStatsText");
+            if (existing != null && existing.TryGetComponent(out TMP_Text existingText))
+            {
+                reportStats = existingText;
+                reportStatsRoot = existing.gameObject;
+                ConfigureReportRect(reportStats.rectTransform);
+                reportStats.fontSize = reportFontSize;
+                reportStats.alignment = TextAlignmentOptions.BottomRight;
+                reportStats.textWrappingMode = TextWrappingModes.Normal;
+                reportStats.raycastTarget = false;
+            }
+        }
+
+        private void ConfigureReportRect(RectTransform rectTransform)
+        {
+            if (rectTransform == null)
+            {
+                return;
+            }
+
+            rectTransform.anchorMin = new Vector2(1f, 0f);
+            rectTransform.anchorMax = new Vector2(1f, 0f);
+            rectTransform.pivot = new Vector2(1f, 0f);
+            rectTransform.anchoredPosition = reportPanelOffset;
+            rectTransform.sizeDelta = reportPanelSize;
+        }
+
+        private static string FormatReportStats(OfficeRunStatsSnapshot stats)
+        {
+            StringBuilder builder = new();
+            builder.AppendLine("PCG report");
+            builder.AppendLine($"Seed: {stats.Seed}");
+            builder.AppendLine($"Layout: {stats.RoomCount} rooms, {stats.ReachableArea}/{stats.WalkableArea} reachable floor tiles");
+            builder.Append("Rooms: ");
+            AppendOfficeRoleCounts(builder, stats.RoomRoleCounts);
+            builder.AppendLine();
+            builder.Append("Props: ");
+            builder.Append(stats.PropCount);
+            builder.Append(" role-aware");
+            if (stats.PropRoleCounts != null && stats.PropRoleCounts.Count > 0)
+            {
+                builder.Append(" (");
+                AppendOfficeRoleCounts(builder, stats.PropRoleCounts);
+                builder.Append(')');
+            }
+
+            builder.AppendLine();
+            builder.AppendLine($"Gameplay: {stats.QuestCount} quests, {stats.QuestItemCount} items, {stats.TaskMarkerCount} markers");
+            builder.Append("NPCs: ");
+
+            if (stats.NpcRoleCounts == null || stats.NpcRoleCounts.Count == 0)
+            {
+                builder.Append("none");
+                return builder.ToString();
+            }
+
+            for (int i = 0; i < stats.NpcRoleCounts.Count; i++)
+            {
+                NpcRoleCount roleCount = stats.NpcRoleCounts[i];
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+
+                builder.Append(roleCount.Count);
+                builder.Append(' ');
+                builder.Append(roleCount.RoleName);
+            }
+
+            return builder.ToString();
+        }
+
+        private static void AppendOfficeRoleCounts(StringBuilder builder, System.Collections.Generic.IReadOnlyList<OfficeRoleCount> roleCounts)
+        {
+            if (roleCounts == null || roleCounts.Count == 0)
+            {
+                builder.Append("none");
+                return;
+            }
+
+            for (int i = 0; i < roleCounts.Count; i++)
+            {
+                OfficeRoleCount roleCount = roleCounts[i];
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+
+                builder.Append(roleCount.Count);
+                builder.Append(' ');
+                builder.Append(roleCount.RoleName);
             }
         }
 
