@@ -18,12 +18,6 @@ namespace CM3070.Dungeon1
         [SerializeField] private Transform dungeonRoot;
         [SerializeField] private float tileSize = 1f;
         [SerializeField] private float wallHeight = 1.25f;
-        [SerializeField] private bool renderSpawnMarkers = true;
-
-        [Header("Spawn Gizmos")]
-        [SerializeField] private Color enemySpawnGizmoColor = new(0.86f, 0.42f, 0.16f, 0.85f);
-        [SerializeField] private Color lootSpawnGizmoColor = new(0.94f, 0.72f, 0.20f, 0.85f);
-        [SerializeField] private float spawnGizmoRadius = 0.28f;
 
         [Header("Base Tile Prefabs")]
         [SerializeField] private GameObject floorPrefab;
@@ -97,11 +91,6 @@ namespace CM3070.Dungeon1
             return new Vector3(gridPosition.x * tileSize, 0f, gridPosition.y * tileSize);
         }
 
-        public void SetRenderSpawnMarkers(bool shouldRender)
-        {
-            renderSpawnMarkers = shouldRender;
-        }
-
         public void SetSpawnStartExitMarkers(bool shouldSpawn)
         {
             spawnStartExitMarkers = shouldSpawn;
@@ -172,26 +161,6 @@ namespace CM3070.Dungeon1
             GameObject instance = Instantiate(prefab, dungeonRoot);
             instance.name = objectName;
             instance.transform.localPosition = position;
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            if (!renderSpawnMarkers || currentLayout == null)
-            {
-                return;
-            }
-
-            DrawSpawnGizmos(currentLayout.EnemyPositions, enemySpawnGizmoColor, spawnGizmoRadius);
-            DrawSpawnGizmos(currentLayout.LootPositions, lootSpawnGizmoColor, spawnGizmoRadius * 0.75f);
-        }
-
-        private void DrawSpawnGizmos(IEnumerable<Vector2Int> positions, Color color, float radius)
-        {
-            Gizmos.color = color;
-            foreach (Vector2Int position in positions)
-            {
-                Gizmos.DrawSphere(GridToWorld(position) + Vector3.up * 0.12f, radius);
-            }
         }
 
         private static bool HasWalkableNeighbor(DungeonLayout layout, int x, int y)

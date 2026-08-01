@@ -401,7 +401,6 @@ namespace CM3070.Office
             builder.AppendLine();
             builder.Append("Props: ");
             builder.Append(stats.PropCount);
-            builder.Append(" role-aware");
             if (stats.PropRoleCounts != null && stats.PropRoleCounts.Count > 0)
             {
                 builder.Append(" (");

@@ -165,7 +165,6 @@ namespace CM3070.Dungeon1
             officePropPlacer?.SetRoomPlan(currentRoomPlan);
 
             // Spawn markers are useful in edit-mode, but hidden during gameplay.
-            visualizer.SetRenderSpawnMarkers(!runtimeObjects);
             visualizer.Render(currentLayout);
 
             entitySpawner.SpawnEntities(

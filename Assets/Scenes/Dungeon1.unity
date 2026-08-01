@@ -49616,10 +49616,6 @@ MonoBehaviour:
   dungeonRoot: {fileID: 1139938571}
   tileSize: 1
   wallHeight: 1.25
-  renderSpawnMarkers: 1
-  enemySpawnGizmoColor: {r: 0.86, g: 0.42, b: 0.16, a: 0.85}
-  lootSpawnGizmoColor: {r: 0.94, g: 0.72, b: 0.2, a: 0.85}
-  spawnGizmoRadius: 0.28
   floorPrefab: {fileID: 5118637166310552092, guid: f268407c021e047759d2f076721f3cc4, type: 3}
   wallPrefab: {fileID: 4018065843562278288, guid: c121d090a0df945d09532332328a76c2, type: 3}
   roomAccentFloorPrefab: {fileID: 8057111820982751123, guid: a4ee46bc4688b4e9caa46c44962b1f26, type: 3}

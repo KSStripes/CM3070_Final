@@ -511,6 +511,7 @@ namespace CM3070.PCG
 
             int enemyBudget = Mathf.Min(settings.maxEnemies, Mathf.RoundToInt(layout.WalkableCount() * settings.enemyDensity));
             float difficultyScore = 0f;
+            bool fillEnemyBudget = settings.enemyDensity >= 1f;
 
             // Enemy probability increases with normalized distance from the start.
             // depth is 0 near the start and approaches 1 near the farthest reachable tile.
@@ -530,7 +531,7 @@ namespace CM3070.PCG
 
                 float depth = distances[position] / (float)maxDistance;
                 float placementChance = Mathf.Lerp(0.08f, 0.52f, depth * settings.difficultyRamp);
-                if (random.NextDouble() <= placementChance)
+                if (fillEnemyBudget || random.NextDouble() <= placementChance)
                 {
                     layout.Tiles[position.x, position.y] = DungeonTile.Enemy;
                     layout.EnemyPositions.Add(position);

@@ -18,10 +18,9 @@ MonoBehaviour:
   feedbackComment: Everyone is happy about the cake. But there is no place for you
     to sit. Your workday continues.
   healthImpact: -5
-  spawnWeight: 1
   requiredItemId: 6
   questItemPrefab: {fileID: 1120874687463514, guid: fa9eb121f08f547f8a944bdd3fcc219d, type: 3}
-  itemRoomRole: 4
+  itemRoomRole: 3
   itemHeight: 0.45
   taskMarkerId: 4
   taskMarkerPrefab: {fileID: 1738513454615862, guid: 22a3ae9b2440e4c7dafe61a96e2d1338, type: 3}

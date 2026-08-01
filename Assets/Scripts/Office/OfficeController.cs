@@ -33,11 +33,9 @@ namespace CM3070.Office
         [SerializeField, Range(0f, 1f)] private float cavePocketChance = 0.34f;
         [SerializeField] private int hybridSmoothingSteps = 2;
 
-        [Header("NPC And Pickup Proportions")]
-        [SerializeField, Range(0f, 0.2f)] private float enemyDensity = 0.035f;
-        [SerializeField] private int maxEnemies = 20;
-        [SerializeField, Range(0f, 0.08f)] private float lootDensity = 0.005f;
-        [SerializeField] private int maxLoot = 14;
+        [Header("NPCs And Pickups")]
+        [SerializeField] private int npcCount = 20;
+        [SerializeField] private int pickupCount = 14;
         [SerializeField] private int spawnExclusionRadius = 4;
 
         [Header("Office Debug")]
@@ -126,8 +124,8 @@ namespace CM3070.Office
             corridorWidth = Mathf.Clamp(corridorWidth, 1, 4);
             maxSplitDepth = Mathf.Clamp(maxSplitDepth, 2, 10);
             hybridSmoothingSteps = Mathf.Max(0, hybridSmoothingSteps);
-            maxEnemies = Mathf.Max(0, maxEnemies);
-            maxLoot = Mathf.Max(0, maxLoot);
+            npcCount = Mathf.Max(0, npcCount);
+            pickupCount = Mathf.Max(0, pickupCount);
             spawnExclusionRadius = Mathf.Max(0, spawnExclusionRadius);
             layoutRetryAttempts = Mathf.Max(1, layoutRetryAttempts);
 
@@ -157,7 +155,6 @@ namespace CM3070.Office
             visualizer.SetRoomPlan(currentRoomPlan);
             officePropPlacer?.SetRoomPlan(currentRoomPlan);
 
-            visualizer.SetRenderSpawnMarkers(!runtimeObjects);
             // OfficeScene gets its exit interaction from OfficeQuestSpawner instead.
             visualizer.SetSpawnStartExitMarkers(false);
             visualizer.Render(currentLayout);
@@ -257,9 +254,9 @@ namespace CM3070.Office
             settings.wallFillChance = wallFillChance;
             settings.cavePocketChance = cavePocketChance;
             settings.hybridSmoothingSteps = hybridSmoothingSteps;
-            settings.enemyDensity = enemyDensity;
-            settings.maxEnemies = maxEnemies;
-            settings.lootCount = Mathf.Min(maxLoot, Mathf.RoundToInt(width * height * lootDensity));
+            settings.enemyDensity = 1f;
+            settings.maxEnemies = npcCount;
+            settings.lootCount = pickupCount;
             settings.spawnExclusionRadius = spawnExclusionRadius;
             return settings;
         }

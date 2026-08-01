@@ -17,10 +17,9 @@ MonoBehaviour:
   objectiveText: Find the access card before someone blames you.
   feedbackComment: You gained access. To where is not yet clear but you remain hopeful.
   healthImpact: 4
-  spawnWeight: 1
   requiredItemId: 1
   questItemPrefab: {fileID: 1938695310604038, guid: 8ddd8d2122bd44bf7bcc63e092a7a181, type: 3}
-  itemRoomRole: 1
+  itemRoomRole: 3
   itemHeight: 0.45
   taskMarkerId: 0
   taskMarkerPrefab: {fileID: 0}

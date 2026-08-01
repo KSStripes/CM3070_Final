@@ -44,6 +44,7 @@ namespace CM3070.Office
         private readonly HashSet<Vector2Int> occupiedNpcPositions = new();
         private readonly Dictionary<string, int> spawnedNpcRoleCounts = new();
         private int spawnedNpcCount;
+        private int nextPatrolType;
 
         public QuestInventory PlayerInventory { get; private set; }
         public Transform PlayerTransform => PlayerInventory != null ? PlayerInventory.transform : null;
@@ -239,6 +240,7 @@ namespace CM3070.Office
         private void ResetSpawnStats()
         {
             spawnedNpcCount = 0;
+            nextPatrolType = 0;
             spawnedNpcRoleCounts.Clear();
         }
 
@@ -458,8 +460,21 @@ namespace CM3070.Office
             if (!npc.TryGetComponent(out NpcPatrol _)) return Fail("NPC", "missing NpcPatrol.");
             if (!npc.TryGetComponent(out NpcPressure _)) return Fail("NPC", "missing NpcPressure.");
 
-            npcController.Configure(currentLayout, visualizer, gridPosition, blockedEntityPositions);
+            npcController.Configure(currentLayout, visualizer, gridPosition, blockedEntityPositions, NextPatrolType());
             return true;
+        }
+
+        private NpcPatrolType NextPatrolType()
+        {
+            NpcPatrolType patrolType = nextPatrolType switch
+            {
+                1 => NpcPatrolType.Square,
+                2 => NpcPatrolType.Wander,
+                _ => NpcPatrolType.LongLine
+            };
+
+            nextPatrolType = (nextPatrolType + 1) % 3;
+            return patrolType;
         }
 
         private static bool PickupReady(GameObject pickup)

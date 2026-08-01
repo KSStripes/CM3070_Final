@@ -16,8 +16,7 @@ namespace CM3070.Office
         [SerializeField] private GameObject[] officePrefabs;
 
         [Header("Placement")]
-        [SerializeField, Range(0f, 0.2f)] private float floorDensity = 0.015f;
-        [SerializeField] private int maxProps = 18;
+        [SerializeField] private int propCount = 18;
         [SerializeField] private int minSpacing = 3;
         [SerializeField] private int markerExclusionRadius = 3;
         [SerializeField] private int propSeedOffset = 617;
@@ -57,8 +56,8 @@ namespace CM3070.Office
                 return;
             }
 
-            int propCount = Mathf.Min(maxProps, Mathf.RoundToInt(candidates.Count * floorDensity));
-            if (propCount <= 0)
+            int targetCount = Mathf.Min(propCount, candidates.Count);
+            if (targetCount <= 0)
             {
                 return;
             }
@@ -66,10 +65,10 @@ namespace CM3070.Office
             System.Random random = new(layout.Seed ^ propSeedOffset);
             Shuffle(candidates, random);
 
-            List<Vector2Int> occupied = new(propCount);
+            List<Vector2Int> occupied = new(targetCount);
             foreach (PropCandidate candidate in candidates)
             {
-                if (occupied.Count >= propCount)
+                if (occupied.Count >= targetCount)
                 {
                     break;
                 }
@@ -250,8 +249,7 @@ namespace CM3070.Office
 
         private void OnValidate()
         {
-            floorDensity = Mathf.Max(0f, floorDensity);
-            maxProps = Mathf.Max(0, maxProps);
+            propCount = Mathf.Max(0, propCount);
             minSpacing = Mathf.Max(0, minSpacing);
             markerExclusionRadius = Mathf.Max(0, markerExclusionRadius);
         }

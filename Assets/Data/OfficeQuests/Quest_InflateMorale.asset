@@ -17,10 +17,9 @@ MonoBehaviour:
   objectiveText: Bring the balloon to the meeting area.
   feedbackComment: Morale is now higher than the budget. Your resolve is not.
   healthImpact: -3
-  spawnWeight: 1
   requiredItemId: 3
   questItemPrefab: {fileID: 1578434290008380, guid: c97c3dd51a09640d492625b6a1fe8b9e, type: 3}
-  itemRoomRole: 4
+  itemRoomRole: 3
   itemHeight: 0.45
   taskMarkerId: 4
   taskMarkerPrefab: {fileID: 1738513454615862, guid: 22a3ae9b2440e4c7dafe61a96e2d1338, type: 3}
