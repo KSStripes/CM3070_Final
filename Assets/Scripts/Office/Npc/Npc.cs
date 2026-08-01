@@ -37,9 +37,10 @@ namespace CM3070.Office
             DungeonLayout layout,
             DungeonVisualizer visualizer,
             Vector2Int start,
-            IReadOnlyCollection<Vector2Int> blockedPositions = null)
+            IReadOnlyCollection<Vector2Int> blockedPositions = null,
+            NpcPatrolType patrolType = NpcPatrolType.LongLine)
         {
-            patrol.Configure(layout, visualizer, start, blockedPositions);
+            patrol.Configure(layout, visualizer, start, blockedPositions, patrolType);
         }
 
         private void Update()
