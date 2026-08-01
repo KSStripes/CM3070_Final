@@ -3,12 +3,15 @@ using CM3070.Dungeon1;
 using CM3070.Office.Quest;
 using CM3070.PCG;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // Instantiates office-scene gameplay entities for a generated workplace layout.
 namespace CM3070.Office
 {
     public sealed class OfficeEntitySpawner : MonoBehaviour
     {
+        private const int FirstNpcSlots = 6;
+
         [System.Serializable]
         private sealed class PickupSpawnOption
         {
@@ -21,7 +24,8 @@ namespace CM3070.Office
         [SerializeField] private float playerMoveSpeed = 5.5f;
 
         [Header("NPCs")]
-        [SerializeField] private GameObject[] enemyPrefabs;
+        [FormerlySerializedAs("enemyPrefabs")]
+        [SerializeField] private GameObject[] npcPrefabs = new GameObject[FirstNpcSlots];
 
         [Header("Office Pickups")]
         [SerializeField] private PickupSpawnOption[] lootPrefabs;
@@ -34,6 +38,22 @@ namespace CM3070.Office
 
         public OfficePlayerInventory PlayerInventory { get; private set; }
         public Transform PlayerTransform => PlayerInventory != null ? PlayerInventory.transform : null;
+
+        private void OnValidate()
+        {
+            if (npcPrefabs == null)
+            {
+                npcPrefabs = new GameObject[FirstNpcSlots];
+                return;
+            }
+
+            if (npcPrefabs.Length >= FirstNpcSlots)
+            {
+                return;
+            }
+
+            System.Array.Resize(ref npcPrefabs, FirstNpcSlots);
+        }
 
         public void SpawnEntities(
             DungeonLayout layout,
@@ -251,10 +271,10 @@ namespace CM3070.Office
 
         private GameObject RandomNpcPrefab()
         {
-            if (enemyPrefabs == null || enemyPrefabs.Length == 0) return null;
+            if (npcPrefabs == null || npcPrefabs.Length == 0) return null;
 
             int validCount = 0;
-            foreach (GameObject prefab in enemyPrefabs)
+            foreach (GameObject prefab in npcPrefabs)
             {
                 if (prefab != null)
                 {
@@ -265,7 +285,7 @@ namespace CM3070.Office
             if (validCount == 0) return null;
 
             int roll = Random.Range(0, validCount);
-            foreach (GameObject prefab in enemyPrefabs)
+            foreach (GameObject prefab in npcPrefabs)
             {
                 if (prefab == null) continue;
                 if (roll == 0) return prefab;
@@ -322,12 +342,12 @@ namespace CM3070.Office
 
         private bool NpcReady(GameObject npc, Vector2Int gridPosition)
         {
-            if (!npc.TryGetComponent(out Enemy enemyController)) return Fail("NPC", "missing Enemy.");
-            if (!npc.TryGetComponent(out EnemyPatrol _)) return Fail("NPC", "missing EnemyPatrol.");
-            if (!npc.TryGetComponent(out EnemyAttack _)) return Fail("NPC", "missing EnemyAttack.");
+            // Office NPC prefabs use dedicated components so Dungeon1 enemies stay independent.
+            if (!npc.TryGetComponent(out Npc npcController)) return Fail("NPC", "missing Npc.");
+            if (!npc.TryGetComponent(out NpcPatrol _)) return Fail("NPC", "missing NpcPatrol.");
+            if (!npc.TryGetComponent(out NpcPressure _)) return Fail("NPC", "missing NpcPressure.");
 
-            // Current office NPCs reuse the existing enemy patrol/attack prototype scripts.
-            enemyController.Configure(currentLayout, visualizer, gridPosition, blockedEntityPositions);
+            npcController.Configure(currentLayout, visualizer, gridPosition, blockedEntityPositions);
             return true;
         }
 
