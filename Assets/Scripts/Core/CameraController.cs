@@ -1,8 +1,7 @@
 using CM3070.PCG;
 using UnityEngine;
 
-// Owns the Dungeon1 camera setup.
-// Keeps the player camera on screen and the overview camera mapped to the HUD texture.
+// Positions the overview/minimap camera and the isometric player camera.
 namespace CM3070.Dungeon1
 {
     public sealed class CameraController : MonoBehaviour
@@ -16,11 +15,8 @@ namespace CM3070.Dungeon1
         [SerializeField] private float playerCameraOrthographicSize = 6.5f;
         [SerializeField] private Vector3 playerCameraTargetOffset = Vector3.zero;
 
-        private Camera editorCamera;
-
         public void EnsureCameras(Transform owner)
         {
-            // Prefer assigned cameras, then named children/scene objects, then create missing cameras.
             if (overviewCamera == null)
             {
                 overviewCamera = FindNamedCamera(owner, "OverviewCamera");
@@ -30,23 +26,6 @@ namespace CM3070.Dungeon1
             {
                 playerCamera = FindNamedCamera(owner, "PlayerCamera");
             }
-
-            if (playerCamera == null)
-            {
-                // Create runtime-safe defaults if the scene was not fully wired in the Inspector.
-                GameObject cameraObject = new("PlayerCamera");
-                cameraObject.transform.SetParent(owner);
-                playerCamera = cameraObject.AddComponent<Camera>();
-            }
-
-            if (overviewCamera == null)
-            {
-                GameObject cameraObject = new("OverviewCamera");
-                cameraObject.transform.SetParent(owner);
-                overviewCamera = cameraObject.AddComponent<Camera>();
-            }
-
-            editorCamera = Camera.main;
 
             if (overviewCamera != null)
             {
@@ -60,10 +39,6 @@ namespace CM3070.Dungeon1
                     // A target texture makes this camera feed the HUD RawImage instead of the main screen.
                     overviewCamera.targetTexture = overviewRenderTexture;
                 }
-                else if (Application.isPlaying && overviewCamera.targetTexture == null)
-                {
-                    Debug.LogWarning("OverviewCamera needs a Target Texture for the HUD map.");
-                }
             }
 
             if (playerCamera != null)
@@ -73,12 +48,6 @@ namespace CM3070.Dungeon1
                 playerCamera.backgroundColor = new Color(0.10f, 0.12f, 0.13f);
                 playerCamera.targetTexture = null;
                 playerCamera.enabled = true;
-            }
-
-            if (Application.isPlaying && editorCamera != null && editorCamera != overviewCamera && editorCamera != playerCamera)
-            {
-                // Avoid rendering from the editor convenience Main Camera during Play mode.
-                editorCamera.enabled = false;
             }
         }
 
@@ -115,7 +84,6 @@ namespace CM3070.Dungeon1
 
         private static Camera FindNamedCamera(Transform owner, string cameraName)
         {
-            // First search under the controller object, then fall back to the scene.
             Transform child = owner.Find(cameraName);
             if (child != null && child.TryGetComponent(out Camera childCamera))
             {

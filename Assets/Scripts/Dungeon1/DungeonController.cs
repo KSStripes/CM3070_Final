@@ -49,12 +49,12 @@ namespace CM3070.Dungeon1
         private DungeonVisualizer visualizer;
         private CameraController cameraController;
         private EntitySpawner entitySpawner;
-        private OfficePropPlacer officePropPlacer;
+        private PropPlacer officePropPlacer;
         private DungeonLayout currentLayout;
-        private OfficeRoomPlan currentOfficeRoomPlan;
+        private RoomPlan currentRoomPlan;
         private int activeSeed;
 
-        public OfficeRoomPlan CurrentOfficeRoomPlan => currentOfficeRoomPlan;
+        public RoomPlan CurrentRoomPlan => currentRoomPlan;
 
         [ContextMenu("Generate Hybrid Preview")]
         public void GenerateHybridPreview()
@@ -83,7 +83,7 @@ namespace CM3070.Dungeon1
             visualizer = GetComponent<DungeonVisualizer>();
             cameraController = GetComponent<CameraController>();
             entitySpawner = GetComponent<EntitySpawner>();
-            officePropPlacer = GetComponent<OfficePropPlacer>();
+            officePropPlacer = GetComponent<PropPlacer>();
 
             if (!Application.isPlaying && generatePreviewInEditMode)
             {
@@ -145,7 +145,7 @@ namespace CM3070.Dungeon1
                 visualizer = GetComponent<DungeonVisualizer>();
                 cameraController = GetComponent<CameraController>();
                 entitySpawner = GetComponent<EntitySpawner>();
-                officePropPlacer = GetComponent<OfficePropPlacer>();
+                officePropPlacer = GetComponent<PropPlacer>();
                 GenerateDungeon(false, true);
             }
         }
@@ -155,14 +155,14 @@ namespace CM3070.Dungeon1
             visualizer ??= GetComponent<DungeonVisualizer>();
             cameraController ??= GetComponent<CameraController>();
             entitySpawner ??= GetComponent<EntitySpawner>();
-            officePropPlacer ??= GetComponent<OfficePropPlacer>();
+            officePropPlacer ??= GetComponent<PropPlacer>();
 
             cameraController.EnsureCameras(transform);
 
             DungeonGenerationSettings settings = BuildSettings();
             GenerateValidOfficeLayout(settings, runtimeObjects);
-            visualizer.SetOfficeRoomPlan(currentOfficeRoomPlan);
-            officePropPlacer?.SetRoomPlan(currentOfficeRoomPlan);
+            visualizer.SetRoomPlan(currentRoomPlan);
+            officePropPlacer?.SetRoomPlan(currentRoomPlan);
 
             // Spawn markers are useful in edit-mode, but hidden during gameplay.
             visualizer.SetRenderSpawnMarkers(!runtimeObjects);
@@ -221,10 +221,10 @@ namespace CM3070.Dungeon1
 
                 DungeonGenerator generator = new(settings);
                 DungeonLayout candidateLayout = generator.Generate(candidateSeed, DungeonGenerationMethod.HybridBspCellular);
-                OfficeRoomPlan candidatePlan = OfficeLayoutPlanner.CreatePlan(candidateLayout);
+                RoomPlan candidatePlan = LayoutPlanner.CreatePlan(candidateLayout);
 
                 currentLayout = candidateLayout;
-                currentOfficeRoomPlan = candidatePlan;
+                currentRoomPlan = candidatePlan;
 
                 if (IsValidOfficeLayout(candidateLayout, candidatePlan))
                 {
@@ -236,7 +236,7 @@ namespace CM3070.Dungeon1
             Debug.LogWarning($"Generated office layout did not meet validation after {layoutRetryAttempts} attempts; using the last candidate.");
         }
 
-        private static bool IsValidOfficeLayout(DungeonLayout layout, OfficeRoomPlan plan)
+        private static bool IsValidOfficeLayout(DungeonLayout layout, RoomPlan plan)
         {
             return layout != null
                 && plan != null

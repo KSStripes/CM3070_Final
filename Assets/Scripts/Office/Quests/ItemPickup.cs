@@ -33,7 +33,7 @@ namespace CM3070.Office.Quest
 
         private void OnTriggerEnter(Collider other)
         {
-            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
+            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
             if (inventory == null || itemId == QuestItemId.None) return;
 
             inventory.AddQuestItem(itemId, amount);

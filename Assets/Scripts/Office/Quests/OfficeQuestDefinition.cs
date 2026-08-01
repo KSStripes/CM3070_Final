@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace CM3070.Office.Quest
 {
+    // Types of office tasks the quest system can spawn.
     public enum OfficeQuestType
     {
         DeliverItem,
@@ -10,6 +11,7 @@ namespace CM3070.Office.Quest
         CollectItemOnly
     }
 
+    // ScriptableObject data for one possible office quest.
     [CreateAssetMenu(fileName = "Quest_OfficeTask", menuName = "CM3070/Office/Quest Definition")]
     public sealed class OfficeQuestDefinition : ScriptableObject
     {
@@ -21,18 +23,17 @@ namespace CM3070.Office.Quest
         [TextArea]
         [SerializeField] private string feedbackComment = "Task complete.";
         [SerializeField] private int healthImpact;
-        [SerializeField, Min(0)] private int spawnWeight = 1;
 
         [Header("Quest Item")]
         [SerializeField] private QuestItemId requiredItemId = QuestItemId.None;
         [SerializeField] private GameObject questItemPrefab;
-        [SerializeField] private OfficeRoomRole itemRoomRole = OfficeRoomRole.Office;
+        [SerializeField] private RoomRole itemRoomRole = RoomRole.Office;
         [SerializeField] private float itemHeight = 0.36f;
 
         [Header("Task Marker")]
         [SerializeField] private OfficeTaskMarkerId taskMarkerId = OfficeTaskMarkerId.None;
         [SerializeField] private GameObject taskMarkerPrefab;
-        [SerializeField] private OfficeRoomRole markerRoomRole = OfficeRoomRole.Office;
+        [SerializeField] private RoomRole markerRoomRole = RoomRole.Office;
         [SerializeField] private float markerHeight = 0.08f;
 
         public string QuestName => questName;
@@ -40,24 +41,20 @@ namespace CM3070.Office.Quest
         public string ObjectiveText => objectiveText;
         public string FeedbackComment => feedbackComment;
         public int HealthImpact => healthImpact;
-        public int SpawnWeight => spawnWeight;
         public QuestItemId RequiredItemId => requiredItemId;
         public GameObject QuestItemPrefab => questItemPrefab;
-        public OfficeRoomRole ItemRoomRole => itemRoomRole;
+        public RoomRole ItemRoomRole => itemRoomRole;
         public float ItemHeight => itemHeight;
         public OfficeTaskMarkerId TaskMarkerId => taskMarkerId;
         public GameObject TaskMarkerPrefab => taskMarkerPrefab;
-        public OfficeRoomRole MarkerRoomRole => markerRoomRole;
+        public RoomRole MarkerRoomRole => markerRoomRole;
         public float MarkerHeight => markerHeight;
         public bool HasQuestItem => requiredItemId != QuestItemId.None && questItemPrefab != null;
         public bool HasTaskMarker => taskMarkerId != OfficeTaskMarkerId.None && taskMarkerPrefab != null;
-        public bool IsRequiredQuest => questType == OfficeQuestType.DeliverItem && requiredItemId != QuestItemId.None && taskMarkerId != OfficeTaskMarkerId.None;
 
         public bool IsSpawnable()
         {
             // Each quest type needs different spawn data.
-            if (spawnWeight <= 0) return false;
-
             return questType switch
             {
                 OfficeQuestType.DeliverItem => HasQuestItem && HasTaskMarker,

@@ -112,15 +112,10 @@ namespace CM3070.Office.Quest
             TryCompleteCollectQuest(itemId);
         }
 
-        public void NotifyPickupCollected(PickupId pickupId, string displayName)
-        {
-            // Coping pickups are tracked by OfficePlayerInventory for now.
-        }
-
         public void NotifyMarkerReached(
             OfficeTaskMarkerId markerId,
             string displayName,
-            OfficePlayerInventory inventory)
+            QuestInventory inventory)
         {
             if (inventory == null || ShiftComplete) return;
 
@@ -133,7 +128,7 @@ namespace CM3070.Office.Quest
             TryCompleteMarkerQuest(markerId, inventory);
         }
 
-        public bool CanUseMarker(OfficeTaskMarkerId markerId, OfficePlayerInventory inventory)
+        public bool CanUseMarker(OfficeTaskMarkerId markerId, QuestInventory inventory)
         {
             if (ShiftComplete) return false;
 
@@ -178,7 +173,7 @@ namespace CM3070.Office.Quest
 
         private void TryCompleteMarkerQuest(
             OfficeTaskMarkerId markerId,
-            OfficePlayerInventory inventory)
+            QuestInventory inventory)
         {
             if (!TryFindCompletableMarkerQuest(markerId, inventory, out OfficeQuestDefinition quest))
             {
@@ -243,7 +238,7 @@ namespace CM3070.Office.Quest
 
         private bool TryFindCompletableMarkerQuest(
             OfficeTaskMarkerId markerId,
-            OfficePlayerInventory inventory,
+            QuestInventory inventory,
             out OfficeQuestDefinition completableQuest)
         {
             completableQuest = null;

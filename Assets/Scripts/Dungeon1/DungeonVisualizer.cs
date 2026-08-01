@@ -8,7 +8,7 @@ namespace CM3070.Dungeon1
     [System.Serializable]
     public sealed class TilePrefabSet
     {
-        public OfficeRoomRole role = OfficeRoomRole.None;
+        public RoomRole role = RoomRole.None;
         public GameObject[] floorPrefabs;
         public GameObject[] wallPrefabs;
     }
@@ -41,10 +41,10 @@ namespace CM3070.Dungeon1
         [SerializeField] private GameObject exitMarkerPrefab;
 
         private DungeonLayout currentLayout;
-        private OfficeRoomPlan officeRoomPlan;
-        private OfficePropPlacer propPlacer;
+        private RoomPlan officeRoomPlan;
+        private PropPlacer propPlacer;
 
-        public void SetOfficeRoomPlan(OfficeRoomPlan plan)
+        public void SetRoomPlan(RoomPlan plan)
         {
             officeRoomPlan = plan;
         }
@@ -52,7 +52,7 @@ namespace CM3070.Dungeon1
         public void Render(DungeonLayout layout)
         {
             currentLayout = layout;
-            propPlacer ??= GetComponent<OfficePropPlacer>();
+            propPlacer ??= GetComponent<PropPlacer>();
             EnsureRoot();
             Clear();
 
@@ -141,7 +141,7 @@ namespace CM3070.Dungeon1
             dungeonRoot = root.transform;
         }
 
-        private void CreateFloor(int x, int y, OfficeRoomRole role)
+        private void CreateFloor(int x, int y, RoomRole role)
         {
             GameObject prefab = FloorPrefabFor(role, x, y);
 
@@ -150,7 +150,7 @@ namespace CM3070.Dungeon1
 
         private void CreateWall(DungeonLayout layout, int x, int y)
         {
-            OfficeRoomRole role = GetNearestWalkableRoomRole(layout, x, y);
+            RoomRole role = GetNearestWalkableRoomRole(layout, x, y);
             GameObject prefab = WallPrefabFor(role, x, y);
 
             CreateTile(prefab, $"Wall ({x}, {y})", new Vector3(x * tileSize, wallHeight * 0.5f, y * tileSize));
@@ -202,17 +202,17 @@ namespace CM3070.Dungeon1
                 || layout.IsWalkable(new Vector2Int(x, y - 1));
         }
 
-        private OfficeRoomRole GetRoomRoleAt(int x, int y)
+        private RoomRole GetRoomRoleAt(int x, int y)
         {
-            if (officeRoomPlan != null && officeRoomPlan.TryGetRoleAt(new Vector2Int(x, y), out OfficeRoomRole role))
+            if (officeRoomPlan != null && officeRoomPlan.TryGetRoleAt(new Vector2Int(x, y), out RoomRole role))
             {
                 return role;
             }
 
-            return OfficeRoomRole.None;
+            return RoomRole.None;
         }
 
-        private OfficeRoomRole GetNearestWalkableRoomRole(DungeonLayout layout, int x, int y)
+        private RoomRole GetNearestWalkableRoomRole(DungeonLayout layout, int x, int y)
         {
             Vector2Int[] neighbors =
             {
@@ -229,19 +229,19 @@ namespace CM3070.Dungeon1
                     continue;
                 }
 
-                OfficeRoomRole role = GetRoomRoleAt(neighbor.x, neighbor.y);
-                if (role != OfficeRoomRole.None)
+                RoomRole role = GetRoomRoleAt(neighbor.x, neighbor.y);
+                if (role != RoomRole.None)
                 {
                     return role;
                 }
             }
 
-            return OfficeRoomRole.None;
+            return RoomRole.None;
         }
 
-        private GameObject FloorPrefabFor(OfficeRoomRole role, int x, int y)
+        private GameObject FloorPrefabFor(RoomRole role, int x, int y)
         {
-            if (role == OfficeRoomRole.None)
+            if (role == RoomRole.None)
             {
                 return PickFrom(corridorFloorPrefabs, x, y, floorPrefab);
             }
@@ -256,9 +256,9 @@ namespace CM3070.Dungeon1
             return roomAccentFloorPrefab != null ? roomAccentFloorPrefab : floorPrefab;
         }
 
-        private GameObject WallPrefabFor(OfficeRoomRole role, int x, int y)
+        private GameObject WallPrefabFor(RoomRole role, int x, int y)
         {
-            if (role == OfficeRoomRole.None)
+            if (role == RoomRole.None)
             {
                 return PickFrom(corridorWallPrefabs, x, y, wallPrefab);
             }
@@ -272,7 +272,7 @@ namespace CM3070.Dungeon1
             return wallPrefab;
         }
 
-        private TilePrefabSet FindTileSet(OfficeRoomRole role)
+        private TilePrefabSet FindTileSet(RoomRole role)
         {
             if (roomTileSets == null)
             {

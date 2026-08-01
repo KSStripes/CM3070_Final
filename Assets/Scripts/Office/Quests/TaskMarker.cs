@@ -23,7 +23,7 @@ namespace CM3070.Office.Quest
         [SerializeField] private Material completedMaterial;
 
         private bool playerInside;
-        private OfficePlayerInventory currentInventory;
+        private QuestInventory currentInventory;
         private TaskMarkerVisualState visualState = TaskMarkerVisualState.Available;
         private QuestManager subscribedQuestManager;
 
@@ -63,7 +63,7 @@ namespace CM3070.Office.Quest
 
         private void OnTriggerEnter(Collider other)
         {
-            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
+            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
             if (inventory == null) return;
 
             playerInside = true;
@@ -78,7 +78,7 @@ namespace CM3070.Office.Quest
 
         private void OnTriggerExit(Collider other)
         {
-            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
+            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
             if (inventory == null || inventory != currentInventory) return;
 
             playerInside = false;
@@ -95,7 +95,7 @@ namespace CM3070.Office.Quest
             }
         }
 
-        private void NotifyQuestManager(OfficePlayerInventory inventory)
+        private void NotifyQuestManager(QuestInventory inventory)
         {
             if (markerId == OfficeTaskMarkerId.None) return;
 
@@ -141,7 +141,7 @@ namespace CM3070.Office.Quest
             subscribedQuestManager = null;
         }
 
-        private void RefreshVisualState(OfficePlayerInventory inventory)
+        private void RefreshVisualState(QuestInventory inventory)
         {
             QuestManager questManager = QuestManager.Instance;
             if (questManager == null)

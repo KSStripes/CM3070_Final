@@ -1,8 +1,7 @@
 using UnityEngine;
 using CM3070.Office;
 
-// Central gameplay notification point.
-// Currently logs events for testing; later this can forward the same events to HUD/UI systems.
+// Owns the shared game state, day progression, and scene-level UI updates.
 namespace CM3070.Dungeon1
 {
     public enum GameState
@@ -39,7 +38,7 @@ namespace CM3070.Dungeon1
         public static GameManager Instance { get; private set; }
         public GameState CurrentState { get; private set; } = GameState.StartScreen;
         public int CurrentDay { get; private set; } = 1;
-        // Defaults to female so starting without clicking a choice still gives a valid avatar.
+        // Safe default if the player starts without choosing an avatar.
         public PlayerAvatarChoice SelectedPlayerAvatar { get; private set; } = PlayerAvatarChoice.Female;
         public string CurrentDayName => DayNameFor(CurrentDay);
         public bool IsFinalDay => CurrentDay >= TotalDays;
@@ -47,7 +46,7 @@ namespace CM3070.Dungeon1
 
         private void Awake()
         {
-            // Singleton pattern: keep one scene-level GameManager available through Instance.
+            // One scene-level manager is accessed by spawned gameplay objects.
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
@@ -74,7 +73,6 @@ namespace CM3070.Dungeon1
 
         public void SetPlayerAvatarChoice(PlayerAvatarChoice avatarChoice)
         {
-            // Called by GameUI before the procedural office run spawns the player.
             SelectedPlayerAvatar = avatarChoice;
         }
 
@@ -99,7 +97,7 @@ namespace CM3070.Dungeon1
 
         public void NotifyCoinsChanged(int coinCount)
         {
-            // Legacy dungeon pickup notification. Office economy/readouts live in OfficeHUD.
+            // Legacy Dungeon1 hook; Office readouts live in OfficeHUD.
         }
 
         public void NotifyArmourCollected(string armourName, string armourType, int maxHealth)
@@ -162,8 +160,8 @@ namespace CM3070.Dungeon1
             return workdayNames[index];
         }
 
+        // OfficeScene uses OfficeController; Dungeon1 keeps its original controller.
         private void StartNewControllerRun()
-        // If the scene is office start the office dungeon controller, otherwise start the normal dungeon controller.
         {
             if (officeController != null)
             {

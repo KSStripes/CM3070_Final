@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CM3070.Office.Quest
 {
-    // Prototype IDs for optional coping pickups, separate from required quest items.
+    // Optional coping pickups, separate from required quest items.
     public enum PickupId
     {
         None,
@@ -20,7 +20,6 @@ namespace CM3070.Office.Quest
     public sealed class Pickup : MonoBehaviour
     {
         [SerializeField] private PickupId pickupId = PickupId.None;
-        [SerializeField] private string displayName = "Pickup";
         [SerializeField, Min(0)] private int healthRestore = 0;
         [SerializeField, Min(0)] private int maxHealthIncrease = 0;
         [SerializeField] private bool destroyOnPickup = true;
@@ -39,7 +38,7 @@ namespace CM3070.Office.Quest
 
         private void Update()
         {
-            // Temporary readability cue until final pickup art/animation exists.
+            // Simple visibility cue for small pickup prefabs.
             transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
         }
 
@@ -47,12 +46,12 @@ namespace CM3070.Office.Quest
         {
             if (pickupId == PickupId.None) return;
 
-            // OfficePlayerInventory marks the player without depending on tags or layers.
-            OfficePlayerInventory inventory = other.GetComponentInParent<OfficePlayerInventory>();
+            // QuestInventory identifies the player without depending on tags or layers.
+            QuestInventory inventory = other.GetComponentInParent<QuestInventory>();
             if (inventory == null) return;
 
             HealthSystem health = other.GetComponentInParent<HealthSystem>();
-            if (!inventory.AddPickup(pickupId, displayName, healthRestore, health))
+            if (healthRestore > 0 && (health == null || !health.Heal(healthRestore)))
             {
                 return;
             }
@@ -62,8 +61,6 @@ namespace CM3070.Office.Quest
             {
                 health.IncreaseMaxHealth(maxHealthIncrease);
             }
-
-            QuestManager.Instance?.NotifyPickupCollected(pickupId, displayName);
 
             if (destroyOnPickup)
             {

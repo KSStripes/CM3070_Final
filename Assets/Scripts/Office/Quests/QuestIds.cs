@@ -1,8 +1,6 @@
-// Stores stable IDs for quest items.
-
 namespace CM3070.Office.Quest
 {
-    // Explicit values assigned because quest scripts refer to the IDs.
+    // Stable IDs used by quest assets and spawned pickups/markers.
     public enum QuestItemId
     {
         None = 0,
@@ -28,5 +26,23 @@ namespace CM3070.Office.Quest
         SignWetFloor = 20,
         TimeSheet = 21,
         TrainingPacket = 22
+    }
+
+    public enum OfficeTaskMarkerId
+    {
+        None = 0,
+        ClockInTerminal = 1,
+        Printer = 2,
+        DeliveryPoint = 3,
+        MeetingArea = 4,
+        BossDesk = 5,
+        ExitMarker = 6,
+        PingPongTable = 7,
+        BeanBags = 8,
+        Janitor = 9,
+        Servers = 10,
+        OfficeTable = 11,
+        Reception = 12,
+        FishTank = 13
     }
 }
