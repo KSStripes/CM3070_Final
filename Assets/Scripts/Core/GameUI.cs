@@ -32,15 +32,15 @@ namespace CM3070.Dungeon1
         [SerializeField] private TMP_Text selectedAvatarText;
 
         [Header("Display Text")]
-        [SerializeField] private string titleLabel = "EndOfShift";
-        [SerializeField] private string dayLabel = "Day";
-        [SerializeField] private string dayCompleteLabel = "Shift Done";
-        [SerializeField] private string gameWonLabel = "Probation Period Finished";
+        [SerializeField] private string titleLabel = "End of Shift";
+        [SerializeField] private string dayLabel = "Shift";
+        [SerializeField] private string dayCompleteLabel = "Shift Complete";
+        [SerializeField] private string gameWonLabel = "Probation Complete";
         [TextArea]
-        [SerializeField] private string gameWonMessage = "Congratulations!\nYou're now hired.";
+        [SerializeField] private string gameWonMessage = "You made it through Saturday.\nThe office will be back on Monday.";
         [TextArea]
         [SerializeField] private string creditsMessage = "Credits\nDesign, code, and burnout:\nKristin Schumann #210569373\nA University of London CM3070 Final Project";
-        [SerializeField] private string gameOverLabel = "Game Over";
+        [SerializeField] private string gameOverLabel = "Resolve Depleted\nTake a breath and start a new shift.";
 
         private GameState currentState;
 
@@ -105,7 +105,7 @@ namespace CM3070.Dungeon1
             {
                 levelCompleteText.text = state == GameState.GameWon
                     ? gameWonMessage
-                    : $"{dayCompleteLabel}\n{dayName} complete";
+                    : $"{dayCompleteLabel}\n{dayName} survived";
             }
 
             if (gameWonText != null)
@@ -203,7 +203,7 @@ namespace CM3070.Dungeon1
         {
             if (selectedAvatarText != null)
             {
-                selectedAvatarText.text = $"Player: {avatarChoice}";
+                selectedAvatarText.text = $"Avatar: {avatarChoice}";
             }
         }
     }

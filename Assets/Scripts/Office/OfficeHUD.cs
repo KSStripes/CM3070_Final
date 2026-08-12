@@ -6,11 +6,12 @@ using UnityEngine;
 namespace CM3070.Office
 {
     // Player-facing office HUD for the workday loop.
-    // GameUI owns shift/day text, health, panels, and minimap; OfficeHUD owns objectives,
+    // GameUI owns shift/day text, Resolve, panels, and minimap; OfficeHUD owns objectives,
     // carried quest items, exit availability, and the temporary cynical feedback line.
     public sealed class OfficeHUD : MonoBehaviour
     {
         private const int SlotCount = 3;
+        private const int ObjectiveMaxCharacters = 86;
 
         [Header("Quest Rows")]
         [SerializeField] private TMP_Text[] quests = new TMP_Text[SlotCount];
@@ -30,13 +31,13 @@ namespace CM3070.Office
         [SerializeField, Range(12f, 16f)] private float reportFontSize = 12f;
         [SerializeField] private Vector2 reportPanelSize = new(360f, 190f);
         [SerializeField] private Vector2 reportPanelOffset = new(-16f, 16f);
-        [SerializeField] private string reportStatsPending = "Report stats pending";
+        [SerializeField] private string reportStatsPending = "PCG report pending";
 
         [Header("Display Text")]
-        [SerializeField] private string emptyQuest = "[ ] Waiting for the day to decide what it wants.";
-        [SerializeField] private string emptySlot = "Empty";
-        [SerializeField] private string exitLocked = "Exit locked";
-        [SerializeField] private string exitReady = "Exit ready";
+        [SerializeField] private string emptyQuest = "[ ] Tasks loading";
+        [SerializeField] private string emptySlot = "No item";
+        [SerializeField] private string exitLocked = "Exit locked: finish tasks";
+        [SerializeField] private string exitReady = "Exit ready: leave shift";
         [SerializeField] private string shiftComplete = "Shift complete";
         [SerializeField, Min(0f)] private float feedbackSeconds = 6f;
 
@@ -61,11 +62,13 @@ namespace CM3070.Office
         private void Awake()
         {
             EnsureReportStatsText();
+            ConfigureHudText();
         }
 
         private void OnEnable()
         {
             EnsureReportStatsText();
+            ConfigureHudText();
             SubscribeToSceneObjects();
             SubscribeToInventory();
             RefreshAll();
@@ -257,7 +260,7 @@ namespace CM3070.Office
                 QuestProgressSnapshot questSnapshot = lastQuestSnapshot.Value.Quests[i];
                 string marker = questSnapshot.IsCompleted ? "[x]" : "[ ]";
                 string objective = questSnapshot.Quest != null
-                    ? questSnapshot.Quest.ObjectiveText
+                    ? Truncate(questSnapshot.Quest.ObjectiveText, ObjectiveMaxCharacters)
                     : emptyQuest;
 
                 SetText(
@@ -282,7 +285,7 @@ namespace CM3070.Office
 
                 QuestItemStack stack = lastInventorySnapshot.Value.QuestItems[i];
                 string amount = stack.Amount > 1 ? $" x{stack.Amount}" : string.Empty;
-                SetText(slot, $"{stack.ItemId}{amount}", filled);
+                SetText(slot, $"{DisplayItemName(stack.ItemId)}{amount}", filled);
             }
         }
 
@@ -390,6 +393,39 @@ namespace CM3070.Office
             rectTransform.sizeDelta = reportPanelSize;
         }
 
+        private void ConfigureHudText()
+        {
+            ConfigureTextArray(quests, TextOverflowModes.Ellipsis);
+            ConfigureTextArray(items, TextOverflowModes.Ellipsis);
+            ConfigureText(exit, TextOverflowModes.Ellipsis);
+            ConfigureText(feedback, TextOverflowModes.Ellipsis);
+        }
+
+        private static void ConfigureTextArray(TMP_Text[] textFields, TextOverflowModes overflowMode)
+        {
+            if (textFields == null)
+            {
+                return;
+            }
+
+            foreach (TMP_Text textField in textFields)
+            {
+                ConfigureText(textField, overflowMode);
+            }
+        }
+
+        private static void ConfigureText(TMP_Text textField, TextOverflowModes overflowMode)
+        {
+            if (textField == null)
+            {
+                return;
+            }
+
+            textField.textWrappingMode = TextWrappingModes.Normal;
+            textField.overflowMode = overflowMode;
+            textField.raycastTarget = false;
+        }
+
         private static string FormatReportStats(OfficeRunStatsSnapshot stats)
         {
             StringBuilder builder = new();
@@ -461,6 +497,42 @@ namespace CM3070.Office
             return textFields != null && index >= 0 && index < textFields.Length
                 ? textFields[index]
                 : null;
+        }
+
+        private static string DisplayItemName(QuestItemId itemId)
+        {
+            return itemId switch
+            {
+                QuestItemId.AccessCard => "Access Card",
+                QuestItemId.ArchiveBox => "Archive Box",
+                QuestItemId.BrokenBadge => "Broken Badge",
+                QuestItemId.DocumentStack => "Document Stack",
+                QuestItemId.FashionMagazine => "Fashion Magazine",
+                QuestItemId.FruitPlate => "Fruit Plate",
+                QuestItemId.GolfClub => "Golf Club",
+                QuestItemId.MysteryPresent => "Mystery Present",
+                QuestItemId.OfficeFish => "Office Fish",
+                QuestItemId.PartyHat => "Party Hat",
+                QuestItemId.PingPongRacket => "Ping-Pong Racket",
+                QuestItemId.PrinterPaper => "Printer Paper",
+                QuestItemId.ReportPage => "Report Page",
+                QuestItemId.ServerCard => "Server Card",
+                QuestItemId.SignWetFloor => "Wet Floor Sign",
+                QuestItemId.TimeSheet => "Timesheet",
+                QuestItemId.TrainingPacket => "Training Packet",
+                QuestItemId.None => "No item",
+                _ => itemId.ToString()
+            };
+        }
+
+        private static string Truncate(string value, int maxCharacters)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length <= maxCharacters)
+            {
+                return value;
+            }
+
+            return value[..Mathf.Max(0, maxCharacters - 3)] + "...";
         }
 
         private static void SetText(TMP_Text textField, string value, Color color)
