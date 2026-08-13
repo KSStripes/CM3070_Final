@@ -103,6 +103,23 @@ MonoBehaviour:
   interval: 1
   pulseScale: 1.18
   pulseSeconds: 0.12
+  pressureLines:
+  - Just following up on this.
+  - Did you read the procedure?
+  - We have standards for a reason.
+  - Please update the tracker.
+  - That is not the approved process.
+  - I noticed a small inconsistency.
+  - Can you document that decision?
+  - This needs to be more robust.
+  - I need this in writing.
+  - Who signed off on that?
+  - Please use the correct template.
+  - That belongs in the shared folder.
+  - We discussed this last week.
+  - Consistency matters.
+  - I am adding one small comment.
+  - Please align with policy.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0

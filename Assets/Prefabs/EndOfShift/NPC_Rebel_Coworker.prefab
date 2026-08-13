@@ -103,6 +103,23 @@ MonoBehaviour:
   interval: 1
   pulseScale: 1.18
   pulseSeconds: 0.12
+  pressureLines:
+  - You look busy. Perfect timing.
+  - Guess who broke the printer?
+  - This place is deeply normal.
+  - Emergency snack meeting?
+  - I renamed the file. Good luck.
+  - The copier is making feelings again.
+  - Want to see something mildly cursed?
+  - I have a shortcut. It is worse.
+  - I clicked the big red button.
+  - Your chair made a noise.
+  - The fridge has politics now.
+  - I made coffee. It lost.
+  - Do you smell burnt toner?
+  - I invented casual panic.
+  - The meeting has escaped.
+  - I put fun in the file name.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0

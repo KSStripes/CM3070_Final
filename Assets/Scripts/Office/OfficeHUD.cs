@@ -379,7 +379,7 @@ namespace CM3070.Office
             }
         }
 
-        private void ShowFeedback(string text)
+        public void ShowFeedback(string text)
         {
             latestFeedback = text;
             feedbackTimer = feedbackSeconds;

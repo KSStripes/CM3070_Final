@@ -103,6 +103,23 @@ MonoBehaviour:
   interval: 1
   pulseScale: 1.18
   pulseSeconds: 0.12
+  pressureLines:
+  - Quick question...
+  - Are you doing okay? You look busy.
+  - Someone is waiting for you.
+  - I am so sorry, but...
+  - Could you help for just a second?
+  - Tiny favour, promise.
+  - I know you are busy, but this is urgent.
+  - The phone is for you again.
+  - They said it would be quick.
+  - I hate to bother you.
+  - Could you just sign here?
+  - There is someone at reception.
+  - I made you a note. Somewhere.
+  - Sorry, another tiny thing.
+  - Everyone keeps asking for you.
+  - I brought this directly to you.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0

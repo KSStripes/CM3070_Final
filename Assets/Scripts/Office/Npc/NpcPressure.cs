@@ -11,10 +11,12 @@ namespace CM3070.Office
         [SerializeField] private float interval = 1f;
         [SerializeField] private float pulseScale = 1.18f;
         [SerializeField] private float pulseSeconds = 0.12f;
+        [SerializeField] private string[] pressureLines;
 
         private Vector3 baseScale;
         private float timer;
         private float pulseTimer;
+        private OfficeHUD hud;
 
         private void Awake()
         {
@@ -51,6 +53,7 @@ namespace CM3070.Office
             }
 
             playerHealth.TakeDamage(damage);
+            ShowPressureLine();
             timer = interval;
             pulseTimer = pulseSeconds;
         }
@@ -75,6 +78,17 @@ namespace CM3070.Office
             {
                 transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
             }
+        }
+
+        private void ShowPressureLine()
+        {
+            if (pressureLines == null || pressureLines.Length == 0)
+            {
+                return;
+            }
+
+            hud ??= FindFirstObjectByType<OfficeHUD>();
+            hud?.ShowFeedback(pressureLines[Random.Range(0, pressureLines.Length)]);
         }
     }
 }

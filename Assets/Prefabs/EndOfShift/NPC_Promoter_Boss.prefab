@@ -103,6 +103,23 @@ MonoBehaviour:
   interval: 1
   pulseScale: 1.18
   pulseSeconds: 0.12
+  pressureLines:
+  - Can I get that by end of day?
+  - Let's circle back, immediately.
+  - I need you to own this.
+  - Quick sync. No, now.
+  - This should only take five minutes.
+  - Are we blocked or are we making excuses?
+  - I love the energy. Increase it.
+  - Put something on my desk before you leave.
+  - Just give me the headlines.
+  - We need more urgency here.
+  - I am sensing hesitation.
+  - Let's make this your top priority.
+  - I need a solution, not context.
+  - Can you stay flexible?
+  - This is a visibility opportunity.
+  - Great, so you volunteer.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0

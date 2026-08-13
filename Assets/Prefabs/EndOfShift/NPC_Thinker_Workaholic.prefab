@@ -103,6 +103,23 @@ MonoBehaviour:
   interval: 1
   pulseScale: 1.18
   pulseSeconds: 0.12
+  pressureLines:
+  - I already finished mine.
+  - The spreadsheet explains everything.
+  - Did you check the numbers?
+  - This could be more efficient.
+  - I made a quick model for that.
+  - Actually, there are three issues.
+  - Your estimate seems optimistic.
+  - I sent notes. Lots of notes.
+  - I colour-coded the dependencies.
+  - The variance is concerning.
+  - I would validate that assumption.
+  - There is a cleaner way to do this.
+  - I stayed late to fix the pivot table.
+  - Have you considered edge cases?
+  - The data says otherwise.
+  - I made a second spreadsheet.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0
