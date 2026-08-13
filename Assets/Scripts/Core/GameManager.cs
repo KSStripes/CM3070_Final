@@ -14,7 +14,7 @@ namespace CM3070.Dungeon1
     }
 
     // Start-menu choice used by the office player prefab to show the matching visual child.
-    public enum PlayerAvatarChoice
+    public enum PlayerChoice
     {
         Female,
         Male
@@ -39,7 +39,7 @@ namespace CM3070.Dungeon1
         public GameState CurrentState { get; private set; } = GameState.StartScreen;
         public int CurrentDay { get; private set; } = 1;
         // Safe default if the player starts without choosing an avatar.
-        public PlayerAvatarChoice SelectedPlayerAvatar { get; private set; } = PlayerAvatarChoice.Female;
+        public PlayerChoice SelectedPlayerChoice { get; private set; } = PlayerChoice.Female;
         public string CurrentDayName => DayNameFor(CurrentDay);
         public bool IsFinalDay => CurrentDay >= TotalDays;
         public int TotalDays => Mathf.Max(1, workdayNames != null ? workdayNames.Length : 0);
@@ -71,9 +71,9 @@ namespace CM3070.Dungeon1
             StartNewControllerRun();
         }
 
-        public void SetPlayerAvatarChoice(PlayerAvatarChoice avatarChoice)
+        public void SetPlayerChoice(PlayerChoice choice)
         {
-            SelectedPlayerAvatar = avatarChoice;
+            SelectedPlayerChoice = choice;
         }
 
         public void NextDay()

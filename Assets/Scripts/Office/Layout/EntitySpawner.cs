@@ -444,10 +444,10 @@ namespace CM3070.Office
             // The player root keeps gameplay scripts; this only swaps the child avatar visuals.
             if (player.TryGetComponent(out PlayerAvatarPresenter avatarPresenter))
             {
-                PlayerAvatarChoice avatarChoice = GameManager.Instance != null
-                    ? GameManager.Instance.SelectedPlayerAvatar
-                    : PlayerAvatarChoice.Female;
-                avatarPresenter.Apply(avatarChoice);
+                PlayerChoice choice = GameManager.Instance != null
+                    ? GameManager.Instance.SelectedPlayerChoice
+                    : PlayerChoice.Female;
+                avatarPresenter.Apply(choice);
             }
 
             return true;

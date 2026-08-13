@@ -9,10 +9,10 @@ namespace CM3070.Office
         [SerializeField] private GameObject femaleAvatarRoot;
         [SerializeField] private GameObject maleAvatarRoot;
 
-        public void Apply(PlayerAvatarChoice choice)
+        public void Apply(PlayerChoice choice)
         {
             // Both avatar prefabs can stay under Player; only the selected one is visible.
-            bool useFemale = choice == PlayerAvatarChoice.Female;
+            bool useFemale = choice == PlayerChoice.Female;
 
             if (femaleAvatarRoot != null)
             {

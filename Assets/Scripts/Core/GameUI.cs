@@ -27,9 +27,9 @@ namespace CM3070.Dungeon1
         [SerializeField] private Slider healthBar;
 
         [Header("Player Avatar Choice")]
-        [SerializeField] private Button femaleAvatarButton;
-        [SerializeField] private Button maleAvatarButton;
-        [SerializeField] private TMP_Text selectedAvatarText;
+        [SerializeField] private Button FButton;
+        [SerializeField] private Button MButton;
+        [SerializeField] private TMP_Text playAsText;
 
         [Header("Display Text")]
         [SerializeField] private string titleLabel = "End of Shift";
@@ -37,7 +37,7 @@ namespace CM3070.Dungeon1
         [SerializeField] private string dayCompleteLabel = "Shift Complete";
         [SerializeField] private string gameWonLabel = "Probation Complete";
         [TextArea]
-        [SerializeField] private string gameWonMessage = "You made it through Saturday.\nThe office will be back on Monday.";
+        [SerializeField] private string gameWonMessage = "Congratulations!\nYou made it through the week.\nThis completes your probation!";
         [TextArea]
         [SerializeField] private string creditsMessage = "Credits\nDesign, code, and burnout:\nKristin Schumann #210569373\nA University of London CM3070 Final Project";
         [SerializeField] private string gameOverLabel = "Resolve Depleted\nTake a breath and start a new shift.";
@@ -66,14 +66,14 @@ namespace CM3070.Dungeon1
                 gameWonButton.onClick.AddListener(OnNewGameButtonPressed);
             }
 
-            if (femaleAvatarButton != null)
+            if (FButton != null)
             {
-                femaleAvatarButton.onClick.AddListener(OnFemaleAvatarButtonPressed);
+                FButton.onClick.AddListener(OnFemaleAvatarButtonPressed);
             }
 
-            if (maleAvatarButton != null)
+            if (MButton != null)
             {
-                maleAvatarButton.onClick.AddListener(OnMaleAvatarButtonPressed);
+                MButton.onClick.AddListener(OnMaleAvatarButtonPressed);
             }
         }
 
@@ -140,8 +140,8 @@ namespace CM3070.Dungeon1
             }
 
             RefreshAvatarChoiceLabel(GameManager.Instance != null
-                ? GameManager.Instance.SelectedPlayerAvatar
-                : PlayerAvatarChoice.Female);
+                ? GameManager.Instance.SelectedPlayerChoice
+                : PlayerChoice.Female);
 
             SetDay(day, dayName, totalDays);
         }
@@ -153,14 +153,14 @@ namespace CM3070.Dungeon1
 
         public void OnFemaleAvatarButtonPressed()
         {
-            GameManager.Instance?.SetPlayerAvatarChoice(PlayerAvatarChoice.Female);
-            RefreshAvatarChoiceLabel(PlayerAvatarChoice.Female);
+            GameManager.Instance?.SetPlayerChoice(PlayerChoice.Female);
+            RefreshAvatarChoiceLabel(PlayerChoice.Female);
         }
 
         public void OnMaleAvatarButtonPressed()
         {
-            GameManager.Instance?.SetPlayerAvatarChoice(PlayerAvatarChoice.Male);
-            RefreshAvatarChoiceLabel(PlayerAvatarChoice.Male);
+            GameManager.Instance?.SetPlayerChoice(PlayerChoice.Male);
+            RefreshAvatarChoiceLabel(PlayerChoice.Male);
         }
 
         public void OnNextDayButtonPressed()
@@ -199,11 +199,11 @@ namespace CM3070.Dungeon1
             }
         }
 
-        private void RefreshAvatarChoiceLabel(PlayerAvatarChoice avatarChoice)
+        private void RefreshAvatarChoiceLabel(PlayerChoice choice)
         {
-            if (selectedAvatarText != null)
+            if (playAsText != null)
             {
-                selectedAvatarText.text = $"Avatar: {avatarChoice}";
+                playAsText.text = $"Play as: {choice}";
             }
         }
     }
