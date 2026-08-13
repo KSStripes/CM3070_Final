@@ -9,28 +9,31 @@ namespace CM3070.Office
     public enum NpcPatrolType
     {
         LongLine,
-        Square,
         Wander
     }
 
     public sealed class NpcPatrol : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 1.7f;
-        [SerializeField] private float waitSeconds = 0.45f;
+        [SerializeField] private Vector2 waitSeconds = new(0.8f, 2.2f);
         [SerializeField] private NpcPatrolType patrolType = NpcPatrolType.LongLine;
-        [SerializeField] private int tileDistance = 3;
-        [SerializeField] private int wanderPoints = 4;
+        [SerializeField] private int tileDistance = 5;
+        [SerializeField] private int wanderPoints = 6;
+        [SerializeField, Range(0f, 180f)] private float idleTurnDegrees = 70f;
 
         private readonly List<Vector3> points = new();
         private int targetIndex;
         private float waitTimer;
+        private float speedMultiplier = 1f;
+        private Quaternion idleRotation;
 
         private void OnValidate()
         {
             moveSpeed = Mathf.Max(0f, moveSpeed);
-            waitSeconds = Mathf.Max(0f, waitSeconds);
+            waitSeconds.x = Mathf.Max(0f, waitSeconds.x);
+            waitSeconds.y = Mathf.Max(waitSeconds.x, waitSeconds.y);
             tileDistance = Mathf.Max(1, tileDistance);
-            wanderPoints = Mathf.Clamp(wanderPoints, 2, 8);
+            wanderPoints = Mathf.Clamp(wanderPoints, 2, 10);
         }
 
         private void Awake()
@@ -51,7 +54,9 @@ namespace CM3070.Office
             patrolType = type;
             points.Clear();
             targetIndex = 0;
+            speedMultiplier = SpeedMultiplier(start, type);
 
+            // Routes are built from PCG grid tiles so NPCs can avoid props and reserved spaces.
             foreach (Vector2Int point in BuildGridPoints(layout, start, blockedPositions))
             {
                 points.Add(visualizer.GridToWorld(point) + Vector3.up * 0.82f);
@@ -76,11 +81,15 @@ namespace CM3070.Office
             if (waitTimer > 0f)
             {
                 waitTimer -= Time.deltaTime;
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation,
+                    idleRotation,
+                    idleTurnDegrees * Time.deltaTime);
                 return;
             }
 
             Vector3 target = points[targetIndex];
-            transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * speedMultiplier * Time.deltaTime);
 
             Vector3 direction = target - transform.position;
             direction.y = 0f;
@@ -92,8 +101,17 @@ namespace CM3070.Office
             if (Vector3.Distance(transform.position, target) <= 0.05f)
             {
                 targetIndex = (targetIndex + 1) % points.Count;
-                waitTimer = waitSeconds;
+                StartWait();
             }
+        }
+
+        private void StartWait()
+        {
+            // Small deterministic pauses make patrols feel less mechanical without random runtime state.
+            float seed = Mathf.Abs(transform.position.x * 0.37f + transform.position.z * 0.61f + targetIndex);
+            waitTimer = Mathf.Lerp(waitSeconds.x, waitSeconds.y, Mathf.Repeat(seed, 1f));
+            float turn = Mathf.Lerp(-idleTurnDegrees, idleTurnDegrees, Mathf.Repeat(seed * 1.7f, 1f));
+            idleRotation = Quaternion.Euler(0f, transform.eulerAngles.y + turn, 0f);
         }
 
         private List<Vector2Int> BuildGridPoints(
@@ -103,7 +121,6 @@ namespace CM3070.Office
         {
             return patrolType switch
             {
-                NpcPatrolType.Square => BuildSquare(layout, start, blockedPositions),
                 NpcPatrolType.Wander => BuildWander(layout, start, blockedPositions),
                 _ => BuildLine(layout, start, blockedPositions, tileDistance * 2)
             };
@@ -121,32 +138,16 @@ namespace CM3070.Office
                 : new List<Vector2Int> { start, end };
         }
 
-        private List<Vector2Int> BuildSquare(
-            DungeonLayout layout,
-            Vector2Int start,
-            IReadOnlyCollection<Vector2Int> blockedPositions)
+        private static float SpeedMultiplier(Vector2Int start, NpcPatrolType type)
         {
-            Vector2Int[] directions = OrderedDirections(start);
-            int distance = Mathf.Max(1, tileDistance);
-
-            for (int i = 0; i < directions.Length; i++)
+            float routeSpeed = type switch
             {
-                Vector2Int firstDirection = directions[i];
-                Vector2Int secondDirection = directions[(i + 1) % directions.Length];
-                Vector2Int cornerA = start + firstDirection * distance;
-                Vector2Int cornerB = cornerA + secondDirection * distance;
-                Vector2Int cornerC = start + secondDirection * distance;
+                NpcPatrolType.Wander => 0.82f,
+                _ => 1f
+            };
 
-                if (CanUsePath(layout, start, cornerA, firstDirection, blockedPositions)
-                    && CanUsePath(layout, cornerA, cornerB, secondDirection, blockedPositions)
-                    && CanUsePath(layout, cornerB, cornerC, -firstDirection, blockedPositions)
-                    && CanUsePath(layout, cornerC, start, -secondDirection, blockedPositions))
-                {
-                    return new List<Vector2Int> { start, cornerA, cornerB, cornerC };
-                }
-            }
-
-            return BuildLine(layout, start, blockedPositions, distance);
+            float variation = 0.9f + 0.2f * Mathf.Repeat((start.x * 13 + start.y * 7) * 0.17f, 1f);
+            return routeSpeed * variation;
         }
 
         private List<Vector2Int> BuildWander(
@@ -154,6 +155,7 @@ namespace CM3070.Office
             Vector2Int start,
             IReadOnlyCollection<Vector2Int> blockedPositions)
         {
+            // Wander picks several straight reachable ends around the start tile, then returns through the start.
             List<Vector2Int> result = new() { start };
 
             foreach (Vector2Int direction in OrderedDirections(start))
@@ -232,26 +234,6 @@ namespace CM3070.Office
             }
 
             return directions;
-        }
-
-        private static bool CanUsePath(
-            DungeonLayout layout,
-            Vector2Int from,
-            Vector2Int to,
-            Vector2Int direction,
-            IReadOnlyCollection<Vector2Int> blockedPositions)
-        {
-            Vector2Int current = from;
-            while (current != to)
-            {
-                current += direction;
-                if (!CanStandAt(layout, current, blockedPositions))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private static bool CanStandAt(

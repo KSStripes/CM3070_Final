@@ -8,6 +8,9 @@ namespace CM3070.Office
     // Places decorative props in rooms based on their office role.
     public sealed class PropPlacer : MonoBehaviour
     {
+        // One extra tile keeps NPC routes clear of larger furniture meshes.
+        private const int PropBlockRadius = 1;
+
         [Header("Prop Prefabs")]
         [SerializeField] private GameObject[] propPrefabs;
         [SerializeField] private GameObject[] receptionPrefabs;
@@ -27,6 +30,7 @@ namespace CM3070.Office
         private readonly HashSet<Vector2Int> occupiedPositions = new();
         private readonly Dictionary<RoomRole, int> placedPropRoleCounts = new();
         private RoomPlan roomPlan;
+        private int placedPropCount;
 
         public IReadOnlyCollection<Vector2Int> OccupiedPositions => occupiedPositions;
         public PropSpawnStatsSnapshot LastSpawnStats => CaptureSpawnStats();
@@ -40,6 +44,7 @@ namespace CM3070.Office
         {
             occupiedPositions.Clear();
             placedPropRoleCounts.Clear();
+            placedPropCount = 0;
 
             if (layout == null || parent == null || !HasAnyPrefab())
             {
@@ -99,8 +104,9 @@ namespace CM3070.Office
                 }
 
                 occupied.Add(candidate.Position);
-                occupiedPositions.Add(candidate.Position);
+                AddBlockedArea(layout, candidate.Position);
                 AddRoleCount(candidate.Role);
+                placedPropCount++;
             }
         }
 
@@ -119,7 +125,7 @@ namespace CM3070.Office
                 .Select(pair => new OfficeRoleCount(DisplayName(pair.Key), pair.Value))
                 .ToList();
 
-            return new PropSpawnStatsSnapshot(occupiedPositions.Count, roleCounts);
+            return new PropSpawnStatsSnapshot(placedPropCount, roleCounts);
         }
 
         private List<PropCandidate> BuildCandidates(DungeonLayout layout, RoomPlan plan)
@@ -252,6 +258,22 @@ namespace CM3070.Office
             propCount = Mathf.Max(0, propCount);
             minSpacing = Mathf.Max(0, minSpacing);
             markerExclusionRadius = Mathf.Max(0, markerExclusionRadius);
+        }
+
+        private void AddBlockedArea(DungeonLayout layout, Vector2Int center)
+        {
+            // Expose a wider footprint to spawning and patrol code while keeping physics simple.
+            for (int x = center.x - PropBlockRadius; x <= center.x + PropBlockRadius; x++)
+            {
+                for (int y = center.y - PropBlockRadius; y <= center.y + PropBlockRadius; y++)
+                {
+                    Vector2Int position = new(x, y);
+                    if (layout.IsWalkable(position))
+                    {
+                        occupiedPositions.Add(position);
+                    }
+                }
+            }
         }
 
         private bool HasAnyPrefab()

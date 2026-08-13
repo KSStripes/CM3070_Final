@@ -81,9 +81,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa41bff49e42406e95b4d0a96446a6a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.NpcPatrol
-  moveSpeed: 1.7
-  waitSeconds: 0.45
-  tileDistance: 3
+  moveSpeed: 1.85
+  waitSeconds: {x: 0.8, y: 2.2}
+  tileDistance: 5
+  wanderPoints: 6
+  idleTurnDegrees: 70
 --- !u!114 &6980604914562765477
 MonoBehaviour:
   m_ObjectHideFlags: 0

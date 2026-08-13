@@ -460,20 +460,24 @@ namespace CM3070.Office
             if (!npc.TryGetComponent(out NpcPatrol _)) return Fail("NPC", "missing NpcPatrol.");
             if (!npc.TryGetComponent(out NpcPressure _)) return Fail("NPC", "missing NpcPressure.");
 
-            npcController.Configure(currentLayout, visualizer, gridPosition, blockedEntityPositions, NextPatrolType());
+            // Later NPCs avoid earlier NPC start tiles, reducing obvious route overlap.
+            HashSet<Vector2Int> routeBlocks = new(blockedEntityPositions);
+            foreach (Vector2Int position in occupiedNpcPositions)
+            {
+                routeBlocks.Add(position);
+            }
+
+            npcController.Configure(currentLayout, visualizer, gridPosition, routeBlocks, NextPatrolType());
             return true;
         }
 
         private NpcPatrolType NextPatrolType()
         {
-            NpcPatrolType patrolType = nextPatrolType switch
-            {
-                1 => NpcPatrolType.Square,
-                2 => NpcPatrolType.Wander,
-                _ => NpcPatrolType.LongLine
-            };
+            NpcPatrolType patrolType = nextPatrolType == 0
+                ? NpcPatrolType.LongLine
+                : NpcPatrolType.Wander;
 
-            nextPatrolType = (nextPatrolType + 1) % 3;
+            nextPatrolType = (nextPatrolType + 1) % 2;
             return patrolType;
         }
 
