@@ -1,3 +1,4 @@
+using CM3070.Dungeon1;
 using CM3070.Office.Quest;
 using System.Text;
 using TMPro;
@@ -12,6 +13,8 @@ namespace CM3070.Office
     {
         private const int SlotCount = 3;
         private const int ObjectiveMaxCharacters = 86;
+        private const float LowResolveRatio = 0.3f;
+        private const float CriticalResolveRatio = 0.15f;
 
         [Header("Quest Rows")]
         [SerializeField] private TMP_Text[] quests = new TMP_Text[SlotCount];
@@ -39,6 +42,8 @@ namespace CM3070.Office
         [SerializeField] private string exitLocked = "Exit locked: finish tasks";
         [SerializeField] private string exitReady = "Exit ready: leave shift";
         [SerializeField] private string shiftComplete = "Shift complete";
+        [SerializeField] private string lowResolveFeedback = "Resolve low: movement is getting heavier.";
+        [SerializeField] private string criticalResolveFeedback = "Resolve critical: find something that restores Resolve.";
         [SerializeField, Min(0f)] private float feedbackSeconds = 6f;
 
         [Header("Colours")]
@@ -58,6 +63,7 @@ namespace CM3070.Office
         private OfficeRunStatsSnapshot? lastRunStatsSnapshot;
         private string latestFeedback = string.Empty;
         private float feedbackTimer;
+        private int resolveWarningLevel;
 
         private void Awake()
         {
@@ -71,6 +77,7 @@ namespace CM3070.Office
             ConfigureHudText();
             SubscribeToSceneObjects();
             SubscribeToInventory();
+            SubscribeToGameManager();
             RefreshAll();
         }
 
@@ -78,6 +85,7 @@ namespace CM3070.Office
         {
             SubscribeToSceneObjects();
             SubscribeToInventory();
+            SubscribeToGameManager();
             RefreshAll();
         }
 
@@ -105,6 +113,7 @@ namespace CM3070.Office
             UnsubscribeFromOfficeController();
             UnsubscribeFromQuestManager();
             UnsubscribeFromInventory();
+            UnsubscribeFromGameManager();
         }
 
         private void OnValidate()
@@ -209,6 +218,23 @@ namespace CM3070.Office
             subscribedInventory = null;
         }
 
+        private void SubscribeToGameManager()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.HealthChanged -= OnHealthChanged;
+                GameManager.Instance.HealthChanged += OnHealthChanged;
+            }
+        }
+
+        private void UnsubscribeFromGameManager()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.HealthChanged -= OnHealthChanged;
+            }
+        }
+
         private void OnQuestStateChanged(QuestStateSnapshot snapshot)
         {
             lastQuestSnapshot = snapshot;
@@ -218,9 +244,27 @@ namespace CM3070.Office
 
         private void OnFeedbackPublished(string feedback)
         {
-            latestFeedback = feedback;
-            feedbackTimer = feedbackSeconds;
-            RefreshFeedback();
+            ShowFeedback(feedback);
+        }
+
+        private void OnHealthChanged(int currentHealth, int maxHealth)
+        {
+            if (maxHealth <= 0)
+            {
+                return;
+            }
+
+            float ratio = currentHealth / (float)maxHealth;
+            int warningLevel = ratio <= CriticalResolveRatio ? 2 : ratio <= LowResolveRatio ? 1 : 0;
+            if (warningLevel == resolveWarningLevel)
+            {
+                return;
+            }
+
+            resolveWarningLevel = warningLevel;
+            // Warn only when crossing down into the same bands that slow movement.
+            if (warningLevel == 2) ShowFeedback(criticalResolveFeedback);
+            else if (warningLevel == 1) ShowFeedback(lowResolveFeedback);
         }
 
         private void OnInventoryChanged(QuestInventorySnapshot snapshot)
@@ -325,6 +369,13 @@ namespace CM3070.Office
             {
                 feedbackRoot.SetActive(!string.IsNullOrWhiteSpace(latestFeedback));
             }
+        }
+
+        private void ShowFeedback(string text)
+        {
+            latestFeedback = text;
+            feedbackTimer = feedbackSeconds;
+            RefreshFeedback();
         }
 
         private void RefreshReportStats()

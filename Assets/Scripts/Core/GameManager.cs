@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using CM3070.Office;
 
@@ -36,6 +37,8 @@ namespace CM3070.Dungeon1
         };
 
         public static GameManager Instance { get; private set; }
+        public event Action<int, int> HealthChanged;
+
         public GameState CurrentState { get; private set; } = GameState.StartScreen;
         public int CurrentDay { get; private set; } = 1;
         // Safe default if the player starts without choosing an avatar.
@@ -111,6 +114,7 @@ namespace CM3070.Dungeon1
         public void NotifyHealthChanged(int currentHealth, int maxHealth)
         {
             gameUI?.SetHealth(currentHealth, maxHealth);
+            HealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
         public void NotifyPlayerDied()
