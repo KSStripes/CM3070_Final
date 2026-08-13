@@ -27,12 +27,12 @@ namespace CM3070.Office
         [SerializeField] private bool randomizeRotation = true;
         [SerializeField] private bool disablePropColliders = true;
 
-        private readonly HashSet<Vector2Int> occupiedPositions = new();
-        private readonly Dictionary<RoomRole, int> placedPropRoleCounts = new();
+        private readonly HashSet<Vector2Int> blocked = new();
+        private readonly Dictionary<RoomRole, int> roleCounts = new();
         private RoomPlan roomPlan;
-        private int placedPropCount;
+        private int placedCount;
 
-        public IReadOnlyCollection<Vector2Int> OccupiedPositions => occupiedPositions;
+        public IReadOnlyCollection<Vector2Int> OccupiedPositions => blocked;
         public PropSpawnStatsSnapshot LastSpawnStats => CaptureSpawnStats();
 
         public void SetRoomPlan(RoomPlan plan)
@@ -42,9 +42,9 @@ namespace CM3070.Office
 
         public void PlaceProps(DungeonLayout layout, Transform parent, float tileSize)
         {
-            occupiedPositions.Clear();
-            placedPropRoleCounts.Clear();
-            placedPropCount = 0;
+            blocked.Clear();
+            roleCounts.Clear();
+            placedCount = 0;
 
             if (layout == null || parent == null || !HasAnyPrefab())
             {
@@ -106,26 +106,26 @@ namespace CM3070.Office
                 occupied.Add(candidate.Position);
                 AddBlockedArea(layout, candidate.Position);
                 AddRoleCount(candidate.Role);
-                placedPropCount++;
+                placedCount++;
             }
         }
 
         private void AddRoleCount(RoomRole role)
         {
-            if (!placedPropRoleCounts.TryAdd(role, 1))
+            if (!roleCounts.TryAdd(role, 1))
             {
-                placedPropRoleCounts[role]++;
+                roleCounts[role]++;
             }
         }
 
         private PropSpawnStatsSnapshot CaptureSpawnStats()
         {
-            List<OfficeRoleCount> roleCounts = placedPropRoleCounts
+            List<OfficeRoleCount> counts = roleCounts
                 .OrderBy(pair => RoleSortIndex(pair.Key))
                 .Select(pair => new OfficeRoleCount(DisplayName(pair.Key), pair.Value))
                 .ToList();
 
-            return new PropSpawnStatsSnapshot(placedPropCount, roleCounts);
+            return new PropSpawnStatsSnapshot(placedCount, counts);
         }
 
         private List<PropCandidate> BuildCandidates(DungeonLayout layout, RoomPlan plan)
@@ -270,7 +270,7 @@ namespace CM3070.Office
                     Vector2Int position = new(x, y);
                     if (layout.IsWalkable(position))
                     {
-                        occupiedPositions.Add(position);
+                        blocked.Add(position);
                     }
                 }
             }
