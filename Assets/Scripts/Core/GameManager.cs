@@ -160,11 +160,14 @@ namespace CM3070.Dungeon1
             CurrentState = state;
             Time.timeScale = CurrentState == GameState.Playing ? 1f : 0f;
             gameUI?.ShowState(CurrentState, CurrentDay, CurrentDayName, TotalDays);
-            PlayStateSound(state);
+            PlayStateSound(state, CurrentDay);
         }
 
-        private static void PlayStateSound(GameState state)
+        private static void PlayStateSound(GameState state, int day)
         {
+            if (state == GameState.Playing) AudioManager.Instance?.PlayGameplayMusic(day);
+            else AudioManager.Instance?.PlayMenuMusic();
+
             if (state == GameState.DayComplete) AudioManager.Instance?.PlayDayComplete();
             else if (state == GameState.GameOver) AudioManager.Instance?.PlayGameOver();
             else if (state == GameState.GameWon) AudioManager.Instance?.PlayGameWon();
