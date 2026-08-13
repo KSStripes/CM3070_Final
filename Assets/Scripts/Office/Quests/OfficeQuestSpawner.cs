@@ -22,7 +22,8 @@ namespace CM3070.Office
         [SerializeField] private int minSpacing = 3;
         [SerializeField] private int markerExclusionRadius = 2;
 
-        private readonly HashSet<Vector2Int> occupiedPositions = new();
+        private readonly HashSet<Vector2Int> blocked = new();
+        private readonly HashSet<Vector2Int> placed = new();
         private Transform questRoot;
         private int spawnedQuestCount;
         private int spawnedQuestItemCount;
@@ -46,7 +47,8 @@ namespace CM3070.Office
 
             EnsureQuestRoot(parent);
             ClearQuestObjects();
-            occupiedPositions.Clear();
+            blocked.Clear();
+            placed.Clear();
             ResetSpawnStats();
             AddBlockedPositions(blockedPositions);
 
@@ -90,7 +92,7 @@ namespace CM3070.Office
 
             foreach (Vector2Int blockedPosition in blockedPositions)
             {
-                occupiedPositions.Add(blockedPosition);
+                blocked.Add(blockedPosition);
             }
         }
 
@@ -197,7 +199,7 @@ namespace CM3070.Office
                 if (CanPlaceAt(layout, candidate))
                 {
                     position = candidate;
-                    occupiedPositions.Add(candidate);
+                    placed.Add(candidate);
                     return true;
                 }
             }
@@ -207,7 +209,7 @@ namespace CM3070.Office
                 if (CanPlaceExitAt(layout, candidate))
                 {
                     position = candidate;
-                    occupiedPositions.Add(candidate);
+                placed.Add(candidate);
                     return true;
                 }
             }
@@ -215,7 +217,7 @@ namespace CM3070.Office
             if (CanPlaceExitAt(layout, layout.Exit))
             {
                 position = layout.Exit;
-                occupiedPositions.Add(position);
+                placed.Add(position);
                 return true;
             }
 
@@ -238,7 +240,7 @@ namespace CM3070.Office
                 if (CanPlaceAt(layout, candidate))
                 {
                     position = candidate;
-                    occupiedPositions.Add(candidate);
+                    placed.Add(candidate);
                     return true;
                 }
             }
@@ -297,15 +299,16 @@ namespace CM3070.Office
                 || layout.IsMarker(position)
                 || position == layout.Start
                 || position == layout.Exit
-                || occupiedPositions.Contains(position))
+                || blocked.Contains(position)
+                || placed.Contains(position))
             {
                 return false;
             }
 
             int minDistanceSquared = minSpacing * minSpacing;
-            foreach (Vector2Int occupiedPosition in occupiedPositions)
+            foreach (Vector2Int placedPosition in placed)
             {
-                if ((position - occupiedPosition).sqrMagnitude < minDistanceSquared)
+                if ((position - placedPosition).sqrMagnitude < minDistanceSquared)
                 {
                     return false;
                 }
@@ -319,7 +322,8 @@ namespace CM3070.Office
             return layout.IsWalkable(position)
                 && position != layout.Start
                 && (position == layout.Exit || !layout.IsMarker(position))
-                && !occupiedPositions.Contains(position);
+                && !blocked.Contains(position)
+                && !placed.Contains(position);
         }
 
         private void SpawnPrefab(
