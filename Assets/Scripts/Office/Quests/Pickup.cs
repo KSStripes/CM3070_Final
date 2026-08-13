@@ -62,6 +62,8 @@ namespace CM3070.Office.Quest
                 health.IncreaseMaxHealth(maxHealthIncrease);
             }
 
+            AudioManager.Instance?.PlayItemPickup();
+
             if (destroyOnPickup)
             {
                 Destroy(gameObject);

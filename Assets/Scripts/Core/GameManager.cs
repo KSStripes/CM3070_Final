@@ -47,6 +47,8 @@ namespace CM3070.Dungeon1
         public bool IsFinalDay => CurrentDay >= TotalDays;
         public int TotalDays => Mathf.Max(1, workdayNames != null ? workdayNames.Length : 0);
 
+        private int lastHealth = -1;
+
         private void Awake()
         {
             // One scene-level manager is accessed by spawned gameplay objects.
@@ -115,6 +117,13 @@ namespace CM3070.Dungeon1
         {
             gameUI?.SetHealth(currentHealth, maxHealth);
             HealthChanged?.Invoke(currentHealth, maxHealth);
+
+            if (CurrentState == GameState.Playing && lastHealth >= 0 && currentHealth < lastHealth)
+            {
+                AudioManager.Instance?.PlayResolveDamage();
+            }
+
+            lastHealth = currentHealth;
         }
 
         public void NotifyPlayerDied()
@@ -151,6 +160,14 @@ namespace CM3070.Dungeon1
             CurrentState = state;
             Time.timeScale = CurrentState == GameState.Playing ? 1f : 0f;
             gameUI?.ShowState(CurrentState, CurrentDay, CurrentDayName, TotalDays);
+            PlayStateSound(state);
+        }
+
+        private static void PlayStateSound(GameState state)
+        {
+            if (state == GameState.DayComplete) AudioManager.Instance?.PlayDayComplete();
+            else if (state == GameState.GameOver) AudioManager.Instance?.PlayGameOver();
+            else if (state == GameState.GameWon) AudioManager.Instance?.PlayGameWon();
         }
 
         private string DayNameFor(int day)

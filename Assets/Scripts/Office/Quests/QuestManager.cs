@@ -45,6 +45,7 @@ namespace CM3070.Office.Quest
         private readonly List<OfficeQuestDefinition> activeQuests = new();
         private readonly HashSet<OfficeQuestDefinition> completedQuests = new();
         private readonly HashSet<OfficeTaskMarkerId> completedQuestMarkers = new();
+        private bool exitUnlockedSoundPlayed;
 
         public static QuestManager Instance { get; private set; }
 
@@ -71,6 +72,7 @@ namespace CM3070.Office.Quest
             activeQuests.Clear();
             completedQuests.Clear();
             completedQuestMarkers.Clear();
+            exitUnlockedSoundPlayed = false;
             ShiftComplete = false;
 
             if (quests != null)
@@ -89,6 +91,7 @@ namespace CM3070.Office.Quest
             ShiftComplete = false;
             completedQuests.Clear();
             completedQuestMarkers.Clear();
+            exitUnlockedSoundPlayed = false;
             NotifyQuestStateChanged();
         }
 
@@ -109,6 +112,7 @@ namespace CM3070.Office.Quest
 
         public void NotifyItemCollected(QuestItemId itemId, string displayName, int amount)
         {
+            AudioManager.Instance?.PlayItemPickup();
             TryCompleteCollectQuest(itemId);
         }
 
@@ -197,6 +201,7 @@ namespace CM3070.Office.Quest
 
             ApplyHealthImpact(quest, inventory.GetComponent<HealthSystem>());
             PublishFeedback(quest);
+            AudioManager.Instance?.PlayTaskComplete();
             NotifyQuestStateChanged();
         }
 
@@ -215,6 +220,7 @@ namespace CM3070.Office.Quest
                     changed = true;
                     ApplyHealthImpact(quest);
                     PublishFeedback(quest);
+                    AudioManager.Instance?.PlayTaskComplete();
                 }
             }
 
@@ -338,7 +344,14 @@ namespace CM3070.Office.Quest
 
         private void NotifyQuestStateChanged()
         {
-            QuestStateChanged?.Invoke(CaptureSnapshot());
+            QuestStateSnapshot snapshot = CaptureSnapshot();
+            QuestStateChanged?.Invoke(snapshot);
+
+            if (!exitUnlockedSoundPlayed && snapshot.RequiredTasksComplete && !snapshot.ShiftComplete)
+            {
+                exitUnlockedSoundPlayed = true;
+                AudioManager.Instance?.PlayExitUnlocked();
+            }
         }
 
         private void AddQuestByMarker(OfficeQuestDefinition quest)

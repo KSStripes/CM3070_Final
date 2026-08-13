@@ -263,8 +263,16 @@ namespace CM3070.Office
 
             resolveWarningLevel = warningLevel;
             // Warn only when crossing down into the same bands that slow movement.
-            if (warningLevel == 2) ShowFeedback(criticalResolveFeedback);
-            else if (warningLevel == 1) ShowFeedback(lowResolveFeedback);
+            if (warningLevel == 2)
+            {
+                AudioManager.Instance?.PlayResolveWarning();
+                ShowFeedback(criticalResolveFeedback);
+            }
+            else if (warningLevel == 1)
+            {
+                AudioManager.Instance?.PlayResolveWarning();
+                ShowFeedback(lowResolveFeedback);
+            }
         }
 
         private void OnInventoryChanged(QuestInventorySnapshot snapshot)

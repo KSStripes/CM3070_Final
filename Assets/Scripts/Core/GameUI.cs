@@ -148,17 +148,20 @@ namespace CM3070.Dungeon1
 
         public void OnStartButtonPressed()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.StartGame();
         }
 
         public void OnFemaleAvatarButtonPressed()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.SetPlayerChoice(PlayerChoice.Female);
             RefreshAvatarChoiceLabel(PlayerChoice.Female);
         }
 
         public void OnMaleAvatarButtonPressed()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.SetPlayerChoice(PlayerChoice.Male);
             RefreshAvatarChoiceLabel(PlayerChoice.Male);
         }
@@ -167,6 +170,7 @@ namespace CM3070.Dungeon1
         {
             if (currentState != GameState.DayComplete) return;
 
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.NextDay();
         }
 
@@ -174,6 +178,7 @@ namespace CM3070.Dungeon1
         {
             if (currentState != GameState.GameOver && currentState != GameState.GameWon) return;
 
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.NewGame();
         }
 
