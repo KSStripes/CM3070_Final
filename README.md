@@ -41,48 +41,13 @@ Controls:
 - Office-themed UI/HUD with task list, inventory, Resolve bar, feedback, and PCG report stats.
 - UI/gameplay sound effects and day-specific low-stress background music.
 
-## Project Structure
-
-- `Assets/Scripts/PCG`  
-  Shared procedural generation algorithms and layout data.
-
-- `Assets/Scripts/Core`  
-  Shared game flow, player, camera, UI, health/Resolve, and audio systems.
-
-- `Assets/Scripts/Office`  
-  Office-specific generation wrapper, HUD, layout planning, prop placement, NPCs, quests, and report stats.
-
-- `Assets/Scripts/Dungeon1`  
-  Earlier dungeon gameplay reference scene.
-
-- `Assets/Scripts/ProtoRuntime`  
-  Lightweight PCG inspection scene runtime.
-
-- `Assets/Prefabs/EndOfShift`  
-  Runtime prefabs for the office prototype.
-
-- `Assets/Data/OfficeQuests`  
-  ScriptableObject quest definitions and quest database.
-
-- `Assets/ThirdParty`  
-  Curated runtime third-party assets required by the Unity project.
-
 ## Design Scope
 
-The final game intentionally uses simple NPC patrol and proximity pressure rather than NavMesh pathfinding, raycast chasing, or full dialogue AI. This keeps the implementation appropriate for a third-year prototype and keeps the report focus on procedural generation and integrated gameplay systems.
+The project uses a hybrid PCG approach: BSP algorithms create readable office-room structure, cellular automata add more organic variation, and flood-fill validation ensures each generated layout remains reachable and playable. Office-specific systems then layer room roles, props, quests, pickups, NPCs, and exit placement onto the generated layout so each run changes while still supporting the same workday gameplay loop. 
+The final game intentionally uses simple NPC patrol and proximity pressure rather than NavMesh pathfinding, raycast chasing, or full dialogue AI. This keeps the implementation focussed on procedural generation. With more time an actual NPC chasing behaviour or dialogue system could have been implemented. Similarly the quests are kept simple for this prototype, but could be extended with more time.
 
-## Report Evidence
-
-The in-game report panel shows useful PCG metrics during play, including seed, room counts, reachable/walkable floor tiles, room role distribution, prop counts, quest counts, quest item/marker counts, and NPC role distribution.
-
-Recommended evidence screenshots:
-
-- `ProtoScene` showing PCG algorithm comparison.
-- `OfficeScene` showing generated layouts and report stats.
-- Quest/objective flow during a workday.
-- NPC pressure and Resolve feedback.
-- Day complete, game over, and final win states.
+The in-game report panel shows useful PCG metrics during play, including seed, room counts, reachable/walkable floor tiles, room role distribution, prop counts, quest counts, quest item/marker counts, and NPC role distribution. This was added for scientific reporting.
 
 ## Asset Credits
 
-This project uses third-party Unity Asset Store assets, including Synty office/UI assets, Human Basic Motions FREE, Yughues materials, Simple Game UI Sounds, and downloaded background music packs. Full citation details are included in the final report.
+This project uses third-party Unity Asset Store assets, including Synty office/UI assets, Human Basic Motions FREE, Yughues materials, Simple Game UI Sounds, and downloaded background music packs. 
