@@ -50,4 +50,15 @@ The in-game report panel shows useful PCG metrics during play, including seed, r
 
 ## Asset Credits
 
-This project uses third-party Unity Asset Store assets, including Synty office/UI assets, Human Basic Motions FREE, Yughues materials, Simple Game UI Sounds, and downloaded background music packs. 
+This project uses third-party Unity Asset Store assets, including Synty office/UI assets, Human Basic Motions, Yughues materials, Simple Game UI Sounds, and background and game music. 
+
+### Full Asset List with Links: 
+- Modern Menus - Synty INTERFACE - GUI: https://assetstore-fallback.unity.com/packages/2d/gui/modern-menus-synty-interface-gui-371178
+- Simple Game UI Sounds: https://assetstore.unity.com/packages/audio/sound-fx/simple-game-ui-sounds-215113
+- Free Game Music Pack by Pete Frogs: https://assetstore.unity.com/packages/audio/music/free-game-music-pack-by-pete-frogs-203200
+- Lo-Fi Chillout Music For Games: https://assetstore.unity.com/packages/audio/music/lo-fi-chillout-music-for-games-213270
+- POLYGON - Office Pack - Art by Synty: https://assetstore.unity.com/packages/3d/props/interior/polygon-office-pack-art-by-synty-159492
+- Synty POLYGON / PolygonGeneric assets: https://www.syntystudios.com/
+- Yughues Free Architectural Materials: https://assetstore.unity.com/packages/2d/textures-materials/yughues-free-architectural-materials-13234
+- Yughues Free Ground Materials: https://assetstore.unity.com/packages/2d/textures-materials/nature/yughues-free-ground-materials-13001
+- Human Basic Motions FREE by Kevin Iglesias: https://assetstore.unity.com/packages/3d/animations/human-basic-motions-free-157744
