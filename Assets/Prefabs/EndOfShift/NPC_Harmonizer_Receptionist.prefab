@@ -83,6 +83,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.NpcPatrol
   moveSpeed: 1.55
   waitSeconds: {x: 0.8, y: 2.2}
+  patrolType: 0
   tileDistance: 5
   wanderPoints: 6
   idleTurnDegrees: 70
@@ -105,8 +106,8 @@ MonoBehaviour:
   pulseSeconds: 0.12
   pressureLines:
   - Quick question...
-  - Are you doing okay? You look busy.
-  - Someone is waiting for you.
+  - Are you doing okay? You don't look busy.
+  - The boss is waiting for you.
   - I am so sorry, but...
   - Could you help for just a second?
   - Tiny favour, promise.

@@ -83,6 +83,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.NpcPatrol
   moveSpeed: 1.35
   waitSeconds: {x: 0.8, y: 2.2}
+  patrolType: 0
   tileDistance: 5
   wanderPoints: 6
   idleTurnDegrees: 70
@@ -106,20 +107,20 @@ MonoBehaviour:
   pressureLines:
   - ...
   - I thought this room was empty.
-  - Please do not perceive me.
+  - Please do not speak to me.
   - Was that due today?
   - I might have missed the meeting.
   - The lights are very loud.
   - I saved it somewhere.
   - I need a quiet corner.
-  - I was mentally buffering.
-  - The deadline feels theoretical.
+  - I am mentally retracting.
+  - The deadline feels far away.
   - I forgot why I stood up.
   - This hallway has too much happening.
   - I am nearly a person today.
   - Was I copied into that?
   - I need one silent minute.
-  - My calendar is a threat.
+  - My calendar looks like Tetris to me.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0

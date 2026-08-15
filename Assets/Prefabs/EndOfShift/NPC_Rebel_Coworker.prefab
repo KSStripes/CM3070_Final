@@ -83,6 +83,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CM3070.Office.NpcPatrol
   moveSpeed: 1.85
   waitSeconds: {x: 0.8, y: 2.2}
+  patrolType: 0
   tileDistance: 5
   wanderPoints: 6
   idleTurnDegrees: 70
@@ -111,15 +112,15 @@ MonoBehaviour:
   - I renamed the file. Good luck.
   - The copier is making feelings again.
   - Want to see something mildly cursed?
-  - I have a shortcut. It is worse.
+  - I have a shortcut. It made things worse.
   - I clicked the big red button.
-  - Your chair made a noise.
-  - The fridge has politics now.
-  - I made coffee. It lost.
-  - Do you smell burnt toner?
+  - Your chair made a funny noise.
+  - The fridge has rotten food in it.
+  - 'I made coffee. Coffee party! '
+  - Guess who copied their ass?
   - I invented casual panic.
-  - The meeting has escaped.
-  - I put fun in the file name.
+  - The meeting needs a revolution.
+  - I wrote fun in each file name.
 --- !u!114 &5811705739354767035
 MonoBehaviour:
   m_ObjectHideFlags: 0
