@@ -1,3 +1,8 @@
+// File: Dungeon1/ExitTrigger.cs
+// Purpose: Dungeon1 exit trigger.
+// Inputs: Player collider entering the exit trigger volume.
+// Output/side effects: Notifies GameManager that the level exit was reached.
+
 using UnityEngine;
 
 // Attach to the exit marker trigger collider.

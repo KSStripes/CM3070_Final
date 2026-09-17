@@ -1,3 +1,8 @@
+// File: Dungeon1/EnemyAttack.cs
+// Purpose: Range-based attack behaviour for Dungeon1 enemies.
+// Inputs: Target HealthSystem, attack range, damage, cooldown, and pulse feedback settings.
+// Output/side effects: Applies timed damage when the player is close and briefly scales the enemy for feedback.
+
 using UnityEngine;
 
 // Handles enemy attack timing, damage, facing, and a simple visual pulse.
@@ -34,7 +39,7 @@ namespace CM3070.Dungeon1
 
         public bool IsInRange(Transform target)
         {
-            // Range check is intentionally simple until chase/pathfinding exists.
+            // Range check is intentionally simple because this prototype does not use chase/pathfinding.
             return target != null && Vector3.Distance(transform.position, target.position) <= attackRange;
         }
 
@@ -56,7 +61,7 @@ namespace CM3070.Dungeon1
 
             playerHealth.TakeDamage(attackDamage);
             attackTimer = attackInterval;
-            // Trigger a visible placeholder attack cue.
+            // Trigger a visible attack cue.
             pulseTimer = attackPulseSeconds;
         }
 
@@ -68,7 +73,7 @@ namespace CM3070.Dungeon1
                 return;
             }
 
-            // Lightweight placeholder feedback until real attack animation/FX are added.
+            // Lightweight attack feedback for the prototype enemy.
             pulseTimer -= Time.deltaTime;
             transform.localScale = baseScale * attackPulseScale;
         }
@@ -76,7 +81,7 @@ namespace CM3070.Dungeon1
         private void FaceTarget(Transform target)
         {
             Vector3 direction = target.position - transform.position;
-            // Keep rotation horizontal; enemies should not tilt up/down.
+            // Keep rotation horizontal so enemies remain upright.
             direction.y = 0f;
             if (direction.sqrMagnitude > 0.001f)
             {

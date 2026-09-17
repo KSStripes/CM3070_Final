@@ -1,3 +1,8 @@
+// File: Office/Npc/NpcPressure.cs
+// Purpose: Office NPC proximity-pressure behaviour.
+// Inputs: Player HealthSystem, pressure range, damage, cooldown, role-specific lines, and feedback scale.
+// Output/side effects: Applies Resolve damage, faces the player, and publishes workplace interruption text.
+
 using CM3070.Dungeon1;
 using UnityEngine;
 

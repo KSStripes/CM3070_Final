@@ -1,3 +1,8 @@
+// File: Office/Layout/PropPlacer.cs
+// Purpose: Procedural office prop placer.
+// Inputs: RoomPlan, DungeonLayout, room-role prefab arrays, prop count, spacing, marker exclusion, and tile size.
+// Output/side effects: Places deterministic room props, records blocked cells, and reports prop counts by room role.
+
 using System.Collections.Generic;
 using System.Linq;
 using CM3070.PCG;
@@ -39,6 +44,7 @@ namespace CM3070.Office
             roomPlan = plan;
         }
 
+        // Places deterministic decorative props inside assigned rooms while preserving spacing and gameplay-marker clearance.
         public void PlaceProps(DungeonLayout layout, Transform parent, float tileSize)
         {
             blocked.Clear();
@@ -127,6 +133,7 @@ namespace CM3070.Office
             return new PropSpawnStatsSnapshot(placedCount, counts);
         }
 
+        // Builds valid room-interior grid positions before shuffling and applying prop spacing rules.
         private List<PropCandidate> BuildCandidates(DungeonLayout layout, RoomPlan plan)
         {
             List<PropCandidate> candidates = new();

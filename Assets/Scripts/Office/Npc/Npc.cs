@@ -1,3 +1,8 @@
+// File: Office/Npc/Npc.cs
+// Purpose: Office NPC state coordinator.
+// Inputs: Generated layout configuration, visualizer, blocked positions, NpcPatrol, NpcPressure, and player HealthSystem.
+// Output/side effects: Switches between patrol and pressure states for workplace NPCs.
+
 using System.Collections.Generic;
 using CM3070.Dungeon1;
 using CM3070.PCG;

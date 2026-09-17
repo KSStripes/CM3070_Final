@@ -1,3 +1,8 @@
+// File: Office/Quests/ItemPickup.cs
+// Purpose: Quest-item pickup trigger.
+// Inputs: Quest item ID, display name, amount, spin speed, QuestInventory, and QuestManager notifications.
+// Output/side effects: Adds quest items to the player inventory, updates quest state, plays feedback, and removes the item.
+
 using CM3070.Office;
 using UnityEngine;
 

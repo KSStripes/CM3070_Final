@@ -1,3 +1,8 @@
+// File: Dungeon1/DungeonController.cs
+// Purpose: Scene coordinator for the Dungeon1 reference prototype.
+// Inputs: Inspector generation settings, enemy/loot budgets, visualizer, camera, spawner, and optional office prop planner.
+// Output/side effects: Generates validated hybrid layouts, renders the dungeon, spawns entities, and positions cameras.
+
 using CM3070.PCG;
 using CM3070.Office;
 using UnityEngine;
@@ -150,6 +155,7 @@ namespace CM3070.Dungeon1
             }
         }
 
+        // Full Dungeon1/reference generation pass used for preview, new games, and next-level transitions.
         private void GenerateDungeon(bool runtimeObjects, bool resetPlayerStats)
         {
             visualizer ??= GetComponent<DungeonVisualizer>();
@@ -185,6 +191,7 @@ namespace CM3070.Dungeon1
             return randomizeSeedOnPlay ? Random.Range(1, int.MaxValue) : seed;
         }
 
+        // Copies Inspector values into a temporary generation settings object for the reference scene.
         private DungeonGenerationSettings BuildSettings()
         {
             DungeonGenerationSettings settings = ScriptableObject.CreateInstance<DungeonGenerationSettings>();

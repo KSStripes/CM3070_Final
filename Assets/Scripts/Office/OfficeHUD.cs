@@ -1,3 +1,8 @@
+// File: Office/OfficeHUD.cs
+// Purpose: Final OfficeScene HUD and PCG report panel.
+// Inputs: QuestManager, QuestInventory, HealthSystem, GameManager, OfficeController, TMP fields, colours, and panel sizing.
+// Output/side effects: Displays day, Resolve, tasks, inventory, exit state, feedback, and seed-specific PCG metrics.
+
 using CM3070.Dungeon1;
 using CM3070.Office.Quest;
 using System.Text;
@@ -8,7 +13,7 @@ namespace CM3070.Office
 {
     // Player-facing office HUD for the workday loop.
     // GameUI owns shift/day text, Resolve, panels, and minimap; OfficeHUD owns objectives,
-    // carried quest items, exit availability, and the temporary cynical feedback line.
+    // carried quest items, exit availability, and contextual feedback lines.
     public sealed class OfficeHUD : MonoBehaviour
     {
         private const int SlotCount = 3;
@@ -386,6 +391,7 @@ namespace CM3070.Office
             RefreshFeedback();
         }
 
+        // Rebuilds the visible PCG report whenever OfficeController publishes new run statistics.
         private void RefreshReportStats()
         {
             EnsureReportStatsText();
@@ -485,6 +491,7 @@ namespace CM3070.Office
             textField.raycastTarget = false;
         }
 
+        // Formats seed, timing, layout, room, prop, quest, and NPC metrics for the PCG panel.
         private static string FormatReportStats(OfficeRunStatsSnapshot stats)
         {
             StringBuilder builder = new();

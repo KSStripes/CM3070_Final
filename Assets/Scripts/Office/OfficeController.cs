@@ -1,3 +1,8 @@
+// File: Office/OfficeController.cs
+// Purpose: Main scene coordinator for the final End of Shift OfficeScene.
+// Inputs: Inspector generation parameters, spawner/visualizer/quest/HUD references, final tuning values, and GameManager calls.
+// Output/side effects: Generates validated office layouts, assigns room roles, places props/quests/entities, records stats, and starts shifts.
+
 using CM3070.Dungeon1;
 using CM3070.PCG;
 using System.Collections.Generic;
@@ -142,6 +147,7 @@ namespace CM3070.Office
             }
         }
 
+        // Full OfficeScene generation pass: layout, room roles, visual tiles, props, quests, actors, cameras, and HUD stats.
         private void GenerateDungeon(bool runtimeObjects, bool resetPlayerStats)
         {
             visualizer ??= GetComponent<DungeonVisualizer>();
@@ -189,6 +195,7 @@ namespace CM3070.Office
             RunStatsChanged?.Invoke(CaptureRunStats());
         }
 
+        // Collects the values shown in the lower-right PCG metrics panel.
         public OfficeRunStatsSnapshot CaptureRunStats()
         {
             if (currentLayout == null)
@@ -242,6 +249,7 @@ namespace CM3070.Office
             return randomizeSeedOnPlay ? Random.Range(1, int.MaxValue) : seed;
         }
 
+        // Copies Inspector tuning values into a per-generation settings object.
         private DungeonGenerationSettings BuildSettings()
         {
             DungeonGenerationSettings settings = ScriptableObject.CreateInstance<DungeonGenerationSettings>();
@@ -265,6 +273,7 @@ namespace CM3070.Office
             return settings;
         }
 
+        // Retries generation until the layout has enough usable room roles for the office loop, recording time and attempts.
         private void GenerateValidOfficeLayout(DungeonGenerationSettings settings, bool runtimeObjects)
         {
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();

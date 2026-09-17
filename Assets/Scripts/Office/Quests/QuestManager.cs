@@ -1,3 +1,8 @@
+// File: Office/Quests/QuestManager.cs
+// Purpose: Runtime office quest-state manager.
+// Inputs: Selected OfficeQuestDefinitions, QuestInventory, player HealthSystem, marker/item notifications, and GameManager exit events.
+// Output/side effects: Tracks task completion, validates marker use, applies quest effects, publishes feedback, and unlocks the shift exit.
+
 using System;
 using System.Collections.Generic;
 using CM3070.Dungeon1;
@@ -65,6 +70,7 @@ namespace CM3070.Office.Quest
             Instance = this;
         }
 
+        // Receives the three selected daily quests from the spawner and rebuilds lookup tables for items and markers.
         public void ConfigureActiveQuests(IEnumerable<OfficeQuestDefinition> quests)
         {
             activeQuestsByMarker.Clear();
@@ -110,12 +116,14 @@ namespace CM3070.Office.Quest
                 ShiftComplete);
         }
 
+        // Called by quest-item pickups so collect-only quests and HUD feedback can update immediately.
         public void NotifyItemCollected(QuestItemId itemId, string displayName, int amount)
         {
             AudioManager.Instance?.PlayItemPickup();
             TryCompleteCollectQuest(itemId);
         }
 
+        // Called by TaskMarker when the player reaches or uses an active marker.
         public void NotifyMarkerReached(
             OfficeTaskMarkerId markerId,
             string displayName,
@@ -230,6 +238,7 @@ namespace CM3070.Office.Quest
             }
         }
 
+        // Completes the shift only after all required daily tasks are finished.
         private void TryExit()
         {
             if (!RequiredTasksComplete())

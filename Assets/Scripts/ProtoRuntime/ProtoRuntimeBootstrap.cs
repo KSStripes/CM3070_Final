@@ -1,3 +1,8 @@
+// File: ProtoRuntime/ProtoRuntimeBootstrap.cs
+// Purpose: Runtime bootstrap for ProtoScene algorithm comparison.
+// Inputs: Scene name, generation settings, camera/text references, and keyboard input for method/seed changes.
+// Output/side effects: Creates missing preview objects, generates BSP/CA/Hybrid layouts, and writes live PCG metrics to the scene.
+
 using CM3070.PCG;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -84,6 +89,7 @@ namespace CM3070.ProtoRuntime
             }
         }
 
+        // Regenerates the currently selected method/seed and measures generation time for on-screen metrics.
         private void Generate()
         {
             DungeonGenerator generator = new(settings);
@@ -152,7 +158,7 @@ namespace CM3070.ProtoRuntime
             statusText.color = new Color(0.84f, 0.88f, 0.86f);
         }
 
-// Method determining TopCamera position
+        // Positions the top camera so the full generated layout is visible.
         private void PositionCamera(DungeonLayout layout)
         {
             Vector3 center = new(layout.Width * 0.5f, 0f, layout.Height * 0.5f);
@@ -169,6 +175,7 @@ namespace CM3070.ProtoRuntime
             }
         }
 
+        // Writes comparison metrics: method, seed, timing, rooms, reachability, path, enemies, and loot.
         private void UpdateStatus(DungeonLayout layout)
         {
             if (statusText == null)

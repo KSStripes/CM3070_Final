@@ -1,3 +1,8 @@
+// File: Core/AudioManager.cs
+// Purpose: Scene audio hub for menu, UI, and gameplay sounds.
+// Inputs: Assigned AudioSources, music clips, one-shot sound effects, and day index.
+// Output/side effects: Plays SFX and loops menu/day music through a persistent singleton.
+
 using UnityEngine;
 
 namespace CM3070.Dungeon1

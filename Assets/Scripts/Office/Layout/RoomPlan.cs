@@ -1,3 +1,8 @@
+// File: Office/Layout/RoomPlan.cs
+// Purpose: Data model for office room-role assignments.
+// Inputs: Generated layout rooms and assigned RoomRole values.
+// Output/side effects: Allows other systems to query room roles by room rectangle or grid position.
+
 using System.Collections.Generic;
 using System.Linq;
 using CM3070.PCG;

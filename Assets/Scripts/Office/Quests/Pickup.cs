@@ -1,3 +1,8 @@
+// File: Office/Quests/Pickup.cs
+// Purpose: Coping pickup behaviour for Resolve recovery or max-Resolve increases.
+// Inputs: Pickup ID, display name, heal/max-health values, spin speed, and player HealthSystem trigger events.
+// Output/side effects: Applies pickup effects, shows feedback/audio, and destroys the pickup when collected.
+
 using CM3070.Dungeon1;
 using CM3070.Office;
 using UnityEngine;

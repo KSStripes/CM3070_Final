@@ -1,3 +1,8 @@
+// File: Core/HealthSystem.cs
+// Purpose: Shared health/Resolve model.
+// Inputs: Starting max health, current health, and damage/heal/max-health changes from NPCs and pickups.
+// Output/side effects: Stores current Resolve, clamps changes, supports snapshots, and notifies GameManager/UI.
+
 using UnityEngine;
 using UnityEngine.Serialization;
 

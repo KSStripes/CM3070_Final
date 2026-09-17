@@ -1,3 +1,8 @@
+// File: Core/GameUI.cs
+// Purpose: Shared menu and state-panel UI controller.
+// Inputs: Buttons, labels, panels, health bar, avatar-choice controls, and GameManager calls.
+// Output/side effects: Shows the correct menu/day/game-over/win state and forwards button actions.
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

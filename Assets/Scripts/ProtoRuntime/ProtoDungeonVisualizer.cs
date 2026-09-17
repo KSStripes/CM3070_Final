@@ -1,3 +1,8 @@
+// File: ProtoRuntime/ProtoDungeonVisualizer.cs
+// Purpose: Lightweight block visualizer for ProtoScene generated layouts.
+// Inputs: A DungeonLayout, tile size, and debug colours for floor/wall/start/exit/enemy/loot tiles.
+// Output/side effects: Builds simple primitive cubes so PCG algorithms can be inspected without final game prefabs.
+
 using CM3070.PCG;
 using UnityEngine;
 

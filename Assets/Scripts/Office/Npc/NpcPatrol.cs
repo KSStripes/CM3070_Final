@@ -1,3 +1,8 @@
+// File: Office/Npc/NpcPatrol.cs
+// Purpose: Office NPC patrol route builder and movement driver.
+// Inputs: Generated layout, visualizer, start tile, blocked positions, selected patrol type, and movement tuning.
+// Output/side effects: Builds LongLine or Wander patrol points from walkable tiles and moves the NPC through them.
+
 using System.Collections.Generic;
 using CM3070.Dungeon1;
 using CM3070.PCG;
@@ -44,6 +49,7 @@ namespace CM3070.Office
             }
         }
 
+        // Configures the patrol from generated grid data after the NPC has been spawned.
         public void Configure(
             DungeonLayout layout,
             DungeonVisualizer visualizer,
@@ -71,6 +77,7 @@ namespace CM3070.Office
             targetIndex = points.Count > 1 ? 1 : 0;
         }
 
+        // Moves the NPC along its generated patrol route; called by Npc while in Patrol state.
         public void Tick()
         {
             if (points.Count <= 1)

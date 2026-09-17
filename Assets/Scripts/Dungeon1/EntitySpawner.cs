@@ -1,3 +1,8 @@
+// File: Dungeon1/EntitySpawner.cs
+// Purpose: Dungeon1 runtime entity spawner.
+// Inputs: Generated layout, visualizer, player/enemy/loot prefabs, spawn budgets, and blocked positions.
+// Output/side effects: Clears previous runtime objects, spawns player, enemies, loot, and wires generated patrol/attack components.
+
 using System.Collections.Generic;
 using CM3070.PCG;
 using UnityEngine;
@@ -34,6 +39,7 @@ namespace CM3070.Dungeon1
         public PlayerInventory PlayerInventory { get; private set; }
         public Transform PlayerTransform => PlayerInventory != null ? PlayerInventory.transform : null;
 
+        // Spawns the original dungeon player, enemies, and loot from the generated layout markers.
         public void SpawnEntities(
             DungeonLayout layout,
             DungeonVisualizer dungeonVisualizer,

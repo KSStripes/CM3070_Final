@@ -1,3 +1,8 @@
+// File: Office/Quests/OfficeQuestSpawner.cs
+// Purpose: Procedural quest-item, task-marker, and exit-marker spawner.
+// Inputs: Quest database, generated layout, RoomPlan, visualizer, blocked prop/entity cells, prefabs, and random seed.
+// Output/side effects: Selects daily quests, places required objects in suitable rooms, and reports quest spawn counts.
+
 using System.Collections.Generic;
 using CM3070.Office.Quest;
 using CM3070.Dungeon1;
@@ -32,6 +37,7 @@ namespace CM3070.Office
         public QuestSpawnStatsSnapshot LastSpawnStats =>
             new(spawnedQuestCount, spawnedQuestItemCount, spawnedTaskMarkerCount);
 
+        // Selects daily quests and places quest items, task markers, and the exit marker in valid generated locations.
         public void SpawnQuestObjects(
             DungeonLayout layout,
             RoomPlan roomPlan,
@@ -160,6 +166,7 @@ namespace CM3070.Office
             spawnedTaskMarkerCount = 0;
         }
 
+        // Chooses a small daily task set from spawnable quest definitions using the current seed stream.
         private List<OfficeQuestDefinition> SelectQuests(System.Random random)
         {
             List<OfficeQuestDefinition> candidates = new();
@@ -225,6 +232,7 @@ namespace CM3070.Office
             return false;
         }
 
+        // Finds a valid tile inside a requested room role while respecting prop/entity blocked cells.
         private bool TryFindInRoomRole(
             DungeonLayout layout,
             RoomPlan roomPlan,

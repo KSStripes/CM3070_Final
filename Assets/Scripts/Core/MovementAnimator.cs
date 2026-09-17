@@ -1,3 +1,8 @@
+// File: Core/MovementAnimator.cs
+// Purpose: Animation speed bridge for player and NPC models.
+// Inputs: Transform movement delta, child Animator components, and animator speed parameter settings.
+// Output/side effects: Sets animation speed based on actual movement without changing gameplay motion.
+
 using UnityEngine;
 
 namespace CM3070.Office

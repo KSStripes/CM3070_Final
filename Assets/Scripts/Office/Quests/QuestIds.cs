@@ -1,3 +1,8 @@
+// File: Office/Quests/QuestIds.cs
+// Purpose: Shared quest item and marker identifiers.
+// Inputs: Enum values referenced by quest definitions, pickups, markers, inventory, and HUD.
+// Output/side effects: Keeps item/marker IDs consistent across ScriptableObjects, prefabs, and runtime code.
+
 namespace CM3070.Office.Quest
 {
     // Stable IDs used by quest assets and spawned pickups/markers.

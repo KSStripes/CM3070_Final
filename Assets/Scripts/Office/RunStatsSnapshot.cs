@@ -1,3 +1,8 @@
+// File: Office/RunStatsSnapshot.cs
+// Purpose: Immutable report-data structs for the OfficeScene HUD.
+// Inputs: Counts and metrics collected from OfficeController, PropPlacer, EntitySpawner, and OfficeQuestSpawner.
+// Output/side effects: Packages seed, timing, layout, room-role, prop, quest, and NPC statistics for display.
+
 using System.Collections.Generic;
 
 namespace CM3070.Office

@@ -1,3 +1,8 @@
+// File: Office/Layout/LayoutPlanner.cs
+// Purpose: Room-role planner for generated office layouts.
+// Inputs: Generated DungeonLayout rooms after PCG validation.
+// Output/side effects: Assigns Reception, Boss, Office, Factory, or Overflow roles and marks whether the plan is usable.
+
 using System.Collections.Generic;
 using System.Linq;
 using CM3070.PCG;

@@ -1,3 +1,8 @@
+// File: PCG/DungeonLayout.cs
+// Purpose: Runtime data container for one generated grid layout.
+// Inputs: Width, height, generated tiles, room rectangles, seed, method, and placement lists.
+// Output/side effects: Stores walkability, room, start/exit, enemy/loot, and evaluation metrics for a generated run.
+
 using System.Collections.Generic;
 using UnityEngine;
 

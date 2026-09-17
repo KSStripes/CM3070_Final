@@ -1,3 +1,8 @@
+// File: Dungeon1/EnemyPatrol.cs
+// Purpose: Simple generated patrol movement for Dungeon1 enemies.
+// Inputs: Generated layout, start tile, blocked positions, visualizer grid conversion, and patrol tuning fields.
+// Output/side effects: Chooses two reachable grid points and moves the enemy between them with a short wait.
+
 using System.Collections.Generic;
 using CM3070.PCG;
 using UnityEngine;

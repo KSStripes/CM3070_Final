@@ -1,3 +1,8 @@
+// File: PCG/DungeonGenerator.cs
+// Purpose: Core procedural generation algorithm implementation.
+// Inputs: DungeonGenerationSettings, optional seed/method overrides, and generated layout state.
+// Output/side effects: Builds BSP, CA, or Hybrid layouts, validates connectivity, places start/exit/loot/enemies, and records metrics.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +28,7 @@ namespace CM3070.PCG
             this.settings = settings;
         }
 
+        // Entry point used by ProtoScene, Dungeon1, and OfficeScene. It accepts optional seed/method overrides so the same settings asset can be reused for comparison tests.
         public DungeonLayout Generate(int? seedOverride = null, DungeonGenerationMethod? methodOverride = null)
         {
             int seed = seedOverride ?? settings.seed;
@@ -62,6 +68,7 @@ namespace CM3070.PCG
             return layout;
         }
 
+        // Builds room-and-corridor structure from recursive rectangular partitions.
         private void GenerateBsp(DungeonLayout layout)
         {
             // BSP reference/inspiration:
@@ -100,6 +107,7 @@ namespace CM3070.PCG
             ConnectRooms(layout);
         }
 
+        // Builds a pure CA layout from random wall/floor noise and repeated neighbour smoothing.
         private void GenerateCellular(DungeonLayout layout, int smoothingSteps)
         {
             // Cellular automata reference/inspiration:
@@ -120,6 +128,7 @@ namespace CM3070.PCG
             SmoothCellular(layout, smoothingSteps, null);
         }
 
+        // Builds the final hybrid layout: BSP first for structure, then CA-style disturbance and smoothing for variation.
         private void GenerateHybrid(DungeonLayout layout)
         {
             // Hybrid BSP + CA implementation:
@@ -446,6 +455,7 @@ namespace CM3070.PCG
             });
         }
 
+        // Chooses a start tile and a sufficiently distant reachable exit for playable traversal.
         private void PlaceStartAndExit(DungeonLayout layout)
         {
             // Start/exit distance metric:
@@ -494,7 +504,7 @@ namespace CM3070.PCG
             Dictionary<Vector2Int, int> distances = GetDistances(layout, layout.Start);
             int maxDistance = Mathf.Max(1, distances.Values.DefaultIfEmpty(1).Max());
 
-            // Furnishing candidates are reachable floor tiles, excluding start, exit, and
+            // Furnishing positions are reachable floor tiles, excluding start, exit, and
             // tiles too close to the start. This keeps early player space safer and ensures
             // enemies/loot are placed only in navigable parts of the generated dungeon.
             List<Vector2Int> candidates = distances.Keys

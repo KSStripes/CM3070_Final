@@ -1,3 +1,8 @@
+// File: Dungeon1/LootPickup.cs
+// Purpose: Trigger pickup handler for Dungeon1 loot prefabs.
+// Inputs: LootProperties on the same GameObject plus player inventory/health components entering the trigger.
+// Output/side effects: Applies coin, armour, or weapon effects, notifies audio/UI through existing systems, and removes the pickup.
+
 using UnityEngine;
 
 // Handles trigger pickup behaviour for loot prefabs.

@@ -1,3 +1,8 @@
+// File: Dungeon1/Enemy.cs
+// Purpose: Dungeon1 enemy state coordinator.
+// Inputs: Generated layout configuration, visualizer grid conversion, player HealthSystem, and EnemyAttack/EnemyPatrol components.
+// Output/side effects: Switches between patrol and attack behaviour for the original dungeon reference scene.
+
 using System.Collections.Generic;
 using CM3070.PCG;
 using UnityEngine;
@@ -7,8 +12,8 @@ namespace CM3070.Dungeon1
 {
     public enum EnemyState
     {
-        // Only Patrol and Attack are active now;
-        Patrol, 
+        // Patrol and Attack are the active states in this prototype.
+        Patrol,
         Attack,
         Chase,
         ReturnToPatrol
@@ -28,7 +33,7 @@ namespace CM3070.Dungeon1
 
         private void Awake()
         {
-            // Get refs to enemy states
+            // Cache state components.
             patrol = GetComponent<EnemyPatrol>();
             attack = GetComponent<EnemyAttack>();
         }
@@ -47,7 +52,7 @@ namespace CM3070.Dungeon1
         {
             EnsurePlayerHealth();
 
-            // Minimal state rule for now: close enough to the player means attack, otherwise patrol.
+            // Minimal state rule: close enough to the player means attack, otherwise patrol.
             if (playerHealth != null && !playerHealth.IsDead && attack.IsInRange(playerHealth.transform))
             {
                 currentState = EnemyState.Attack;

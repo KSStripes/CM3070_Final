@@ -1,3 +1,8 @@
+// File: Core/PlayerController.cs
+// Purpose: Keyboard movement controller for the player.
+// Inputs: Keyboard input, CharacterController, gravity, movement speed, and optional low-Resolve speed modifiers.
+// Output/side effects: Moves and rotates the player in world X/Z space for the isometric camera.
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 

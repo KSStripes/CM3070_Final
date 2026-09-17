@@ -1,3 +1,8 @@
+// File: Office/Quests/QuestInventory.cs
+// Purpose: Small runtime inventory for carried quest items.
+// Inputs: Quest item IDs and amounts collected by ItemPickup.
+// Output/side effects: Stores item counts, supports marker consumption, and emits snapshots for the HUD.
+
 using System.Collections.Generic;
 using System;
 using CM3070.Office.Quest;

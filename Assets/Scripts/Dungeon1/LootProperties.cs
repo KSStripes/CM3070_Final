@@ -1,3 +1,8 @@
+// File: Dungeon1/LootProperties.cs
+// Purpose: Data component describing Dungeon1 loot effects.
+// Inputs: Inspector values for loot type, display name, coin value, armour values, weapon values, and lifetime.
+// Output/side effects: Provides typed pickup data used by LootPickup and PlayerInventory.
+
 using UnityEngine;
 
 // Inspector data for loot prefabs.
@@ -12,7 +17,7 @@ namespace CM3070.Dungeon1
         Weapon, // adds weapon type to inventory, increases attack
         Armour, // adds armour type to inventory, increases max health
     }
-    
+
     public sealed class LootProperties : MonoBehaviour
     {
         // Only the fields relevant to the chosen LootType are used at pickup time.
@@ -38,7 +43,7 @@ namespace CM3070.Dungeon1
         public string WeaponName => weaponName;
         public string WeaponType => weaponType;
         public int AttackAmount => attackAmount;
-        
+
     }
 
 }

@@ -1,3 +1,8 @@
+// File: Dungeon1/DungeonVisualizer.cs
+// Purpose: Prefab-based renderer for Dungeon1 and office-adapted generated layouts.
+// Inputs: A DungeonLayout, optional RoomPlan, tile prefabs, room tile sets, marker prefabs, and tile scale.
+// Output/side effects: Instantiates floors, visible walls, start/exit markers, and room-role-specific tile variants.
+
 using System.Collections.Generic;
 using CM3070.Office;
 using CM3070.PCG;

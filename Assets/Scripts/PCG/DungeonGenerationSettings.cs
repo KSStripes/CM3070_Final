@@ -1,3 +1,8 @@
+// File: PCG/DungeonGenerationSettings.cs
+// Purpose: ScriptableObject configuration for PCG generation and spawn balance.
+// Inputs: Inspector values for grid size, seed, BSP, CA, Hybrid, enemy, loot, and distance settings.
+// Output/side effects: Centralises generator parameters and clamps invalid values before generation.
+
 using UnityEngine;
 
 namespace CM3070.PCG

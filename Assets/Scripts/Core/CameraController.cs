@@ -1,3 +1,8 @@
+// File: Core/CameraController.cs
+// Purpose: Shared camera setup and positioning helper.
+// Inputs: Generated layout dimensions, player target position, and scene camera references.
+// Output/side effects: Ensures overview/player cameras exist and positions them for generated layouts.
+
 using CM3070.PCG;
 using UnityEngine;
 

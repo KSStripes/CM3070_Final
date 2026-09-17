@@ -1,3 +1,8 @@
+// File: Office/Quests/TaskMarker.cs
+// Purpose: Interactive task-marker trigger for office objectives and exit.
+// Inputs: Marker ID, visual renderers/materials, QuestManager, QuestInventory, and player trigger state.
+// Output/side effects: Updates marker visuals, handles interaction, and notifies QuestManager when a task marker is reached.
+
 using CM3070.Office;
 using UnityEngine;
 
@@ -29,7 +34,7 @@ namespace CM3070.Office.Quest
 
         private void Reset()
         {
-            // Task markers should sense the player without blocking movement.
+            // Task markers sense the player without blocking movement.
             Collider markerCollider = GetComponent<Collider>();
             markerCollider.isTrigger = true;
             FindHighlightRenderers();
@@ -88,7 +93,7 @@ namespace CM3070.Office.Quest
 
         public void Interact()
         {
-            // Public hook for future button prompts without changing prefab wiring.
+        // Public hook for marker interaction without changing prefab wiring.
             if (playerInside && currentInventory != null)
             {
                 NotifyQuestManager(currentInventory);

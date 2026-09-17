@@ -1,3 +1,8 @@
+// File: Core/GameManager.cs
+// Purpose: Shared game-state coordinator for Dungeon1 and OfficeScene.
+// Inputs: UI, controllers, day names, selected avatar, health/inventory events, and exit/death notifications.
+// Output/side effects: Moves the game through menu, active shift, day complete, game over, and final win states.
+
 using System;
 using UnityEngine;
 using CM3070.Office;
@@ -69,6 +74,7 @@ namespace CM3070.Dungeon1
             SetState(GameState.StartScreen);
         }
 
+        // Starts the current probation-week run using the selected avatar and day-one office generation.
         public void StartGame()
         {
             CurrentDay = 1;
@@ -81,6 +87,7 @@ namespace CM3070.Dungeon1
             SelectedPlayerChoice = choice;
         }
 
+        // Advances the work week or ends the game after the final configured workday.
         public void NextDay()
         {
             if (CurrentState == GameState.GameWon)
@@ -93,6 +100,7 @@ namespace CM3070.Dungeon1
             StartNextControllerRun();
         }
 
+        // Resets the run to Monday, restores core stats, and returns to the start state.
         public void NewGame()
         {
             CurrentDay = 1;

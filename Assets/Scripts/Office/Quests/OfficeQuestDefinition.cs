@@ -1,3 +1,8 @@
+// File: Office/Quests/OfficeQuestDefinition.cs
+// Purpose: ScriptableObject definition for one office task.
+// Inputs: Quest type, item ID, marker ID, room-role preferences, prefab references, display text, and Resolve effects.
+// Output/side effects: Stores authorable task data used by spawning, quest logic, and HUD display.
+
 using CM3070.Office;
 using UnityEngine;
 

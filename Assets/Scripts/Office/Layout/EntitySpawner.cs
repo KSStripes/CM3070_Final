@@ -1,3 +1,8 @@
+// File: Office/Layout/EntitySpawner.cs
+// Purpose: Office player, NPC, and coping-pickup spawner.
+// Inputs: Generated layout, visualizer, player/NPC/pickup prefabs, blocked cells, room plan, spawn budgets, and player choice.
+// Output/side effects: Spawns runtime actors/items, configures NPC patrols, and records NPC/pickup statistics.
+
 using System.Collections.Generic;
 using System.Linq;
 using CM3070.Dungeon1;
@@ -74,6 +79,7 @@ namespace CM3070.Office
             }
         }
 
+        // Main spawn entry point for the player, office NPCs, and coping pickups after layout/prop blocking is known.
         public void SpawnEntities(
             DungeonLayout layout,
             DungeonVisualizer dungeonVisualizer,
@@ -265,6 +271,7 @@ namespace CM3070.Office
             return new EntitySpawnStatsSnapshot(spawnedNpcCount, roleCounts);
         }
 
+        // Searches from a preferred tile to a nearby reachable unblocked tile for actors and pickups.
         private bool TryFindEntitySpawnPosition(Vector2Int preferredPosition, out Vector2Int spawnPosition)
         {
             if (CanSpawnEntityAt(preferredPosition))

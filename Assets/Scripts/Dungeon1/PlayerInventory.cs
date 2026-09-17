@@ -1,3 +1,8 @@
+// File: Dungeon1/PlayerInventory.cs
+// Purpose: Dungeon1 player inventory and equipment state.
+// Inputs: LootProperties collected by the player and optional HealthSystem references for armour effects.
+// Output/side effects: Stores coins, armour, weapons, attack value, and notifies GameManager/UI when values change.
+
 using UnityEngine;
 
 // Stores player inventory/state gained from pickups.
@@ -88,7 +93,7 @@ namespace CM3070.Dungeon1
             ArmourCount++;
             ArmourName = armour.ArmourName;
             ArmourType = armour.ArmourType;
-            // Armour currently increases max health as a simple defence placeholder.
+            // Armour increases max health as the prototype defence effect.
             health.IncreaseMaxHealth(armour.DefenseAmount);
             GameManager.Instance?.NotifyArmourCollected(ArmourName, ArmourType, health.MaxHealth);
         }
@@ -100,7 +105,7 @@ namespace CM3070.Dungeon1
             WeaponCount++;
             WeaponName = weapon.WeaponName;
             WeaponType = weapon.WeaponType;
-            // Attack is a simple stat placeholder until a weapon system exists.
+            // Attack is stored as a simple weapon stat for the reference dungeon loop.
             Attack += weapon.AttackAmount;
             GameManager.Instance?.NotifyWeaponCollected(weapon, this);
         }
