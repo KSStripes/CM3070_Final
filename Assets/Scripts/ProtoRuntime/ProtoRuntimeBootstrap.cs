@@ -15,6 +15,7 @@ namespace CM3070.ProtoRuntime
         private ProtoDungeonVisualizer visualizer;
         private DungeonGenerationMethod activeMethod;
         private int activeSeed;
+        private long lastGenerationMilliseconds;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateDefaultBootstrap()
@@ -86,7 +87,10 @@ namespace CM3070.ProtoRuntime
         private void Generate()
         {
             DungeonGenerator generator = new(settings);
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
             DungeonLayout layout = generator.Generate(activeSeed, activeMethod);
+            stopwatch.Stop();
+            lastGenerationMilliseconds = stopwatch.ElapsedMilliseconds;
             visualizer.Render(layout);
             PositionCamera(layout);
             UpdateStatus(layout);
@@ -176,9 +180,11 @@ namespace CM3070.ProtoRuntime
                 $"CM3070 PCG Roguelite Prototype\n" +
                 $"Method: {layout.Method}\n" +
                 $"Seed: {layout.Seed}\n" +
+                $"Generation time: {lastGenerationMilliseconds} ms\n" +
+                $"Rooms: {layout.Rooms.Count}\n" +
                 $"Walkable tiles: {layout.WalkableCount()} / {layout.Width * layout.Height}\n" +
-                //$"Main region: {layout.MainRegionSize}\n" +
-                //$"Start-exit path: {layout.ShortestPathLength}\n" +
+                $"Main region: {layout.MainRegionSize}\n" +
+                $"Start-exit path: {layout.ShortestPathLength}\n" +
                 $"Enemies: {layout.EnemyPositions.Count}\n" +
                 $"Loot: {layout.LootPositions.Count}\n" +
                 // $"Difficulty estimate: {layout.EstimatedDifficulty:0.0}\n\n" +

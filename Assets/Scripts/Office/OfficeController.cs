@@ -49,6 +49,8 @@ namespace CM3070.Office
         private DungeonLayout currentLayout;
         private RoomPlan currentRoomPlan;
         private int activeSeed;
+        private long lastLayoutGenerationMilliseconds;
+        private int lastLayoutGenerationAttempts;
 
         public event System.Action<OfficeRunStatsSnapshot> RunStatsChanged;
 
@@ -206,6 +208,8 @@ namespace CM3070.Office
 
             return new OfficeRunStatsSnapshot(
                 currentLayout.Seed,
+                lastLayoutGenerationMilliseconds,
+                lastLayoutGenerationAttempts,
                 currentLayout.Rooms.Count,
                 CaptureRoomRoleCounts(),
                 currentLayout.WalkableCount(),
@@ -263,8 +267,12 @@ namespace CM3070.Office
 
         private void GenerateValidOfficeLayout(DungeonGenerationSettings settings, bool runtimeObjects)
         {
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            lastLayoutGenerationAttempts = 0;
+
             for (int attempt = 0; attempt < layoutRetryAttempts; attempt++)
             {
+                lastLayoutGenerationAttempts = attempt + 1;
                 int candidateSeed = runtimeObjects
                     ? (attempt == 0 ? activeSeed : Random.Range(1, int.MaxValue))
                     : seed + attempt;
@@ -279,10 +287,14 @@ namespace CM3070.Office
                 if (IsValidOfficeLayout(candidateLayout, candidatePlan))
                 {
                     activeSeed = candidateSeed;
+                    stopwatch.Stop();
+                    lastLayoutGenerationMilliseconds = stopwatch.ElapsedMilliseconds;
                     return;
                 }
             }
 
+            stopwatch.Stop();
+            lastLayoutGenerationMilliseconds = stopwatch.ElapsedMilliseconds;
             Debug.LogWarning($"Generated office layout did not meet validation after {layoutRetryAttempts} attempts; using the last candidate.");
         }
 

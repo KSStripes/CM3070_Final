@@ -71,6 +71,8 @@ namespace CM3070.Office
     {
         public OfficeRunStatsSnapshot(
             int seed,
+            long generationMilliseconds,
+            int generationAttempts,
             int roomCount,
             IReadOnlyList<OfficeRoleCount> roomRoleCounts,
             int walkableArea,
@@ -84,6 +86,8 @@ namespace CM3070.Office
             IReadOnlyList<NpcRoleCount> npcRoleCounts)
         {
             Seed = seed;
+            GenerationMilliseconds = generationMilliseconds;
+            GenerationAttempts = generationAttempts;
             RoomCount = roomCount;
             RoomRoleCounts = roomRoleCounts;
             WalkableArea = walkableArea;
@@ -98,6 +102,8 @@ namespace CM3070.Office
         }
 
         public int Seed { get; }
+        public long GenerationMilliseconds { get; }
+        public int GenerationAttempts { get; }
         public int RoomCount { get; }
         public IReadOnlyList<OfficeRoleCount> RoomRoleCounts { get; }
         public int WalkableArea { get; }

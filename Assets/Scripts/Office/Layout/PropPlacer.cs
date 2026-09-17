@@ -22,7 +22,6 @@ namespace CM3070.Office
         [SerializeField] private int propCount = 18;
         [SerializeField] private int minSpacing = 3;
         [SerializeField] private int markerExclusionRadius = 3;
-        [SerializeField] private int propSeedOffset = 617;
         [SerializeField] private float propHeight = 0.08f;
         [SerializeField] private bool randomizeRotation = true;
         [SerializeField] private bool disablePropColliders = true;
@@ -67,7 +66,7 @@ namespace CM3070.Office
                 return;
             }
 
-            System.Random random = new(layout.Seed ^ propSeedOffset);
+            System.Random random = new(layout.Seed);
             Shuffle(candidates, random);
 
             List<Vector2Int> occupied = new(targetCount);

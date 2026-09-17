@@ -32,7 +32,7 @@ namespace CM3070.Office
         [SerializeField] private GameObject reportStatsRoot;
         [SerializeField] private TMP_Text reportStats;
         [SerializeField, Range(12f, 16f)] private float reportFontSize = 12f;
-        [SerializeField] private Vector2 reportPanelSize = new(360f, 190f);
+        [SerializeField] private Vector2 reportPanelSize = new(430f, 170f);
         [SerializeField] private Vector2 reportPanelOffset = new(-16f, 16f);
         [SerializeField] private string reportStatsPending = "PCG report pending";
 
@@ -490,6 +490,7 @@ namespace CM3070.Office
             StringBuilder builder = new();
             builder.AppendLine("PCG report");
             builder.AppendLine($"Seed: {stats.Seed}");
+            builder.AppendLine($"Generation: {stats.GenerationMilliseconds} ms, {stats.GenerationAttempts} attempt(s)");
             builder.AppendLine($"Layout: {stats.RoomCount} rooms, {stats.ReachableArea}/{stats.WalkableArea} reachable floor tiles");
             builder.Append("Rooms: ");
             AppendOfficeRoleCounts(builder, stats.RoomRoleCounts);
